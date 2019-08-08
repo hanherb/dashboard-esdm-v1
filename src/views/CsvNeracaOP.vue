@@ -175,9 +175,11 @@ export default {
           parseInt(result[35][colname]) +
           parseInt(result[40][colname]);
       }
-      sum("RENCANA TAHUN 2018");
-      sum("REALISASI TAHUN 2018");
-      sum("RENCANA TAHUN 2019");
+      
+      for(var i = 2018; i <= 2020; i++) {
+        sum("RENCANA TAHUN " + i);
+        sum("REALISASI TAHUN "+ i);
+      }
 
       console.log(result);
       return result // JavaScript object

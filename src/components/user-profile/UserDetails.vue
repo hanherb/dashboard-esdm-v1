@@ -52,7 +52,6 @@
 
       <!-- User Tags -->
       <div class="user-details__tags p-4">
-        <!-- <d-link v-for="(tag, idx) in tags" :key="idx" :to="'/user-profile'"> -->
         <d-link v-for="(tag, idx) in tags" :key="idx" :to="tag.url + user._id">
           <span class="badge badge-pill badge-light text-light text-uppercase mb-2 border" style="cursor: pointer;">{{ tag.name }}</span>
         </d-link>
@@ -83,8 +82,48 @@ export default {
       },
       tags: [
         {
-          'name': 'Rekap Belanja Barang',
+          'name': 'Belanja Barang',
           'url': '/rekap-belanja-barang-perusahaan?id='
+        },
+        {
+          'name': 'Anggaran Belanja',
+          'url': '/rekap-anggaran-belanja?id='
+        },
+        {
+          'name': 'Arus Kas',
+          'url': '/rekap-arus-kas?id='
+        },
+        {
+          'name': 'Asumsi Keuangan',
+          'url': '/rekap-asumsi-keuangan?id='
+        },
+        {
+          'name': 'HPP',
+          'url': '/rekap-harga-pokok?id='
+        },
+        {
+          'name': 'Investasi',
+          'url': '/rekap-Investasi?id='
+        },
+        {
+          'name': 'Keuangan Lainnya',
+          'url': '/rekap-keuangan-lainnya?id='
+        },
+        {
+          'name': 'Laba Rugi',
+          'url': '/rekap-laba-rugi?id='
+        },
+        {
+          'name': 'Neraca Keuangan',
+          'url': '/rekap-neraca?id='
+        },
+        {
+          'name': 'Penerimaan Negara',
+          'url': '/rekap-penerimaan-negara?id='
+        },
+        {
+          'name': 'Sumber Pembiayaan',
+          'url': '/rekap-sumber-pembiayaan?id='
         }
       ],
     }
@@ -106,6 +145,19 @@ export default {
         graphqlFunction.graphqlFetchOne(query, variable, (result) => {
           this.user = result.user;
           this.avatarImg = require('@/assets/images/uploads/' + this.user.profile_picture + '.png');
+          for(var i = 0; i < this.tags.length; i++) {
+            if(this.user.role == "user") {
+              if(this.tags[i].name == "HPP") {
+                if(this.user.tahapan_kegiatan == "Eksplorasi") {
+                  this.tags.splice(i, 1);
+                }
+              }
+            }
+            else {
+              this.tags = [];
+              break;
+            }
+          }
         });
       })
     },

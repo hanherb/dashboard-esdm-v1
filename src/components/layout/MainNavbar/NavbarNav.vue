@@ -7,8 +7,8 @@
           <d-badge pill theme="danger">{{ notifications.length }}</d-badge>
         </div>
       </a>
-      <d-collapse v-for="notification in notifications" key="notifications" id="notifications" class="dropdown-menu dropdown-menu-small">
-        <d-dropdown-item :href="notification.href">
+      <d-collapse class="dropdown-menu dropdown-menu-small" id="notifications">
+        <d-dropdown-item v-for="notification in notifications" :href="notification.href">
           <div class="notification__icon-wrapper">
             <div class="notification__icon">
               <i class="material-icons">&#xE6E1;</i>
@@ -87,13 +87,28 @@ export default {
           this.notifications.push(temp);
         }
         else if(this.session.status == "active") {
-          var temp = {
-            id: "notif_active",
-            category: "Profile",
-            description: "Your profile is <span class='text-success text-semibold'>complete</span>, you can upload CSV files now",
-            href: "/admin/csv-neraca",
+          if(this.session.role == "user") {
+            if(this.session.tahapan_kegiatan == "Eksplorasi") {
+              var tk = "eksplorasi";
+            }
+            else if(this.session.tahapan_kegiatan == "Operasi Produksi") {
+              var tk = "op";
+            }
+            var temp = {
+              id: "notif_active",
+              category: "Profile",
+              description: "Your profile is <span class='text-success text-semibold'>complete</span>, you can upload CSV files now",
+              href: "/admin/csv-neraca-"+tk,
+            }
+            var temp2 = {
+              id: "notif_format_csv",
+              category: "Import CSV",
+              description: "Click here to download CSV Format",
+              href: "/admin/downloads/FormatCSV.rar",
+            }
+            this.notifications.push(temp);
+            this.notifications.push(temp2);
           }
-          this.notifications.push(temp);
         }
       }
     },

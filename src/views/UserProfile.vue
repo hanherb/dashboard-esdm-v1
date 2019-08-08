@@ -7,10 +7,14 @@
       </d-col>
 
       <d-col lg="8">
+        <d-alert show v-if="session.role == 'user'">Download Format CSV - <a class="alert-link" href="/admin/downloads/FormatCSV.rar">Click Here</a></d-alert> 
         <up-user-laba-rugi v-if="user.role == 'user' || user.role == 'admin'" />
         <up-user-neraca v-if="user.role == 'user' || user.role == 'admin'" />
         <up-user-rasio-keuangan v-if="user.role == 'user' || user.role == 'admin'" />
         <up-user-goods v-if="user.role == 'supplier' || user.role == 'admin'" />
+        <ao-neraca />
+        <ao-laba-rugi />
+        <ao-penerimaan-negara />
       </d-col>
     </d-row>
   </d-container>
@@ -29,6 +33,9 @@ import UserLabaRugi from '@/components/user-profile/UserLabaRugi.vue';
 import UserNeraca from '@/components/user-profile/UserNeraca.vue';
 import UserRasioKeuangan from '@/components/user-profile/UserRasioKeuangan.vue';
 import UserGoods from '@/components/user-profile/UserGoods.vue';
+import NeracaChart from '@/components/user-profile/NeracaChart.vue';
+import LabaRugiChart from '@/components/user-profile/LabaRugiChart.vue';
+import PenerimaanNegaraChart from '@/components/user-profile/PenerimaanNegaraChart.vue';
 
 export default {
   name: 'user-profile',
@@ -39,16 +46,21 @@ export default {
     upUserNeraca: UserNeraca,
     upUserRasioKeuangan: UserRasioKeuangan,
     upUserGoods: UserGoods,
+    aoNeraca: NeracaChart,
+    aoLabaRugi: LabaRugiChart,
+    aoPenerimaanNegara: PenerimaanNegaraChart,
   },
   data(){
     return{
-      user: {},  
+      user: {},
+      session: {},
     }
   },
 
   created: function() 
   {
     this.fetchUser();
+    this.session = this.$session.get('user');
   },
 
   methods: {

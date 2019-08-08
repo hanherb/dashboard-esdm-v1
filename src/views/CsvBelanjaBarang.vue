@@ -3,13 +3,15 @@
     div( class="panel panel-sm")
       div( class="panel-heading")
         h4 Import CSV Belanja Barang
+        p &#10060 = Belum upload rencana & realisasi. &#9888 = Sudah upload rencana, belum upload realisasi. &#10004 = Sudah upload rencana dan realisasi.
       div( class="panel-body")
         div( class="form-group")
           div( class="col-sm-9")
             d-row
               d-col( md="3" v-for="kategori in kategoriStatus")
-                p(v-if="kategori.status == 1") Kategori {{kategori.letter}} - &#10004
-                p(v-else) Kategori {{kategori.letter}} - &#10060
+                p(v-if="kategori.status == 1") Kategori {{kategori.letter}} - &#9888
+                p(v-else-if="kategori.status == 0") Kategori {{kategori.letter}} - &#10060
+                p(v-else) Kategori {{kategori.letter}} - &#10004
             input( type="file" id="csv_file" name="csv_file" class="form-control" @change="loadCSV($event)")
         div( class="col-sm-offset-3 col-sm-9")
           div( class="checkbox-inline")
@@ -181,7 +183,12 @@ export default {
               if(this.kategoriStatus[j].letter == response.data[i].data[0]["Kategori"]) {
                 this.columns = Object.keys(response.data[i].data[0]);
                 this.tableData.push({"data": response.data[i].data});
-                this.kategoriStatus[j].status = 1;
+                if(response.data[i].data[0]["Rencana/Realisasi"] == "Rencana") {
+                  this.kategoriStatus[j].status = 1;
+                }
+                else if(response.data[i].data[0]["Rencana/Realisasi"] == "Realisasi") {
+                  this.kategoriStatus[j].status = 2;
+                }
               }
             }
           }
@@ -358,10 +365,10 @@ export default {
       for(var i = 0; i < this.tableData.length; i++) {
         for(var j = 1; j < this.tableData[i].data.length; j++) {
           if(this.tableData[i].data[j]["Self Assessment"]) {
-            document.querySelectorAll(".csv_table_barang tr:nth-child(" + (j+1) +") td:nth-child(14)")[i].classList.add('self-assessment');
+            document.querySelectorAll(".csv_table_barang tr:nth-child(" + (j+1) +") td:nth-child(16)")[i].classList.add('self-assessment');
           }
           else if(this.tableData[i].data[j]["Surveyor"]) {
-            document.querySelectorAll(".csv_table_barang tr:nth-child(" + (j+1) +") td:nth-child(15)")[i].classList.add('surveyor');
+            document.querySelectorAll(".csv_table_barang tr:nth-child(" + (j+1) +") td:nth-child(17)")[i].classList.add('surveyor');
           }
         }
       }

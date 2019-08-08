@@ -164,7 +164,7 @@ export default {
       }
 
       function div(colname) {
-        for(var i = 1; i < result.length; i++) {
+        for(var i = 0; i < result.length; i++) {
           if(colname == "% REALISASI TERHADAP RENCANA TAHUN 2018") {
             result[i][colname] = result[i]["REALISASI TAHUN 2018"] / result[i]["RENCANA TAHUN 2018"] * 100;
           }
@@ -174,11 +174,12 @@ export default {
         }
       }
 
-      sum("RENCANA TAHUN 2018");
-      sum("REALISASI TAHUN 2018");
-      sum("RENCANA TAHUN 2019");
-      div("% REALISASI TERHADAP RENCANA TAHUN 2018");
-      div("% RENCANA TAHUN 2019 TERHADAP RENCANA TAHUN 2018");
+      for(var i = 2018; i <= 2020; i++) {
+        sum("RENCANA TAHUN " + i);
+        sum("REALISASI TAHUN " + i);
+        div("% REALISASI TERHADAP RENCANA TAHUN " + i);
+        div("% RENCANA TAHUN " + (i+1) + " TERHADAP RENCANA TAHUN " + i);
+      }
 
       return result // JavaScript object
     },

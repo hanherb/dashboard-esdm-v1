@@ -71,7 +71,12 @@ export default {
           if(response.data.token) {
             alert("Login Success");
             if(response.data.response.status != 'wait-profile') {
-              this.$router.push('/analytics');
+              if(response.data.response.role == "admin") {
+                this.$router.push('/analytics');
+              }
+              else {
+                this.$router.push('/user-profile?id=' + response.data.response._id);
+              }
             }
             else {
               if(response.data.response.role != "supplier") {

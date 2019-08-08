@@ -2,7 +2,12 @@
   <aside :class="['main-sidebar', 'col-12', 'col-md-3', 'col-lg-2', 'px-0', sidebarVisible ? 'open' : '']">
       <div class="main-navbar">
         <nav class="navbar align-items-stretch navbar-light bg-white flex-md-nowrap border-bottom p-0">
-          <a class="navbar-brand w-100 mr-0" href="#" style="line-height: 25px;">
+          <a class="navbar-brand w-100 mr-0" v-if="role == 'admin'" href="/admin/analytics" style="line-height: 25px;">
+            <div class="d-table m-auto">
+              <span v-if="!hideLogoText" class="d-none d-md-inline ml-1">ESDM Dashboard</span>
+            </div>
+          </a>
+          <a class="navbar-brand w-100 mr-0" v-else="role == 'user'" :href="'/admin/user-profile?id=' + id" style="line-height: 25px;">
             <div class="d-table m-auto">
               <span v-if="!hideLogoText" class="d-none d-md-inline ml-1">ESDM Dashboard</span>
             </div>
@@ -69,6 +74,7 @@ export default {
     return {
       sidebarVisible: false,
       tahapan_kegiatan: this.$session.get('user').tahapan_kegiatan,
+      id: this.$session.get('user')._id,
       role: this.$session.get('user').role,
     };
   },

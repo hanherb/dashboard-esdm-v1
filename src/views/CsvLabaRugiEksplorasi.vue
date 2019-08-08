@@ -132,10 +132,13 @@ export default {
 
         result[2][colname] = parseInt(result[0][colname]) - parseInt(result[1][colname]);
 
-        for(var i = laba_kotor+1; i < laba_rugi_operasi; i++) {
+        for(var i = laba_kotor+2; i < laba_rugi_operasi-1; i++) {
           if(!result[i][colname] || result[i][colname] == '-') {
             result[i][colname] = 0;
           }
+          result[laba_rugi_operasi-1][colname] = 
+            parseInt(result[laba_rugi_operasi-1][colname]) +
+            parseInt(result[i][colname]);
         }
 
         result[laba_rugi_operasi][colname] = parseInt(result[laba_kotor][colname]) - parseInt(result[laba_rugi_operasi-1][colname]);
@@ -162,21 +165,24 @@ export default {
       }
 
       function div(colname) {
-        for(var i = 1; i < result.length; i++) {
-          if(colname == "% REALISASI TERHADAP RENCANA TAHUN 2018") {
-            result[i][colname] = result[i]["REALISASI TAHUN 2018"] / result[i]["RENCANA TAHUN 2018"] * 100;
-          }
-          else if(colname == "% RENCANA TAHUN 2019 TERHADAP RENCANA TAHUN 2018") {
-            result[i][colname] = result[i]["RENCANA TAHUN 2019"] / result[i]["RENCANA TAHUN 2018"] * 100;
+        for(var i = 0; i < result.length; i++) {
+          if(i != laba_kotor+1 && i != laba_rugi_operasi+1) {
+            if(colname == "% REALISASI TERHADAP RENCANA TAHUN 2018") {
+              result[i][colname] = result[i]["REALISASI TAHUN 2018"] / result[i]["RENCANA TAHUN 2018"] * 100;
+            }
+            else if(colname == "% RENCANA TAHUN 2019 TERHADAP RENCANA TAHUN 2018") {
+              result[i][colname] = result[i]["RENCANA TAHUN 2019"] / result[i]["RENCANA TAHUN 2018"] * 100;
+            }
           }
         }
       }
 
-      sum("RENCANA TAHUN 2018");
-      sum("REALISASI TAHUN 2018");
-      sum("RENCANA TAHUN 2019");
-      div("% REALISASI TERHADAP RENCANA TAHUN 2018");
-      div("% RENCANA TAHUN 2019 TERHADAP RENCANA TAHUN 2018");
+      for(var i = 2018; i <= 2019; i++) {
+        sum("RENCANA TAHUN " + i);
+        sum("REALISASI TAHUN " + i);
+        div("% REALISASI TERHADAP RENCANA TAHUN " + i);
+        div("% RENCANA TAHUN " + (i+1) + " TERHADAP RENCANA TAHUN " + i);
+      }
 
       return result // JavaScript object
     },

@@ -1,5 +1,5 @@
 <template>
-  <d-card class="card-small h-100">
+  <d-card class="card-small mb-4">
     <!-- Card Header -->
     <d-card-header class="border-bottom">
       <h6 class="m-0">{{ title }}</h6>
@@ -60,21 +60,22 @@ import Chart from '../../utils/chart';
 
 const defaultChartData = {
   labels: [
-    '09:00 PM',
-    '10:00 PM',
-    '11:00 PM',
-    '12:00 PM',
-    '13:00 PM',
-    '14:00 PM',
-    '15:00 PM',
-    '16:00 PM',
-    '17:00 PM',
+    '2010',
+    '2011',
+    '2012',
+    '2013',
+    '2014',
+    '2015',
+    '2016',
+    '2017',
+    '2018',
+    '2019',
   ],
   datasets: [
     {
       label: 'Today',
       fill: 'start',
-      data: [5, 5, 10, 30, 10, 42, 5, 15, 5],
+      data: [5, 5, 10, 30, 10, 42, 5, 15, 5, 35],
       backgroundColor: colors.primary.toRGBA(0.1),
       borderColor: colors.primary.toRGBA(1),
       pointBackgroundColor: colors.white.toHex(),
@@ -84,15 +85,22 @@ const defaultChartData = {
     {
       label: 'Yesterday',
       fill: 'start',
-      data: ['', 23, 5, 10, 5, 5, 30, 2, 10],
+      data: ['', 23, 5, 10, 5, 5, 30, 2, 10, 15],
       backgroundColor: colors.salmon.toRGBA(0.1),
       borderColor: colors.salmon.toRGBA(1),
       pointBackgroundColor: colors.white.toHex(),
       pointHoverBackgroundColor: colors.salmon.toRGBA(1),
-      borderDash: [5, 5],
       borderWidth: 1.5,
-      pointRadius: 0,
-      pointBorderColor: colors.salmon.toRGBA(1),
+    },
+    {
+      label: 'Tomorrow',
+      fill: 'start',
+      data: [15, 23, 5, 10, 15, 15, 15, 5, 40, 25],
+      backgroundColor: colors.green.toRGBA(0.1),
+      borderColor: colors.green.toRGBA(1),
+      pointBackgroundColor: colors.white.toHex(),
+      pointHoverBackgroundColor: colors.green.toRGBA(1),
+      borderWidth: 1.5,
     },
   ],
 };

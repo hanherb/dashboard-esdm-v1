@@ -226,6 +226,56 @@ export default new Router({
       component: () => import('./views/RekapBelanjaBarangPerusahaan.vue'),
     },
     {
+      path: '/rekap-arus-kas',
+      name: 'rekap-arus-kas',
+      component: () => import('./views/RekapArusKas.vue'),
+    },
+    {
+      path: '/rekap-anggaran-belanja',
+      name: 'rekap-anggaran-belanja',
+      component: () => import('./views/RekapAnggaranBelanja.vue'),
+    },
+    {
+      path: '/rekap-asumsi-keuangan',
+      name: 'rekap-asumsi-keuangan',
+      component: () => import('./views/RekapAsumsiKeuangan.vue'),
+    },
+    {
+      path: '/rekap-harga-pokok',
+      name: 'rekap-harga-pokok',
+      component: () => import('./views/RekapHargaPokok.vue'),
+    },
+    {
+      path: '/rekap-investasi',
+      name: 'rekap-investasi',
+      component: () => import('./views/RekapInvestasi.vue'),
+    },
+    {
+      path: '/rekap-keuangan-lainnya',
+      name: 'rekap-keuangan-lainnya',
+      component: () => import('./views/RekapKeuanganLainnya.vue'),
+    },
+    {
+      path: '/rekap-laba-rugi',
+      name: 'rekap-laba-rugi',
+      component: () => import('./views/RekapLabaRugi.vue'),
+    },
+    {
+      path: '/rekap-neraca',
+      name: 'rekap-neraca',
+      component: () => import('./views/RekapNeraca.vue'),
+    },
+    {
+      path: '/rekap-penerimaan-negara',
+      name: 'rekap-penerimaan-negara',
+      component: () => import('./views/RekapPenerimaanNegara.vue'),
+    },
+    {
+      path: '/rekap-sumber-pembiayaan',
+      name: 'rekap-sumber-pembiayaan',
+      component: () => import('./views/RekapSumberPembiayaan.vue'),
+    },
+    {
       path: '/commerce',
       name: 'commerce',
       component: () => import('./plugins/commerce/views/Commerce.vue'),

@@ -1,32 +1,40 @@
 export default function () {
   return [{
     title: 'Dashboards',
+    role: 'admin',
     items: [{
       title: 'Analytics',
-      to: '/analytics',
+      to: {
+        name: 'analytics',
+        role: 'admin'
+      },
       htmlBefore: '<i class="material-icons">&#xE917;</i>',
       htmlAfter: '',
     }],
   },
   {
     title: 'Data',
+    role: 'admin',
     items: [{
       title: 'Users',
       htmlBefore: '<i class="material-icons">&#xE7FD;</i>',
       to: {
         name: 'users',
+        role: 'admin'
       },
     }, {
       title: 'Companies',
       htmlBefore: '<i class="material-icons">&#xE7FD;</i>',
       to: {
         name: 'company-list',
+        role: 'admin'
       },
     }, {
       title: 'Supplier',
       htmlBefore: '<i class="material-icons">&#xE7FD;</i>',
       to: {
         name: 'supplier-list',
+        role: 'admin'
       },
     }],
   }, {

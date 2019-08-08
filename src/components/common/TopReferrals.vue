@@ -74,14 +74,16 @@ export default {
         for(var i = 0; i < response.data.length; i++) {
           for(var j = 0; j < response.data[i].data.length; j++) {
             if(response.data[i].data[j]["Negara"]) {
-              if(this.topImport.length < 20) {
-                this.topImport.push({
-                  "name": response.data[i].data[j]["Jenis Barang"],
-                  "qty": response.data[i].data[j]["Kuantitas"]
-                });
-              }
-              else {
-                break;
+              if(response.data[i].data[0]["Rencana/Realisasi"] == "Realisasi") {
+                if(this.topImport.length < 20) {
+                  this.topImport.push({
+                    "name": response.data[i].data[j]["Jenis Barang"],
+                    "qty": response.data[i].data[j]["Kuantitas"]
+                  });
+                }
+                else {
+                  break;
+                }
               }
             }
           }

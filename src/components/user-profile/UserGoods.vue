@@ -1,5 +1,5 @@
 <template>
-  <d-card class="card-small lo-stats">
+  <d-card class="card-small lo-stats mb-4">
 
     <!-- Card Header -->
     <d-card-header class="border-bottom">

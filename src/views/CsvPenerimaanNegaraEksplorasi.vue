@@ -143,11 +143,13 @@ export default {
           }
         }
       }
-      sum("RENCANA TAHUN 2018");
-      sum("REALISASI TAHUN 2018");
-      sum("RENCANA TAHUN 2019");
-      div("% REALISASI TERHADAP RENCANA TAHUN 2018");
-      div("% RENCANA TAHUN 2019 TERHADAP RENCANA TAHUN 2018");
+
+      for(var i = 2018; i <= 2019; i++) {
+        sum("RENCANA TAHUN " + i);
+        sum("REALISASI TAHUN " + i);
+        div("% REALISASI TERHADAP RENCANA TAHUN " + i);
+        div("% RENCANA TAHUN " + (i+1) + " TERHADAP RENCANA TAHUN " + i);
+      }
       console.log(result);
       return result // JavaScript object
     },

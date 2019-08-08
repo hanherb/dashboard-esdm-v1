@@ -60,7 +60,7 @@ export default {
       var id = window.location.href.split("?id=")[1];
       this.axios.get(address + ":3000/get-log", headers).then((response) => {
         response.data.reverse();
-        for(let i = 0; i < 20; i++) {
+        for(let i = 0; i < 10; i++) {
           if(response.data[i].userId == id) {
             this.activities.push(response.data[i]);
           }

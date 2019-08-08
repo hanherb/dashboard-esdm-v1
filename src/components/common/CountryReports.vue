@@ -180,24 +180,26 @@ export default {
         for(var i = 0; i < response.data.length; i++) {
           for(var j = 0; j < response.data[i].data.length; j++) {
             if(response.data[i].data[j]["Negara"]) {
-              if(this.countries.length == 0) {
-                this.countries.push({
-                  "name": response.data[i].data[j]["Negara"],
-                  "qty": parseInt(response.data[i].data[j]["Kuantitas"])
-                });
-              }
-              else {
-                for(var k = 0; k < this.countries.length; k++) {
-                  if(this.countries[k].name == response.data[i].data[j]["Negara"]) {
-                    this.countries[k].qty += parseInt(response.data[i].data[j]["Kuantitas"]);
-                    break;
-                  }
-                  if(k == this.countries.length-1) {
-                    this.countries.push({
-                      "name": response.data[i].data[j]["Negara"],
-                      "qty": parseInt(response.data[i].data[j]["Kuantitas"])
-                    });
-                    break;
+              if(response.data[i].data[0]["Rencana/Realisasi"] == "Realisasi") {
+                if(this.countries.length == 0) {
+                  this.countries.push({
+                    "name": response.data[i].data[j]["Negara"],
+                    "qty": parseInt(response.data[i].data[j]["Kuantitas"])
+                  });
+                }
+                else {
+                  for(var k = 0; k < this.countries.length; k++) {
+                    if(this.countries[k].name == response.data[i].data[j]["Negara"]) {
+                      this.countries[k].qty += parseInt(response.data[i].data[j]["Kuantitas"]);
+                      break;
+                    }
+                    if(k == this.countries.length-1) {
+                      this.countries.push({
+                        "name": response.data[i].data[j]["Negara"],
+                        "qty": parseInt(response.data[i].data[j]["Kuantitas"])
+                      });
+                      break;
+                    }
                   }
                 }
               }
