@@ -2,9 +2,9 @@
   <d-navbar-nav class="flex-row">
     <li v-if="session" class="nav-item border-left border-right dropdown notifications">
       <a class="nav-link nav-link-icon text-center" v-d-toggle.notifications>
-        <div class="nav-link-icon__wrapper">
+        <div class="nav-link-icon__wrapper" v-on:click="checkNotifClick">
           <i class="material-icons">&#xE7F4;</i>
-          <d-badge pill theme="danger">{{ notifications.length }}</d-badge>
+          <d-badge v-if="notifClicked == 0" pill theme="danger">{{ notifications.length }}</d-badge>
         </div>
       </a>
       <d-collapse class="dropdown-menu dropdown-menu-small" id="notifications">
@@ -58,6 +58,7 @@ export default {
     return {
       session: {},
       notifications: [],
+      notifClicked: 0,
       avatarImg: null,
     }
   },
@@ -95,22 +96,27 @@ export default {
               var tk = "op";
             }
             var temp = {
-              id: "notif_active",
-              category: "Profile",
-              description: "Your profile is <span class='text-success text-semibold'>complete</span>, you can upload CSV files now",
-              href: "/admin/csv-neraca-"+tk,
-            }
-            var temp2 = {
               id: "notif_format_csv",
               category: "Import CSV",
               description: "Click here to download CSV Format",
               href: "/admin/downloads/FormatCSV.rar",
+              read: 0,
+            }
+            var temp2 = {
+              id: "notif_active",
+              category: "Profile",
+              description: "Your profile is <span class='text-success text-semibold'>complete</span>, you can upload CSV files now",
+              href: "/admin/csv-neraca-"+tk,
+              read: 0,
             }
             this.notifications.push(temp);
             this.notifications.push(temp2);
           }
         }
       }
+    },
+    checkNotifClick() {
+      this.notifClicked = 1;
     },
     logout() {
       this.axios.get(address + ":3000/logout").then((response) => {

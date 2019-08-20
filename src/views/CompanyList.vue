@@ -9,6 +9,16 @@
             <i class="material-icons">&#xe7fd;</i>
           </d-button>
         </d-link>
+        <d-link :to="'/rekap-user?id=' + props.row._id">
+          <d-button class="btn-white" v-d-tooltip.hover="'Rekap User'">
+            <i class="material-icons">&#xe8ad;</i>
+          </d-button>
+        </d-link>
+        <d-link :to="'/verifikasi-barang?id=' + props.row._id">
+          <d-button class="btn-white" v-d-tooltip.hover="'Verifikasi Barang'">
+            <i class="material-icons">&#xe8cc;</i>
+          </d-button>
+        </d-link>
       </d-button-group>
     </v-client-table>
   </d-container>

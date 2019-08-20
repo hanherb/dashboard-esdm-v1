@@ -36,7 +36,7 @@
                 </div>
               </td>
               <td class="lo-stats__items text-center">{{ commerce.qty }}</td>
-              <td class="lo-stats__total text-center text-success">Rp. {{ commerce.price }}</td>
+              <td class="lo-stats__total text-center text-success">$ {{ commerce.price }}</td>
               <td class="lo-stats__total text-center">{{ commerce.category }}</td>
             </tr>
           </tbody>

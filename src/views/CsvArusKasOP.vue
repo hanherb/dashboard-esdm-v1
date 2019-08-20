@@ -2,7 +2,7 @@
   div( class="container")
     div( class="panel panel-sm")
       div( class="panel-heading")
-        h4 Import CSV Arus Kas
+        h4 Import Spreadsheet Arus Kas
       div( class="panel-body")
         div( class="form-group")
           div( class="col-sm-9")

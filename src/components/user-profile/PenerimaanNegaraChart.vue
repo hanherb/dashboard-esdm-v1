@@ -98,18 +98,7 @@ export default {
         to: null,
       },
       chartData: {
-        labels: [
-          '2018',
-          '2019',
-          '2020',
-          '2021',
-          '2022',
-          '2023',
-          '2024',
-          '2025',
-          '2026',
-          '2027',
-        ],
+        labels: [],
         datasets: [
           {
             label: 'Royalti',
@@ -169,8 +158,14 @@ export default {
       this.axios.get(address + ":3000/get-penerimaan-negara", headers).then((response) => {
         for(let i = 0; i < response.data.length; i++) {
           if(response.data[i].upload_by == id) {
+            var keys = Object.keys(response.data[i].data[0]);
+            for(var k = 0; k < keys.length; k++) {
+              if(keys[k].split(' ')[0] == "REALISASI") {
+                this.chartData.labels.push(keys[k].split('REALISASI TAHUN ')[1]);
+              }
+            }
             var tempTahun = [];
-            for(var k = 2018; k <= 2019; k++) {
+            for(var k = this.chartData.labels[0]; k <= this.chartData.labels[this.chartData.labels.length-1]; k++) {
               var temp = {};
               for(let j = 0; j < response.data[i].data.length; j++) {
                 if(response.data[i].data[j]["URAIAN"] == "Royalti") {
@@ -231,7 +226,7 @@ export default {
                 gridLines: false,
                 ticks: {
                   callback(tick, index) {
-                    return index % 2 === 0 ? '' : tick;
+                    return index % 1 ? '' : tick;
                   },
                 },
               },

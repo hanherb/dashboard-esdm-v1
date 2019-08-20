@@ -10,18 +10,6 @@
     <!-- Activity Items -->
     <v-client-table class="dataTables_wrapper" :data="tableData" :columns="columns" :options="clientTableOptions">
       <!-- Actions Column Slot -->
-      <d-button-group slot="actions" slot-scope="props" size="small" class="d-flex justify-content-center">
-        <d-link :to="'/update-user?id=' + props.row._id">
-          <d-button class="btn-white" v-d-tooltip.hover="'Edit'">
-            <i class="material-icons">&#xE254;</i>
-          </d-button>
-        </d-link>
-        <d-link :to="'/delete-user?id=' + props.row._id">
-          <d-button class="btn-white" v-d-tooltip.hover="'Delete'">
-            <i class="material-icons">&#xE872;</i>
-          </d-button>
-        </d-link>
-      </d-button-group>
     </v-client-table>
   </d-card>
 </template>
@@ -56,7 +44,7 @@ export default {
       columns: [],
       tableData: [],
       clientTableOptions: {
-        perPage: 10,
+        perPage: 25,
         recordsPerPage: [10, 25, 50, 100],
         skin: 'transaction-history table dataTable',
         sortIcon: {
@@ -73,6 +61,9 @@ export default {
           nav: 'scroll',
         },
       },
+      tahun: [],
+      uraian: [],
+      neraca: [],
     }
   },
 
@@ -83,59 +74,204 @@ export default {
 
   methods: {
     fetchNeraca() {
+      this.columns.push('Uraian');
       var id = window.location.href.split("?id=")[1];
       this.axios.get(address + ":3000/get-neraca", headers).then((response) => {
         for(let i = 0; i < response.data.length; i++) {
-          if(i == 0) {
-            this.columns.push('Tahun');
-          }
           if(response.data[i].upload_by == id) {
-            var temp = [];
-            for(let j = 0; j < response.data[i].data.length; j++) {
-              if(response.data[i].data[j]["URAIAN"] == "Kas dan Bank" ||
-                response.data[i].data[j]["URAIAN"] == "Piutang Usaha" ||
-                response.data[i].data[j]["URAIAN"] == "Persediaan" ||
-                response.data[i].data[j]["URAIAN"] == "Jumlah Aktiva Lancar" ||
-                response.data[i].data[j]["URAIAN"] == "Aktiva Tetap" ||
-                response.data[i].data[j]["URAIAN"] == "Aktiva Eksplorasi dan Evaluasi" ||
-                response.data[i].data[j]["URAIAN"] == "Jumlah Aktiva Tidak Lancar" ||
-                response.data[i].data[j]["URAIAN"] == "Hutang Usaha" ||
-                response.data[i].data[j]["URAIAN"] == "Hutang Afiliasi" ||
-                response.data[i].data[j]["URAIAN"] == "Jumlah Kewajiban Jangka Pendek" ||
-                response.data[i].data[j]["URAIAN"] == "Hutang Bank" ||
-                response.data[i].data[j]["URAIAN"] == "Hutang Afiliasi" ||
-                response.data[i].data[j]["URAIAN"] == "Provisi untuk Reklamasi dan Penutupan Tambang" ||
-                response.data[i].data[j]["URAIAN"] == "Jumlah Kewajiban Jangka Panjang" ||
-                response.data[i].data[j]["URAIAN"] == "Modal Yang Disetor" ||
-                response.data[i].data[j]["URAIAN"] == "Laba (rugi) ditahan" ||
-                response.data[i].data[j]["URAIAN"] == "Ekuitas") {
-                this.columns.push(response.data[i].data[j]["URAIAN"]);
-                if(!response.data[i].data[j]["REALISASI TAHUN 2018"]) {
-                  response.data[i].data[j]["REALISASI TAHUN 2018"] = 0;
-                }
-                temp.push(response.data[i].data[j]["REALISASI TAHUN 2018"]);
+            var keys = Object.keys(response.data[i].data[0]);
+            for(var k = 0; k < keys.length; k++) {
+              if(keys[k].split(' ')[0] == "REALISASI") {
+                this.tahun.push(keys[k].split('REALISASI TAHUN ')[1]);
               }
             }
-            this.tableData = [{
-              "Tahun": '2018',
-              "Kas dan Bank": temp[0],
-              "Piutang Usaha": temp[1],
-              "Persediaan": temp[2],
-              "Jumlah Aktiva Lancar": temp[3],
-              "Aktiva Tetap": temp[4],
-              "Aktiva Eksplorasi dan Evaluasi": temp[5],
-              "Jumlah Aktiva Tidak Lancar": temp[6],
-              "Hutang Usaha": temp[7],
-              "Hutang Afiliasi": temp[8],
-              "Jumlah Kewajiban Jangka Pendek": temp[9],
-              "Hutang Bank": temp[10],
-              "Hutang Afiliasi": temp[11],
-              "Provisi untuk Reklamasi dan Penutupan Tambang": temp[12],
-              "Jumlah Kewajiban Jangka Panjang": temp[13],
-              "Modal Yang Disetor": temp[14],
-              "Laba (rugi) ditahan": temp[15],
-              "Ekuitas": temp[16]
-            }]
+            for(var k = this.tahun[0]; k <= this.tahun[this.tahun.length-1]; k++) {
+              this.columns.push(String(k));
+              for(let j = 0; j < response.data[i].data.length; j++) {
+                if(response.data[i].data[j]["URAIAN"] == "Kas dan Bank") {
+                  if(k == this.tahun[0]) {
+                    this.uraian.push(response.data[i].data[j]["URAIAN"]);
+                  }
+                  this.neraca.push({
+                    "uraian": response.data[i].data[j]["URAIAN"],
+                    "tahun": k,
+                    "value": response.data[i].data[j]["REALISASI TAHUN "+k]
+                  });
+                }
+                else if(response.data[i].data[j]["URAIAN"] == "Piutang Usaha") {
+                  if(k == this.tahun[0]) {
+                    this.uraian.push(response.data[i].data[j]["URAIAN"]);
+                  }
+                  this.neraca.push({
+                    "uraian": response.data[i].data[j]["URAIAN"],
+                    "tahun": k,
+                    "value": response.data[i].data[j]["REALISASI TAHUN "+k]
+                  });
+                }
+                else if(response.data[i].data[j]["URAIAN"] == "Persediaan") {
+                  if(k == this.tahun[0]) {
+                    this.uraian.push(response.data[i].data[j]["URAIAN"]);
+                  }
+                  this.neraca.push({
+                    "uraian": response.data[i].data[j]["URAIAN"],
+                    "tahun": k,
+                    "value": response.data[i].data[j]["REALISASI TAHUN "+k]
+                  });
+                }
+                else if(response.data[i].data[j]["URAIAN"] == "Jumlah Aktiva Lancar") {
+                  if(k == this.tahun[0]) {
+                    this.uraian.push(response.data[i].data[j]["URAIAN"]);
+                  }
+                  this.neraca.push({
+                    "uraian": response.data[i].data[j]["URAIAN"],
+                    "tahun": k,
+                    "value": response.data[i].data[j]["REALISASI TAHUN "+k]
+                  });
+                }
+                else if(response.data[i].data[j]["URAIAN"] == "Aktiva Tetap") {
+                  if(k == this.tahun[0]) {
+                    this.uraian.push(response.data[i].data[j]["URAIAN"]);
+                  }
+                  this.neraca.push({
+                    "uraian": response.data[i].data[j]["URAIAN"],
+                    "tahun": k,
+                    "value": response.data[i].data[j]["REALISASI TAHUN "+k]
+                  });
+                }
+                else if(response.data[i].data[j]["URAIAN"] == "Aktiva Eksplorasi dan Evaluasi") {
+                  if(k == this.tahun[0]) {
+                    this.uraian.push(response.data[i].data[j]["URAIAN"]);
+                  }
+                  this.neraca.push({
+                    "uraian": response.data[i].data[j]["URAIAN"],
+                    "tahun": k,
+                    "value": response.data[i].data[j]["REALISASI TAHUN "+k]
+                  });
+                }
+                else if(response.data[i].data[j]["URAIAN"] == "Jumlah Aktiva Tidak Lancar") {
+                  if(k == this.tahun[0]) {
+                    this.uraian.push(response.data[i].data[j]["URAIAN"]);
+                  }
+                  this.neraca.push({
+                    "uraian": response.data[i].data[j]["URAIAN"],
+                    "tahun": k,
+                    "value": response.data[i].data[j]["REALISASI TAHUN "+k]
+                  });
+                }
+                else if(response.data[i].data[j]["URAIAN"] == "Hutang Usaha") {
+                  if(k == this.tahun[0]) {
+                    this.uraian.push(response.data[i].data[j]["URAIAN"]);
+                  }
+                  this.neraca.push({
+                    "uraian": response.data[i].data[j]["URAIAN"],
+                    "tahun": k,
+                    "value": response.data[i].data[j]["REALISASI TAHUN "+k]
+                  });
+                }
+                else if(response.data[i].data[j]["URAIAN"] == "Hutang Afiliasi Jangka Pendek") {
+                  if(k == this.tahun[0]) {
+                    this.uraian.push(response.data[i].data[j]["URAIAN"]);
+                  }
+                  this.neraca.push({
+                    "uraian": response.data[i].data[j]["URAIAN"],
+                    "tahun": k,
+                    "value": response.data[i].data[j]["REALISASI TAHUN "+k]
+                  });
+                }
+                else if(response.data[i].data[j]["URAIAN"] == "Jumlah Kewajiban Jangka Pendek") {
+                  if(k == this.tahun[0]) {
+                    this.uraian.push(response.data[i].data[j]["URAIAN"]);
+                  }
+                  this.neraca.push({
+                    "uraian": response.data[i].data[j]["URAIAN"],
+                    "tahun": k,
+                    "value": response.data[i].data[j]["REALISASI TAHUN "+k]
+                  });
+                }
+                else if(response.data[i].data[j]["URAIAN"] == "Hutang Bank") {
+                  if(k == this.tahun[0]) {
+                    this.uraian.push(response.data[i].data[j]["URAIAN"]);
+                  }
+                  this.neraca.push({
+                    "uraian": response.data[i].data[j]["URAIAN"],
+                    "tahun": k,
+                    "value": response.data[i].data[j]["REALISASI TAHUN "+k]
+                  });
+                }
+                else if(response.data[i].data[j]["URAIAN"] == "Hutang Afiliasi Jangka Panjang") {
+                  if(k == this.tahun[0]) {
+                    this.uraian.push(response.data[i].data[j]["URAIAN"]);
+                  }
+                  this.neraca.push({
+                    "uraian": response.data[i].data[j]["URAIAN"],
+                    "tahun": k,
+                    "value": response.data[i].data[j]["REALISASI TAHUN "+k]
+                  });
+                }
+                else if(response.data[i].data[j]["URAIAN"] == "Provisi untuk Reklamasi dan Penutupan Tambang") {
+                  if(k == this.tahun[0]) {
+                    this.uraian.push(response.data[i].data[j]["URAIAN"]);
+                  }
+                  this.neraca.push({
+                    "uraian": response.data[i].data[j]["URAIAN"],
+                    "tahun": k,
+                    "value": response.data[i].data[j]["REALISASI TAHUN "+k]
+                  });
+                }
+                else if(response.data[i].data[j]["URAIAN"] == "Jumlah Kewajiban Jangka Panjang") {
+                  if(k == this.tahun[0]) {
+                    this.uraian.push(response.data[i].data[j]["URAIAN"]);
+                  }
+                  this.neraca.push({
+                    "uraian": response.data[i].data[j]["URAIAN"],
+                    "tahun": k,
+                    "value": response.data[i].data[j]["REALISASI TAHUN "+k]
+                  });
+                }
+                else if(response.data[i].data[j]["URAIAN"] == "Modal Yang Disetor") {
+                  if(k == this.tahun[0]) {
+                    this.uraian.push(response.data[i].data[j]["URAIAN"]);
+                  }
+                  this.neraca.push({
+                    "uraian": response.data[i].data[j]["URAIAN"],
+                    "tahun": k,
+                    "value": response.data[i].data[j]["REALISASI TAHUN "+k]
+                  });
+                }
+                else if(response.data[i].data[j]["URAIAN"] == "Laba (rugi) ditahan") {
+                  if(k == this.tahun[0]) {
+                    this.uraian.push(response.data[i].data[j]["URAIAN"]);
+                  }
+                  this.neraca.push({
+                    "uraian": response.data[i].data[j]["URAIAN"],
+                    "tahun": k,
+                    "value": response.data[i].data[j]["REALISASI TAHUN "+k]
+                  });
+                }
+                else if(response.data[i].data[j]["URAIAN"] == "Ekuitas") {
+                  if(k == this.tahun[0]) {
+                    this.uraian.push(response.data[i].data[j]["URAIAN"]);
+                  }
+                  this.neraca.push({
+                    "uraian": response.data[i].data[j]["URAIAN"],
+                    "tahun": k,
+                    "value": response.data[i].data[j]["REALISASI TAHUN "+k]
+                  });
+                }
+              }
+            }
+          }
+        }
+        for(var k = 0; k < this.uraian.length; k++) {
+          this.tableData.push({
+            "Uraian": this.uraian[k],
+          });
+        }
+        for(var l = 0; l < this.tableData.length; l++) {
+          for(var k = 0; k < this.neraca.length; k++) {
+            if(this.tableData[l]["Uraian"] == this.neraca[k]["uraian"]) {
+              this.tableData[l][this.neraca[k]["tahun"]] = basicFunction.numberWithCommas(this.neraca[k]["value"]);
+            }
           }
         }
       });

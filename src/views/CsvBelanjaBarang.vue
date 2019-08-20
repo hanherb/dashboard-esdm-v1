@@ -2,21 +2,25 @@
   div( class="container")
     div( class="panel panel-sm")
       div( class="panel-heading")
-        h4 Import CSV Belanja Barang
-        p &#10060 = Belum upload rencana & realisasi. &#9888 = Sudah upload rencana, belum upload realisasi. &#10004 = Sudah upload rencana dan realisasi.
+        h4 Import Spreadsheet Belanja Barang
       div( class="panel-body")
         div( class="form-group")
           div( class="col-sm-9")
             d-row
-              d-col( md="3" v-for="kategori in kategoriStatus")
-                p(v-if="kategori.status == 1") Kategori {{kategori.letter}} - &#9888
-                p(v-else-if="kategori.status == 0") Kategori {{kategori.letter}} - &#10060
-                p(v-else) Kategori {{kategori.letter}} - &#10004
             input( type="file" id="csv_file" name="csv_file" class="form-control" @change="loadCSV($event)")
         div( class="col-sm-offset-3 col-sm-9")
           div( class="checkbox-inline")
             label( for="header_rows") 
         d-container( fluid class="main-content-container px-4 pb-4")
+          d-row
+            d-col( md="3" class="form-group")
+              d-form-select( v-model="selected_1" :options="select_kategori" @change="filterKategori($event)")
+            d-col( md="3" class="form-group")
+              d-form-select( v-model="selected_2" :options="select_rencana_realisasi" @change="filterRencanaRealisasi($event)")
+            d-col( md="2" class="form-group")
+              d-form-select( v-model="selected_3" :options="select_tahun" @change="filterTahun($event)")
+            d-col( md="2" class="form-group")
+              d-button( theme="primary" v-on:click="applyFilter") Apply Filter
           v-client-table( v-for="tableData in tableData" class="dataTables_wrapper csv_table_barang" :data="tableData.data" :columns="columns" :options="clientTableOptions")
               table( class="table mb-0")
                 thead( class="bg-light")
@@ -35,6 +39,7 @@
 import graphqlFunction from '../graphqlFunction';
 import address from '../address';
 import headers from '../headers';
+import kategoriBarang from '@/data/kategori-barang';
 import Vue from 'vue';
 import { ClientTable } from 'vue-tables-2';
 import '@/assets/scss/vue-tables.scss';
@@ -53,6 +58,11 @@ export default {
       sortKey: '',
       columns: [],
       tableData: [],
+      filter: {
+        kategori: "All",
+        rencana_realisasi: "All",
+        tahun: "All",
+      },
       clientTableOptions: {
         perPage: 40,
         recordsPerPage: [10, 25, 50, 100],
@@ -72,89 +82,45 @@ export default {
         },
       },
       validation: "",
-      kategori: "",
-      kategoriStatus: [
-        {
-         'letter': 'A',
-         'status': 0
-        },
-        {
-         'letter': 'B',
-         'status': 0
-        },
-        {
-         'letter': 'C',
-         'status': 0
-        },
-        {
-         'letter': 'D',
-         'status': 0
-        },
-        {
-         'letter': 'E',
-         'status': 0
-        },
-        {
-         'letter': 'F',
-         'status': 0
-        },
-        {
-         'letter': 'G',
-         'status': 0
-        },
-        {
-         'letter': 'H',
-         'status': 0
-        },
-        {
-         'letter': 'I',
-         'status': 0
-        },
-        {
-         'letter': 'J',
-         'status': 0
-        },
-        {
-         'letter': 'K',
-         'status': 0
-        },
-        {
-         'letter': 'L',
-         'status': 0
-        },
-        {
-         'letter': 'M',
-         'status': 0
-        },
-        {
-         'letter': 'N',
-         'status': 0
-        },
-        {
-         'letter': 'O',
-         'status': 0
-        },
-        {
-         'letter': 'P',
-         'status': 0
-        },
-        {
-         'letter': 'Q',
-         'status': 0
-        },
-        {
-         'letter': 'R',
-         'status': 0
-        },
-        {
-         'letter': 'S',
-         'status': 0
-        },
-        {
-         'letter': 'T',
-         'status': 0
-        } 
-      ]
+      select_kategori: [
+        {value: null, text: 'Filter Kategori..', disabled: true },
+        {value: 'All', text: 'Show All'},
+        {value: 'HEAVY EQUIPMENT', text: 'A. HEAVY EQUIPMENT'},
+        {value: 'LAND TRANSPORT EQUIPMENT', text: 'B. LAND TRANSPORT EQUIPMENT'},
+        {value: 'WATER TRANSPORT EQUIPMENT', text: 'C. WATER TRANSPORT EQUIPMENT'},
+        {value: 'AIR TRANSPORT EQUIPMENT', text: 'D. AIR TRANSPORT EQUIPMENT'},
+        {value: 'COMMUNICATION', text: 'E. COMMUNICATION'},
+        {value: 'LAND SURVEY & RECOINASSANCE', text: 'F. LAND SURVEY & RECOINASSANCE'},
+        {value: 'DRILLING EQUIPMENT', text: 'G. DRILLING EQUIPMENT'},
+        {value: 'SAMPLING & LAB', text: 'H. SAMPLING & LAB'},
+        {value: 'REPAIR & MAINTENANCE', text: 'I. REPAIR & MAINTENANCE'},
+        {value: 'BUILDING MATERIALS', text: 'J. BUILDING MATERIALS'},
+        {value: 'UTILITIES, FURNITURE & APPLIANCES', text: 'K. UTILITIES, FURNITURE & APPLIANCES'},
+        {value: 'CONSUMABLES: FUEL', text: 'L. CONSUMABLES: FUEL'},
+        {value: 'CONSUMABLES: FOOD', text: 'M. CONSUMABLES: FOOD'},
+        {value: 'MISCELLANEOUS', text: 'N. MISCELLANEOUS'},
+        {value: 'MEDICAL: HEALTHY & SAFETY', text: 'O. MEDICAL: HEALTHY & SAFETY'},
+        {value: 'RECREATION FACILITY', text: 'P. RECREATION FACILITY'},
+        {value: 'POWER STATION', text: 'Q. POWER STATION'},
+        {value: 'PROCESSING PLANT', text: 'R. PROCESSING PLANT'},
+        {value: 'SCHOOL & TRAINING', text: 'S. SCHOOL & TRAINING'},
+        {value: 'ENVIRONMENTAL', text: 'T. ENVIRONMENTAL'}
+      ],
+      select_rencana_realisasi: [
+        {value: null, text: 'Filter Rencana/Realisasi..', disabled: true },
+        {value: 'All', text: 'Show All'},
+        {value: 'Rencana', text: 'Rencana'},
+        {value: 'Realisasi', text: 'Realisasi'},
+      ],
+      select_tahun: [
+        {value: null, text: 'Filter Tahun..', disabled: true },
+        {value: 'All', text: 'Show All'},
+        {value: '2018', text: '2018'},
+        {value: '2019', text: '2019'},
+      ],
+      selected_1: null,
+      selected_2: null,
+      selected_3: null,
     };
   },
   filters: {
@@ -170,29 +136,24 @@ export default {
       setTimeout(function() {
         vm.coloring();
       }, 2000);
-    });
+    }, this.filter.kategori, this.filter.rencana_realisasi, this.filter.tahun);
   },
 
   methods: {
-    fetchBelanjaBarang(cb) {
+    fetchBelanjaBarang(cb, kategori, rencana_realisasi, tahun) {
       var id = this.$session.get('user')._id;
       this.axios.get(address + ":3000/get-belanja-barang", headers).then((response) => {
         for(var i = 0; i < response.data.length; i++) {
           if(response.data[i].upload_by == id) {
-            for(var j = 0; j < this.kategoriStatus.length; j++) {
-              if(this.kategoriStatus[j].letter == response.data[i].data[0]["Kategori"]) {
-                this.columns = Object.keys(response.data[i].data[0]);
-                this.tableData.push({"data": response.data[i].data});
-                if(response.data[i].data[0]["Rencana/Realisasi"] == "Rencana") {
-                  this.kategoriStatus[j].status = 1;
-                }
-                else if(response.data[i].data[0]["Rencana/Realisasi"] == "Realisasi") {
-                  this.kategoriStatus[j].status = 2;
-                }
-              }
+            this.columns = Object.keys(response.data[i].data[0]);
+            if((kategori == response.data[i].data[0]["Jenis Barang"] || kategori == 'All') &&
+              (rencana_realisasi == response.data[i].data[0]["Rencana/Realisasi"] || rencana_realisasi == 'All') &&
+              (tahun == response.data[i].data[0]["Tahun"] || tahun == 'All')) {
+              this.tableData.push({"data": response.data[i].data});
             }
           }
         }
+        console.log(this.tableData);
         if(cb)
           return cb();
       })
@@ -372,6 +333,24 @@ export default {
           }
         }
       }
+    },
+    filterKategori(kategori) {
+      this.filter.kategori = kategori;
+    },
+    filterRencanaRealisasi(rencana_realisasi) {
+      this.filter.rencana_realisasi = rencana_realisasi;
+    },
+    filterTahun(tahun) {
+      this.filter.tahun = tahun;
+    },
+    applyFilter() {
+      this.tableData = [];
+      var vm = this;
+      this.fetchBelanjaBarang(() => {
+        setTimeout(function() {
+          vm.coloring();
+        }, 2000);
+      }, this.filter.kategori, this.filter.rencana_realisasi, this.filter.tahun);
     }
   }
 };

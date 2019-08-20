@@ -18,7 +18,7 @@
           <tr v-for="(country, idx) in countries" :key="idx">
             <td> {{ country.name }}</td>
             <td class="text-right">-</td>
-            <td class="text-right">{{ country.qty }}</td>
+            <td class="text-right">{{ country.price.toLocaleString() }}</td>
           </tr>
         </tbody>
       </table>
@@ -184,19 +184,19 @@ export default {
                 if(this.countries.length == 0) {
                   this.countries.push({
                     "name": response.data[i].data[j]["Negara"],
-                    "qty": parseInt(response.data[i].data[j]["Kuantitas"])
+                    "price": parseInt(response.data[i].data[j]["Total Price (US$)"])
                   });
                 }
                 else {
                   for(var k = 0; k < this.countries.length; k++) {
                     if(this.countries[k].name == response.data[i].data[j]["Negara"]) {
-                      this.countries[k].qty += parseInt(response.data[i].data[j]["Kuantitas"]);
+                      this.countries[k].price += parseInt(response.data[i].data[j]["Total Price (US$)"]);
                       break;
                     }
                     if(k == this.countries.length-1) {
                       this.countries.push({
                         "name": response.data[i].data[j]["Negara"],
-                        "qty": parseInt(response.data[i].data[j]["Kuantitas"])
+                        "price": parseInt(response.data[i].data[j]["Total Price (US$)"])
                       });
                       break;
                     }
@@ -207,11 +207,11 @@ export default {
           }
         }
 
-        this.countries.sort(function(a, b){return b.qty-a.qty});
+        this.countries.sort(function(a, b){return b.price-a.price});
 
         for(var i = 0; i < this.countries.length; i++) {
           this.mapsData.push(
-            [this.countries[i].name, this.countries[i].qty]
+            [this.countries[i].name, this.countries[i].price]
           );
         }
         if(callback)

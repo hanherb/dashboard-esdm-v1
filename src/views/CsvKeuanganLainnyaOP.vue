@@ -2,7 +2,7 @@
   div( class="container")
     div( class="panel panel-sm")
       div( class="panel-heading")
-        h4 Import CSV Keuangan Lainnya
+        h4 Import Spreadsheet Keuangan Lainnya
       div( class="panel-body")
         div( class="form-group")
           div( class="col-sm-9")

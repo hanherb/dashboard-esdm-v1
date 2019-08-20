@@ -10,18 +10,6 @@
     <!-- Activity Items -->
     <v-client-table class="dataTables_wrapper" :data="tableData" :columns="columns" :options="clientTableOptions">
       <!-- Actions Column Slot -->
-      <d-button-group slot="actions" slot-scope="props" size="small" class="d-flex justify-content-center">
-        <d-link :to="'/update-user?id=' + props.row._id">
-          <d-button class="btn-white" v-d-tooltip.hover="'Edit'">
-            <i class="material-icons">&#xE254;</i>
-          </d-button>
-        </d-link>
-        <d-link :to="'/delete-user?id=' + props.row._id">
-          <d-button class="btn-white" v-d-tooltip.hover="'Delete'">
-            <i class="material-icons">&#xE872;</i>
-          </d-button>
-        </d-link>
-      </d-button-group>
     </v-client-table>
   </d-card>
 </template>
@@ -73,6 +61,9 @@ export default {
           nav: 'scroll',
         },
       },
+      tahun: [],
+      uraian: [],
+      labaRugi: [],
     }
   },
 
@@ -83,37 +74,94 @@ export default {
 
   methods: {
     fetchLabaRugi() {
+      this.columns.push('Uraian');
       var id = window.location.href.split("?id=")[1];
       this.axios.get(address + ":3000/get-laba-rugi", headers).then((response) => {
         for(let i = 0; i < response.data.length; i++) {
-          if(i == 0) {
-            this.columns.push('Tahun');
-          }
           if(response.data[i].upload_by == id) {
-            var temp = [];
-            for(let j = 0; j < response.data[i].data.length; j++) {
-              if(response.data[i].data[j]["URAIAN"] == "Penjualan" ||
-                response.data[i].data[j]["URAIAN"] == "Harga Pokok Penjualan" ||
-                response.data[i].data[j]["URAIAN"] == "Laba (Rugi) kotor" ||
-                response.data[i].data[j]["URAIAN"] == "Laba/ (Rugi) Operasi" ||
-                response.data[i].data[j]["URAIAN"] == "Laba/(Rugi) sebelum Pajak" ||
-                response.data[i].data[j]["URAIAN"] == "Laba/ (Rugi) Bersih") {
-                this.columns.push(response.data[i].data[j]["URAIAN"]);
-                if(!response.data[i].data[j]["REALISASI TAHUN 2018"]) {
-                  response.data[i].data[j]["REALISASI TAHUN 2018"] = 0;
-                }
-                temp.push(response.data[i].data[j]["REALISASI TAHUN 2018"]);
+            var keys = Object.keys(response.data[i].data[0]);
+            for(var k = 0; k < keys.length; k++) {
+              if(keys[k].split(' ')[0] == "REALISASI") {
+                this.tahun.push(keys[k].split('REALISASI TAHUN ')[1]);
               }
             }
-            this.tableData = [{
-              "Tahun": '2018',
-              "Penjualan": temp[0],
-              "Harga Pokok Penjualan": temp[1], 
-              "Laba (Rugi) kotor": temp[2],
-              "Laba/ (Rugi) Operasi": temp[3],
-              "Laba/(Rugi) sebelum Pajak": temp[4],
-              "Laba/ (Rugi) Bersih": temp[5],
-            }]
+            for(var k = this.tahun[0]; k <= this.tahun[this.tahun.length-1]; k++) {
+              this.columns.push(String(k));
+              for(let j = 0; j < response.data[i].data.length; j++) {
+                if(response.data[i].data[j]["URAIAN"] == "Penjualan") {
+                  if(k == this.tahun[0]) {
+                    this.uraian.push(response.data[i].data[j]["URAIAN"]);
+                  }
+                  this.labaRugi.push({
+                    "uraian": response.data[i].data[j]["URAIAN"],
+                    "tahun": k,
+                    "value": response.data[i].data[j]["REALISASI TAHUN "+k]
+                  });
+                }
+                else if(response.data[i].data[j]["URAIAN"] == "Harga Pokok Penjualan") {
+                  if(k == this.tahun[0]) {
+                    this.uraian.push(response.data[i].data[j]["URAIAN"]);
+                  }
+                  this.labaRugi.push({
+                    "uraian": response.data[i].data[j]["URAIAN"],
+                    "tahun": k,
+                    "value": response.data[i].data[j]["REALISASI TAHUN "+k]
+                  });
+                }
+                else if(response.data[i].data[j]["URAIAN"] == "Laba (Rugi) kotor") {
+                  if(k == this.tahun[0]) {
+                    this.uraian.push(response.data[i].data[j]["URAIAN"]);
+                  }
+                  this.labaRugi.push({
+                    "uraian": response.data[i].data[j]["URAIAN"],
+                    "tahun": k,
+                    "value": response.data[i].data[j]["REALISASI TAHUN "+k]
+                  });
+                }
+                else if(response.data[i].data[j]["URAIAN"] == "Laba/ (Rugi) Operasi") {
+                  if(k == this.tahun[0]) {
+                    this.uraian.push(response.data[i].data[j]["URAIAN"]);
+                  }
+                  this.labaRugi.push({
+                    "uraian": response.data[i].data[j]["URAIAN"],
+                    "tahun": k,
+                    "value": response.data[i].data[j]["REALISASI TAHUN "+k]
+                  });
+                }
+                else if(response.data[i].data[j]["URAIAN"] == "Laba/(Rugi) sebelum Pajak") {
+                  if(k == this.tahun[0]) {
+                    this.uraian.push(response.data[i].data[j]["URAIAN"]);
+                  }
+                  this.labaRugi.push({
+                    "uraian": response.data[i].data[j]["URAIAN"],
+                    "tahun": k,
+                    "value": response.data[i].data[j]["REALISASI TAHUN "+k]
+                  });
+                }
+                else if(response.data[i].data[j]["URAIAN"] == "Laba/ (Rugi) Bersih") {
+                  if(k == this.tahun[0]) {
+                    this.uraian.push(response.data[i].data[j]["URAIAN"]);
+                  }
+                  this.labaRugi.push({
+                    "uraian": response.data[i].data[j]["URAIAN"],
+                    "tahun": k,
+                    "value": response.data[i].data[j]["REALISASI TAHUN "+k]
+                  });
+                }
+              }
+            }
+          }
+        }
+        for(var k = 0; k < this.uraian.length; k++) {
+          this.tableData.push({
+            "Uraian": this.uraian[k],
+          });
+        }
+        for(var l = 0; l < this.tableData.length; l++) {
+          for(var k = 0; k < this.labaRugi.length; k++) {
+            if(this.tableData[l]["Uraian"] == this.labaRugi[k]["uraian"]) {
+              this.tableData[l][this.labaRugi[k]["tahun"]] = basicFunction.numberWithCommas(this.labaRugi[k]["value"]);
+            }
           }
         }
       });

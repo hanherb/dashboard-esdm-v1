@@ -1,21 +1,16 @@
 <template lang="pug">
   <d-container fluid class="main-content-container px-4 pb-4">
-    <label>Filter Asal Barang :</label>
-    <d-col md="1" class="form-group">
-      <d-input-group seamless>
-        <d-form-select :options="origins" @change="filterBelanjaBarang($event)">
-        </d-form-select>
-      </d-input-group>
-    </d-col>
     <d-button-group class="">
       <d-button size="sm" type="button" class="btn-white" v-on:click="toggleAll">Show All</d-button>
-      <d-button size="sm" type="button" class="btn-white" v-on:click="toggleRencana">Hide Rencana</d-button>
-      <d-button size="sm" type="button" class="btn-white" v-on:click="toggleRealisasi">Hide Realisasi</d-button>
+      <d-button size="sm" type="button" class="btn-white" v-on:click="toggleRealisasi">Rencana</d-button>
+      <d-button size="sm" type="button" class="btn-white" v-on:click="toggleRencana">Realisasi</d-button> 
     </d-button-group>
     <v-client-table class="dataTables_wrapper belanjaBarang" :data="belanjaBarang.tableData" :columns="belanjaBarang.columns" :options="belanjaBarang.clientTableOptions">
     </v-client-table>
     <br>
-    <as-chart-barang-total />
+    <d-col md="12">
+      <as-chart-barang-total />
+    </d-col>
   </d-container>
 </template>
 <script>
@@ -40,22 +35,16 @@ export default {
     return{
       origins: ['All'],
       belanjaBarang: {
-        columns: ['', 'Kategori', 'Nasional_1', 'Provinsi_1', 'Kabupaten_1', 'Negara_1', 'Total Harga_1', 'Kuantitas_1', 'Nasional_2', 'Provinsi_2', 'Kabupaten_2', 'Negara_2', 'Total Harga_2', 'Kuantitas_2'],
+        columns: ['', 'Kategori', 'Impor_1', 'Local Content_1', 'Local Expenditure_1', 'Impor_2', 'Local Content_2', 'Local Expenditure_2'],
         tableData: [],
         clientTableOptions: {
           headings: {
-            'Nasional_1': 'Rencana Nasional', 
-            'Provinsi_1': 'Rencana Provinsi', 
-            'Kabupaten_1': 'Rencana Kabupaten', 
-            'Negara_1': 'Rencana Negara', 
-            'Total Harga_1': 'Rencana Total Harga', 
-            'Kuantitas_1': 'Rencana Kuantitas',
-            'Nasional_2': 'Realisasi Nasional', 
-            'Provinsi_2': 'Realisasi Provinsi', 
-            'Kabupaten_2': 'Realisasi Kabupaten', 
-            'Negara_2': 'Realisasi Negara', 
-            'Total Harga_2': 'Realisasi Total Harga', 
-            'Kuantitas_2': 'Realisasi Kuantitas'
+            'Impor_1': 'Rencana Impor', 
+            'Local Content_1': 'Rencana Local Content', 
+            'Local Expenditure_1': 'Rencana Local Expenditure', 
+            'Impor_2': 'Realisasi Impor', 
+            'Local Content_2': 'Realisasi Local Content', 
+            'Local Expenditure_2': 'Realisasi Local Expenditure', 
           },
           perPage: 40,
           recordsPerPage: [10, 25, 50, 100],
@@ -122,23 +111,17 @@ export default {
         this.belanjaBarang.tableData.push({
           '': arrLetter[i],
           'Kategori': arrKategori[i],
-          'Nasional_1': 0, 
-          'Provinsi_1': 0, 
-          'Kabupaten_1': 0, 
-          'Negara_1': 0, 
-          'Kuantitas_1': 0, 
-          'Total Harga_1': 0,
-          'Nasional_2': 0, 
-          'Provinsi_2': 0, 
-          'Kabupaten_2': 0, 
-          'Negara_2': 0, 
-          'Kuantitas_2': 0, 
-          'Total Harga_2': 0
+          'Impor_1': 0, 
+          'Local Content_1': 0, 
+          'Local Expenditure_1': 0, 
+          'Impor_2': 0, 
+          'Local Content_2': 0, 
+          'Local Expenditure_2': 0, 
         });
       }
     },
     resetColumn(cb) {
-      this.belanjaBarang.columns = ['', 'Kategori', 'Nasional_1', 'Provinsi_1', 'Kabupaten_1', 'Negara_1', 'Total Harga_1', 'Kuantitas_1', 'Nasional_2', 'Provinsi_2', 'Kabupaten_2', 'Negara_2', 'Total Harga_2', 'Kuantitas_2'];
+      this.belanjaBarang.columns = ['', 'Kategori', 'Impor_1', 'Local Content_1', 'Local Expenditure_1', 'Impor_2', 'Local Content_2', 'Local Expenditure_2'];
       if(cb)
         return cb();
     },
@@ -146,16 +129,12 @@ export default {
       this.belanjaBarang.tableData = [];
       this.presetTable();
       this.axios.get(address + ":3000/get-belanja-barang", headers).then((response) => {
-        var totalNegaraRencana = 0;
-        var totalNasionalRencana = 0;
-        var totalProvinsiRencana = 0;
-        var totalKabupatenRencana = 0;
-        var totalQtyRencana = 0;
-        var totalNegaraRealisasi = 0;
-        var totalNasionalRealisasi = 0;
-        var totalProvinsiRealisasi = 0;
-        var totalKabupatenRealisasi = 0;
-        var totalQtyRealisasi = 0;
+        var totalImpor1 = 0;
+        var totalLocalContent1 = 0;
+        var totalLocalExpenditure1 = 0;
+        var totalImpor2 = 0;
+        var totalLocalContent2 = 0;
+        var totalLocalExpenditure2 = 0;
         for(var i = 0; i < response.data.length; i++) {
           if(response.data[i].data[0]["Rencana/Realisasi"] == "Rencana") {
             var status = "rencana";
@@ -163,252 +142,92 @@ export default {
           else {
             var status = "realisasi";
           }
-          var negara = 0;
-          var nasional = 0;
-          var provinsi = 0;
-          var kabupaten = 0;
-          var qty = 0;
+          var impor = 0;
+          var localContent = 0;
+          var localExpenditure = 0;
           var kategori = response.data[i].data[0]["Jenis Barang"];
           for(var j = 0; j < response.data[i].data.length; j++) {
             if(response.data[i].data[j]["Negara"]) {
-              if(!this.origins.includes(response.data[i].data[j]["Negara"])) {
-                this.origins.push(response.data[i].data[j]["Negara"]);
-              }
-              negara += response.data[i].data[j]["Total Price (US$)"];
-              qty += parseInt(response.data[i].data[j]["Kuantitas"]);
+              impor += response.data[i].data[j]["Total Price (US$)"];
               if(status == "rencana") {
-                totalNegaraRencana += response.data[i].data[j]["Total Price (US$)"];
-                totalQtyRencana += parseInt(response.data[i].data[j]["Kuantitas"]);
+                totalImpor1 += response.data[i].data[j]["Total Price (US$)"];
               }
               else {
-                totalNegaraRealisasi += response.data[i].data[j]["Total Price (US$)"];
-                totalQtyRealisasi += parseInt(response.data[i].data[j]["Kuantitas"]);
+                totalImpor2 += response.data[i].data[j]["Total Price (US$)"];
               }
             }
-            else if(response.data[i].data[j]["Nasional"]) {
-              if(!this.origins.includes(response.data[i].data[j]["Nasional"])) {
-                this.origins.push(response.data[i].data[j]["Nasional"]);
-              }
-              nasional += response.data[i].data[j]["Total Price (US$)"];
-              qty += parseInt(response.data[i].data[j]["Kuantitas"]);
+            else if(response.data[i].data[j]["Produsen/Suplier"] == "Produsen") {
+              localContent += response.data[i].data[j]["Total Price (US$)"];
               if(status == "rencana") {
-                totalNasionalRencana += response.data[i].data[j]["Total Price (US$)"];
-                totalQtyRencana += parseInt(response.data[i].data[j]["Kuantitas"]);
+                totalLocalContent1 += response.data[i].data[j]["Total Price (US$)"];
               }
               else {
-                totalNasionalRealisasi += response.data[i].data[j]["Total Price (US$)"];
-                totalQtyRealisasi += parseInt(response.data[i].data[j]["Kuantitas"]);
+                totalLocalContent2 += response.data[i].data[j]["Total Price (US$)"];
               }
             }
-            else if(response.data[i].data[j]["Provinsi"]) {
-              if(!this.origins.includes(response.data[i].data[j]["Provinsi"])) {
-                this.origins.push(response.data[i].data[j]["Provinsi"]);
-              }
-              provinsi += response.data[i].data[j]["Total Price (US$)"];
-              qty += parseInt(response.data[i].data[j]["Kuantitas"]);
+            else if(response.data[i].data[j]["Produsen/Suplier"] == "Suplier") {
+              localExpenditure += response.data[i].data[j]["Total Price (US$)"];
               if(status == "rencana") {
-                totalProvinsiRencana += response.data[i].data[j]["Total Price (US$)"];
-                totalQtyRencana += parseInt(response.data[i].data[j]["Kuantitas"]);
+                totalLocalExpenditure1 += response.data[i].data[j]["Total Price (US$)"];
               }
               else {
-                totalProvinsiRealisasi += response.data[i].data[j]["Total Price (US$)"];
-                totalQtyRealisasi += parseInt(response.data[i].data[j]["Kuantitas"]);
-              }
-            }
-            else if(response.data[i].data[j]["Kabupaten"]) {
-              if(!this.origins.includes(response.data[i].data[j]["Kabupaten"])) {
-                this.origins.push(response.data[i].data[j]["Kabupaten"]);
-              }
-              kabupaten += response.data[i].data[j]["Total Price (US$)"];
-              qty += parseInt(response.data[i].data[j]["Kuantitas"]);
-              if(status == "rencana") {
-                totalKabupatenRencana += response.data[i].data[j]["Total Price (US$)"];
-                totalQtyRencana += parseInt(response.data[i].data[j]["Kuantitas"]);
-              }
-              else {
-                totalKabupatenRealisasi += response.data[i].data[j]["Total Price (US$)"];
-                totalQtyRealisasi += parseInt(response.data[i].data[j]["Kuantitas"]);
+                totalLocalExpenditure2 += response.data[i].data[j]["Total Price (US$)"];
               }
             }
           }
           for(var k = 0; k < this.belanjaBarang.tableData.length; k++) {
             if(kategori == this.belanjaBarang.tableData[k]["Kategori"]) {
               if(status == "rencana") {
-                this.belanjaBarang.tableData[k]["Negara_1"] = negara.toLocaleString();
-                this.belanjaBarang.tableData[k]["Nasional_1"] = nasional.toLocaleString();
-                this.belanjaBarang.tableData[k]["Provinsi_1"] = provinsi.toLocaleString();
-                this.belanjaBarang.tableData[k]["Kabupaten_1"] = kabupaten.toLocaleString();
-                this.belanjaBarang.tableData[k]["Kuantitas_1"] = qty.toLocaleString();
-                this.belanjaBarang.tableData[k]["Total Harga_1"] = (negara + nasional + provinsi + kabupaten).toLocaleString();
+                this.belanjaBarang.tableData[k]["Impor_1"] = impor.toLocaleString();
+                this.belanjaBarang.tableData[k]["Local Content_1"] = localContent.toLocaleString();
+                this.belanjaBarang.tableData[k]["Local Expenditure_1"] = localExpenditure.toLocaleString();
               }
               else {
-                this.belanjaBarang.tableData[k]["Negara_2"] = negara.toLocaleString();
-                this.belanjaBarang.tableData[k]["Nasional_2"] = nasional.toLocaleString();
-                this.belanjaBarang.tableData[k]["Provinsi_2"] = provinsi.toLocaleString();
-                this.belanjaBarang.tableData[k]["Kabupaten_2"] = kabupaten.toLocaleString();
-                this.belanjaBarang.tableData[k]["Kuantitas_2"] = qty.toLocaleString();
-                this.belanjaBarang.tableData[k]["Total Harga_2"] = (negara + nasional + provinsi + kabupaten).toLocaleString();
+                this.belanjaBarang.tableData[k]["Impor_2"] = impor.toLocaleString();
+                this.belanjaBarang.tableData[k]["Local Content_2"] = localContent.toLocaleString();
+                this.belanjaBarang.tableData[k]["Local Expenditure_2"] = localExpenditure.toLocaleString();
               }
             }
           }
         }
 
+        var persentaseImpor1 = (totalImpor1 / (totalImpor1 + totalLocalContent1 + totalLocalExpenditure1)) * 100;
+        var persentaseLocalContent1 = (totalLocalContent1 / (totalImpor1 + totalLocalContent1 + totalLocalExpenditure1)) * 100;
+        var persentaseLocalExpenditure1 = (totalLocalExpenditure1 / (totalImpor1 + totalLocalContent1 + totalLocalExpenditure1)) * 100;
+        var persentaseImpor2 = (totalImpor2 / (totalImpor2 + totalLocalContent2 + totalLocalExpenditure2)) * 100;
+        var persentaseLocalContent2 = (totalLocalContent2 / (totalImpor2 + totalLocalContent2 + totalLocalExpenditure2)) * 100;
+        var persentaseLocalExpenditure2 = (totalLocalExpenditure2 / (totalImpor2 + totalLocalContent2 + totalLocalExpenditure2)) * 100;
+
         this.belanjaBarang.tableData.push({
           'Kategori': 'Total',
-          'Negara_1': totalNegaraRencana.toLocaleString(),
-          'Nasional_1': totalNasionalRencana.toLocaleString(),
-          'Provinsi_1': totalProvinsiRencana.toLocaleString(),
-          'Kabupaten_1': totalKabupatenRencana.toLocaleString(),
-          'Kuantitas_1': totalQtyRencana.toLocaleString(),
-          'Total Harga_1': (totalNegaraRencana + totalNasionalRencana + totalProvinsiRencana + totalKabupatenRencana).toLocaleString(),
-          'Negara_2': totalNegaraRealisasi.toLocaleString(),
-          'Nasional_2': totalNasionalRealisasi.toLocaleString(),
-          'Provinsi_2': totalProvinsiRealisasi.toLocaleString(),
-          'Kabupaten_2': totalKabupatenRealisasi.toLocaleString(),
-          'Kuantitas_2': totalQtyRealisasi.toLocaleString(),
-          'Total Harga_2': (totalNegaraRealisasi + totalNasionalRealisasi + totalProvinsiRealisasi + totalKabupatenRealisasi).toLocaleString()
+          'Impor_1': totalImpor1.toLocaleString,
+          'Local Content_1': totalLocalContent1.toLocaleString,
+          'Local Expenditure_1': totalLocalExpenditure1.toLocaleString,
+          'Impor_2': totalImpor2.toLocaleString,
+          'Local Content_2': totalLocalContent2.toLocaleString,
+          'Local Expenditure_2': totalLocalExpenditure2.toLocaleString,
+        });
+        this.belanjaBarang.tableData.push({
+          'Kategori': 'Persentase (%)',
+          'Impor_1': persentaseImpor1.toFixed(2),
+          'Local Content_1': persentaseLocalContent1.toFixed(2),
+          'Local Expenditure_1': persentaseLocalExpenditure1.toFixed(2),
+          'Impor_2': persentaseImpor2.toFixed(2),
+          'Local Content_2': persentaseLocalContent2.toFixed(2),
+          'Local Expenditure_2': persentaseLocalExpenditure2.toFixed(2),
         });
         if(cb)
           return cb();
       })
     },
-    filterBelanjaBarang(origin) {
-      if(origin == 'All') {
-        this.fetchBelanjaBarang();
-      }
-      else {
-        this.belanjaBarang.tableData = [];
-        this.presetTable();
-        this.axios.get(address + ":3000/get-belanja-barang", headers).then((response) => {
-          var totalNegaraRencana = 0;
-          var totalNasionalRencana = 0;
-          var totalProvinsiRencana = 0;
-          var totalKabupatenRencana = 0;
-          var totalQtyRencana = 0;
-          var totalNegaraRealisasi = 0;
-          var totalNasionalRealisasi = 0;
-          var totalProvinsiRealisasi = 0;
-          var totalKabupatenRealisasi = 0;
-          var totalQtyRealisasi = 0;
-          for(var i = 0; i < response.data.length; i++) {
-            if(response.data[i].data[0]["Rencana/Realisasi"] == "Rencana") {
-              var status = "rencana";
-            }
-            else {
-              var status = "realisasi";
-            }
-            var negara = 0;
-            var nasional = 0;
-            var provinsi = 0;
-            var kabupaten = 0;
-            var qty = 0;
-            var kategori = response.data[i].data[0]["Jenis Barang"];
-            for(var j = 0; j < response.data[i].data.length; j++) {
-              if(response.data[i].data[j]["Negara"]) {
-                if(response.data[i].data[j]["Negara"] == origin) {
-                  negara += response.data[i].data[j]["Total Price (US$)"];
-                  qty += parseInt(response.data[i].data[j]["Kuantitas"]);
-                  if(status == "rencana") {
-                    totalNegaraRencana += response.data[i].data[j]["Total Price (US$)"];
-                    totalQtyRencana += parseInt(response.data[i].data[j]["Kuantitas"]);
-                  }
-                  else {
-                    totalNegaraRealisasi += response.data[i].data[j]["Total Price (US$)"];
-                    totalQtyRealisasi += parseInt(response.data[i].data[j]["Kuantitas"]);
-                  }
-                }
-              }
-              else if(response.data[i].data[j]["Nasional"]) {
-                if(response.data[i].data[j]["Nasional"] == origin) {
-                  nasional += response.data[i].data[j]["Total Price (US$)"];
-                  qty += parseInt(response.data[i].data[j]["Kuantitas"]);
-                  if(status == "rencana") {
-                    totalNasionalRencana += response.data[i].data[j]["Total Price (US$)"];
-                    totalQtyRencana += parseInt(response.data[i].data[j]["Kuantitas"]);
-                  }
-                  else {
-                    totalNasionalRealisasi += response.data[i].data[j]["Total Price (US$)"];
-                    totalQtyRealisasi += parseInt(response.data[i].data[j]["Kuantitas"]);
-                  }
-                }
-              }
-              else if(response.data[i].data[j]["Provinsi"]) {
-                if(response.data[i].data[j]["Provinsi"] == origin) {
-                  provinsi += response.data[i].data[j]["Total Price (US$)"];
-                  qty += parseInt(response.data[i].data[j]["Kuantitas"]);
-                  if(status == "rencana") {
-                    totalProvinsiRencana += response.data[i].data[j]["Total Price (US$)"];
-                    totalQtyRencana += parseInt(response.data[i].data[j]["Kuantitas"]);
-                  }
-                  else {
-                    totalProvinsiRealisasi += response.data[i].data[j]["Total Price (US$)"];
-                    totalQtyRealisasi += parseInt(response.data[i].data[j]["Kuantitas"]);
-                  }
-                }
-              }
-              else if(response.data[i].data[j]["Kabupaten"]) {
-                if(response.data[i].data[j]["Kabupaten"] == origin) {
-                  kabupaten += response.data[i].data[j]["Total Price (US$)"];
-                  qty += parseInt(response.data[i].data[j]["Kuantitas"]);
-                  if(status == "rencana") {
-                    totalKabupatenRencana += response.data[i].data[j]["Total Price (US$)"];
-                    totalQtyRencana += parseInt(response.data[i].data[j]["Kuantitas"]);
-                  }
-                  else {
-                    totalKabupatenRealisasi += response.data[i].data[j]["Total Price (US$)"];
-                    totalQtyRealisasi += parseInt(response.data[i].data[j]["Kuantitas"]);
-                  }
-                }
-              }
-            }
-            for(var k = 0; k < this.belanjaBarang.tableData.length; k++) {
-              if(kategori == this.belanjaBarang.tableData[k]["Kategori"]) {
-                if(status == "rencana") {
-                  this.belanjaBarang.tableData[k]["Negara_1"] = negara.toLocaleString();
-                  this.belanjaBarang.tableData[k]["Nasional_1"] = nasional.toLocaleString();
-                  this.belanjaBarang.tableData[k]["Provinsi_1"] = provinsi.toLocaleString();
-                  this.belanjaBarang.tableData[k]["Kabupaten_1"] = kabupaten.toLocaleString();
-                  this.belanjaBarang.tableData[k]["Kuantitas_1"] = qty.toLocaleString();
-                  this.belanjaBarang.tableData[k]["Total Harga_1"] = (negara + nasional + provinsi + kabupaten).toLocaleString();
-                }
-                else {
-                  this.belanjaBarang.tableData[k]["Negara_2"] = negara.toLocaleString();
-                  this.belanjaBarang.tableData[k]["Nasional_2"] = nasional.toLocaleString();
-                  this.belanjaBarang.tableData[k]["Provinsi_2"] = provinsi.toLocaleString();
-                  this.belanjaBarang.tableData[k]["Kabupaten_2"] = kabupaten.toLocaleString();
-                  this.belanjaBarang.tableData[k]["Kuantitas_2"] = qty.toLocaleString();
-                  this.belanjaBarang.tableData[k]["Total Harga_2"] = (negara + nasional + provinsi + kabupaten).toLocaleString();
-                }
-              }
-            }
-          }
-
-          this.belanjaBarang.tableData.push({
-            'Kategori': 'Total',
-            'Negara_1': totalNegaraRencana.toLocaleString(),
-            'Nasional_1': totalNasionalRencana.toLocaleString(),
-            'Provinsi_1': totalProvinsiRencana.toLocaleString(),
-            'Kabupaten_1': totalKabupatenRencana.toLocaleString(),
-            'Kuantitas_1': totalQtyRencana.toLocaleString(),
-            'Total Harga_1': (totalNegaraRencana + totalNasionalRencana + totalProvinsiRencana + totalKabupatenRencana).toLocaleString(),
-            'Negara_2': totalNegaraRealisasi.toLocaleString(),
-            'Nasional_2': totalNasionalRealisasi.toLocaleString(),
-            'Provinsi_2': totalProvinsiRealisasi.toLocaleString(),
-            'Kabupaten_2': totalKabupatenRealisasi.toLocaleString(),
-            'Kuantitas_2': totalQtyRealisasi.toLocaleString(),
-            'Total Harga_2': (totalNegaraRealisasi + totalNasionalRealisasi + totalProvinsiRealisasi + totalKabupatenRealisasi).toLocaleString()
-          });
-        })
-      }
-    },
     coloring() {
-      for(var i = 3; i <= 8; i++) {
+      for(var i = 3; i <= 5; i++) {
         for(var j = 0; j < this.belanjaBarang.tableData.length; j++) {
           document.querySelectorAll(".belanjaBarang td:nth-child(" + i + ")")[j].classList.add('rencana-column');
           document.querySelectorAll(".belanjaBarang td:nth-child(" + i + ")")[j].classList.remove('realisasi-column');
         }
       }
-      for(var i = 9; i <= 14; i++) {
+      for(var i = 6; i <= 8; i++) {
         for(var j = 0; j < this.belanjaBarang.tableData.length; j++) {
           document.querySelectorAll(".belanjaBarang td:nth-child(" + i + ")")[j].classList.add('realisasi-column');
           document.querySelectorAll(".belanjaBarang td:nth-child(" + i + ")")[j].classList.remove('rencana-column');
@@ -416,7 +235,7 @@ export default {
       }
     },
     toggleColor() {
-      for(var i = 3; i <= 8; i++) {
+      for(var i = 3; i <= 5; i++) {
         for(var j = 0; j < this.belanjaBarang.tableData.length; j++) {
           document.querySelectorAll(".belanjaBarang td:nth-child(" + i + ")")[j].classList.add('realisasi-column');
         }
@@ -433,7 +252,7 @@ export default {
     toggleRencana() {
       for(var i = 0; i < this.belanjaBarang.columns.length; i++) {
         if(this.belanjaBarang.columns[i].split('_')[1] == "1") {
-          this.belanjaBarang.columns.splice(i, 6);
+          this.belanjaBarang.columns.splice(i, 3);
         }
       }
       this.toggleColor();
@@ -441,7 +260,7 @@ export default {
     toggleRealisasi() {
       for(var i = 0; i < this.belanjaBarang.columns.length; i++) {
         if(this.belanjaBarang.columns[i].split('_')[1] == "2") {
-          this.belanjaBarang.columns.splice(i, 6);
+          this.belanjaBarang.columns.splice(i, 3);
         }
       }
     },

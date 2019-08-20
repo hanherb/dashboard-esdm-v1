@@ -2,7 +2,7 @@
   div( class="container")
     div( class="panel panel-sm")
       div( class="panel-heading")
-        h4 Import CSV Harga Pokok Penjualan
+        h4 Import Spreadsheet Harga Pokok Penjualan
       div( class="panel-body")
         div( class="form-group")
           div( class="col-sm-9")

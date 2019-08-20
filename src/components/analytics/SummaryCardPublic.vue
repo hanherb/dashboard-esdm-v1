@@ -1,55 +1,25 @@
 <template>
   <d-container fluid class="main-content-container px-4">
+    <d-button-group size="small" class="d-inline-flex mb-3 mb-sm-0 ml-0" id="btn-group-filter">
+      <a tag="button" class="btn btn-white active" id="totalAset" v-on:click="toggleCard($event.currentTarget.id)">Total Aset</a>
+      <a tag="button" class="btn btn-white" id="totalPenjualan" v-on:click="toggleCard($event.currentTarget.id)">Total Penjualan</a>
+      <a tag="button" class="btn btn-white" id="totalAsetEksplorasi" v-on:click="toggleCard($event.currentTarget.id)">Total Aset Eksplorasi</a>
+      <a tag="button" class="btn btn-white" id="totalDER" v-on:click="toggleCard($event.currentTarget.id)">AVG DER</a>
+      <a tag="button" class="btn btn-white" id="totalNPM" v-on:click="toggleCard($event.currentTarget.id)">AVG NPM</a>
+    </d-button-group>
 
-    <!-- Page Header -->
-    <d-row no-gutters class="page-header py-4">
-
-      <!-- Page Header - Title -->
-      <d-col col sm="4" class="text-center text-sm-left mb-4 mb-sm-0">
-        <span class="text-uppercase page-subtitle">Overview</span>
-        <h3 class="page-title">Analytics</h3>
-      </d-col>
-
-      <!-- Page Header - Datepicker -->
-      <!-- <d-col sm="4" class="d-flex">
-        <d-input-group size="sm" class="d-flex justify-content-end my-auto date-range">
-          <d-datepicker v-model="dateRange.from" :highlighted="{ from: dateRange.from, to: dateRange.to || new Date() }" typeable placeholder="Start date" small />
-          <d-datepicker v-model="dateRange.to" :highlighted="{ from: dateRange.from, to: dateRange.to || new Date() }" typeable placeholder="End date" small />
-          <d-input-group-text slot="append">
-            <i class="material-icons">&#xE916;</i>
-          </d-input-group-text>
-        </d-input-group>
-      </d-col> -->
-
-    </d-row>
-
-    <!-- Small Stats Blocks -->
-    <d-row>
-      <d-col v-for="(stats, idx) in smallStats" :key="idx" md="6" lg="3" class="mb-4">
-        <small-stats :id="`small-stats-${idx}`" :chart-data="stats.datasets" :label="stats.label" :value="stats.value" :percentage="stats.percentage" :increase="stats.increase" :decrease="stats.decrease" />
-      </d-col>
-    </d-row>
-
-    <hr>
-  
-    <ao-summary-card />
-
-    <!-- <d-row> -->
-      <!-- Sessions -->
-      <!-- <d-col lg="8" md="12" sm="12" class="mb-4">
-        <ao-sessions />
-      </d-col> -->
-
-      <!-- Users by Device -->
-      <!-- <d-col lg="4" md="6" sm="6" class="mb-4">
-        <ao-users-by-device />
-      </d-col> -->
-
-      <!-- Goals Overview -->
-      <!-- <d-col lg="5" class="mb-4">
-        <ao-goals-overview />
-      </d-col>
-    </d-row> -->
+    <div class="komoditas-card">
+      <br>
+      <d-row>
+        <d-col v-for="(stats, idx) in komoditasStats" :key="idx" md="6" lg="3" class="mb-4">
+          <small-stats v-if="activeCard == 'totalAset'" :id="`small-stats-${idx}`" :chart-data="stats.datasets" :label="stats.label" :value="stats.value.totalAset" :percentage="stats.percentage" :increase="stats.increase" :decrease="stats.decrease" variation="1"/>
+          <small-stats v-if="activeCard == 'totalPenjualan'" :id="`small-stats-${idx}`" :chart-data="stats.datasets" :label="stats.label" :value="stats.value.totalPenjualan" :percentage="stats.percentage" :increase="stats.increase" :decrease="stats.decrease" variation="1" />
+          <small-stats v-if="activeCard == 'totalAsetEksplorasi'" :id="`small-stats-${idx}`" :chart-data="stats.datasets" :label="stats.label" :value="stats.value.totalAsetEksplorasi" :percentage="stats.percentage" :increase="stats.increase" :decrease="stats.decrease" variation="1" />
+          <small-stats v-if="activeCard == 'totalDER'" :id="`small-stats-${idx}`" :chart-data="stats.datasets" :label="stats.label" :value="stats.value.totalDER" :percentage="stats.percentage" :increase="stats.increase" :decrease="stats.decrease" variation="1" />
+          <small-stats v-if="activeCard == 'totalNPM'" :id="`small-stats-${idx}`" :chart-data="stats.datasets" :label="stats.label" :value="stats.value.totalNPM" :percentage="stats.percentage" :increase="stats.increase" :decrease="stats.decrease" variation="1" />
+        </d-col>
+      </d-row>
+    </div>
   </d-container>
 </template>
 
@@ -57,24 +27,16 @@
 import graphqlFunction from '@/graphqlFunction';
 import basicFunction from '@/basicFunction';
 import address from '@/address';
-import headers from '@/headers';
 import SmallStats from '@/components/common/SmallStats.vue';
 import Sessions from '@/components/analytics/Sessions.vue';
-import UsersByDevice from '@/components/analytics/UsersByDevice.vue';
-import GoalsOverview from '@/components/analytics/GoalsOverview/GoalsOverview.vue';
-import SummaryCard from '@/components/analytics/SummaryCard.vue';
 import KomoditasGroup from '@/data/komoditas-group.json';
 
-import colors from '../utils/colors';
+import colors from '@/utils/colors';
 
 export default {
   name: 'analytics',
   components: {
     SmallStats,
-    aoSessions: Sessions,
-    aoUsersByDevice: UsersByDevice,
-    aoGoalsOverview: GoalsOverview,
-    aoSummaryCard: SummaryCard,
   },
   data() {
     return {
@@ -82,7 +44,6 @@ export default {
         from: null,
         to: null,
       },
-      users: [],
       komoditasGroup: KomoditasGroup,
       komoditasCard: [],
       totalAset: [],
@@ -94,66 +55,6 @@ export default {
     };
   },
   computed: {
-    // Small Stats Components Data
-    smallStats() {
-      return [{
-        label: 'Users',
-        value: this.users.length,
-        percentage: '12.4%',
-        increase: true,
-        decrease: false,
-        datasets: [{
-          label: 'Today',
-          fill: 'start',
-          borderWidth: 1.5,
-          backgroundColor: colors.primary.toRGBA(0.1),
-          borderColor: colors.primary.toRGBA(),
-          data: [9, 3, 3, 9, 9],
-        }],
-      }, {
-        label: 'Sessions',
-        value: '8,391',
-        percentage: '7.21%',
-        increase: false,
-        decrease: true,
-        datasets: [{
-          label: 'Today',
-          fill: 'start',
-          borderWidth: 1.5,
-          backgroundColor: colors.success.toRGBA(0.1),
-          borderColor: colors.success.toRGBA(),
-          data: [3.9, 4, 4, 9, 4],
-        }],
-      }, {
-        label: 'Pageviews',
-        value: '21,293',
-        percentage: '3.71%',
-        increase: true,
-        decrease: false,
-        datasets: [{
-          label: 'Today',
-          fill: 'start',
-          borderWidth: 1.5,
-          backgroundColor: colors.warning.toRGBA(0.1),
-          borderColor: colors.warning.toRGBA(),
-          data: [6, 6, 9, 3, 3],
-        }],
-      }, {
-        label: 'Pages/Session',
-        value: '6.43',
-        percentage: '2.71%',
-        increase: false,
-        decrease: true,
-        datasets: [{
-          label: 'Today',
-          fill: 'start',
-          borderWidth: 1.5,
-          backgroundColor: colors.salmon.toRGBA(0.1),
-          borderColor: colors.salmon.toRGBA(),
-          data: [0, 9, 3, 3, 3],
-        }],
-      }];
-    },
     komoditasStats() {
       return this.komoditasCard;
     },
@@ -161,28 +62,11 @@ export default {
 
   created: function()
   {
-    this.fetchUsers();
     this.createKomoditasCard();
     this.calculateSummary();
   },
 
   methods: {
-    fetchUsers() {
-      this.axios.get(address + ":3000/get-user", headers).then((response) => {
-        let query = `query getAllUser {
-          users {
-            _id
-            fullname
-            email
-            role
-            authority
-          }
-        }`;
-        graphqlFunction.graphqlFetchAll(query, (result) => {
-          this.users = result.users;
-        });
-      })
-    },
     fetchKomoditasGroup(komoditas) {
       var arrKeys = Object.keys(this.komoditasGroup);
       for(var i = 0; i < arrKeys.length; i++) {
@@ -196,27 +80,32 @@ export default {
     createKomoditasCard() {
       var arrKeys = Object.keys(this.komoditasGroup);
       for(var i = 0; i < arrKeys.length; i++) {
-        this.komoditasCard.push({
-          label: arrKeys[i],
-          value: {
-            totalAset: 0,
-            totalPenjualan: 0,
-            totalAsetEksplorasi: 0,
-            totalDER: 0,
-            totalNPM: 0,
-          },
-          percentage: '0',
-          increase: true,
-          decrease: false,
-          datasets: [{
-            label: 'Today',
-            fill: 'start',
-            borderWidth: 1.5,
-            backgroundColor: colors.primary.toRGBA(0.1),
-            borderColor: colors.primary.toRGBA(),
-            data: [0, 0, 0, 0, 0],
-          }],
-        });
+        if(arrKeys[i] != 'Mineral Logam Lainnya' &&
+          arrKeys[i] != 'Batuan' &&
+          arrKeys[i] != 'Mineral Non-logam' &&
+          arrKeys[i] != 'Radioaktif') {
+          this.komoditasCard.push({
+            label: arrKeys[i],
+            value: {
+              totalAset: 0,
+              totalPenjualan: 0,
+              totalAsetEksplorasi: 0,
+              totalDER: 0,
+              totalNPM: 0,
+            },
+            percentage: '0',
+            increase: true,
+            decrease: false,
+            datasets: [{
+              label: 'Today',
+              fill: 'start',
+              borderWidth: 1.5,
+              backgroundColor: colors.primary.toRGBA(0.1),
+              borderColor: colors.primary.toRGBA(),
+              data: [0, 0, 0, 0, 0],
+            }],
+          });
+        }
       }
     },
     fillKomoditasCard() {
@@ -260,7 +149,7 @@ export default {
       this.activeCard = id;
     },
     calculateSummary() {
-      this.axios.get(address + ":3000/get-neraca", headers).then((response) => {
+      this.axios.get(address + ":3000/get-neraca-public").then((response) => {
         for(var i = 0; i < response.data.length; i++) {
           var aktivaLancar = 0;
           var aktivaTidakLancar = 0;
@@ -351,7 +240,7 @@ export default {
         }
       });
 
-      this.axios.get(address + ":3000/get-laba-rugi", headers).then((response) => {
+      this.axios.get(address + ":3000/get-laba-rugi-public").then((response) => {
         for(var i = 0; i < response.data.length; i++) {
           var penjualan = 0;
           var labaBersih = 0;

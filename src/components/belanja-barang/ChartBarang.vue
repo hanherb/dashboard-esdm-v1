@@ -101,18 +101,7 @@ export default {
         to: null,
       },
       chartData: {
-        labels: [
-          '2018',
-          '2019',
-          '2020',
-          '2021',
-          '2022',
-          '2023',
-          '2024',
-          '2025',
-          '2026',
-          '2027',
-        ],
+        labels: [],
         datasets: [
           {
             label: 'Local',
@@ -150,25 +139,19 @@ export default {
     fetchBelanjaBarang(cb) {
       var id = window.location.href.split("?id=")[1];
       this.axios.get(address + ":3000/get-belanja-barang", headers).then((response) => {
-        var tempTahun = {
-          '2018': [],
-          '2019': [],
-          '2020': [],
-          '2021': [],
-          '2022': [],
-          '2023': [],
-          '2024': [],
-          '2025': [],
-          '2026': [],
-          '2027': [],
-        };
+        var tempTotal = [];
         for(let i = 0; i < response.data.length; i++) {
           if(response.data[i].upload_by == id) {
             if(response.data[i].data[0]["Rencana/Realisasi"] == "Realisasi") {
               var tahun = response.data[i].data[0]["Tahun"];
+              if(!this.chartData.labels.includes(tahun)) {
+                this.chartData.labels.push(tahun);
+                this.chartData.labels.sort(function(a, b){return a-b});
+              }
               var temp = {
                 "Local": 0,
                 "Import": 0,
+                "Year": tahun
               };
               for(let j = 0; j < response.data[i].data.length; j++) {
                 if(response.data[i].data[j]["Nasional"]) {
@@ -184,17 +167,19 @@ export default {
                   temp["Import"] += response.data[i].data[j]["Total Price (US$)"];
                 }
               }
-              tempTahun[tahun].push(temp);
+              tempTotal.push(temp);
             }
           }
         }
         for(var i = 0; i < this.chartData.datasets.length; i++) {
-          for(var k = 2018; k <= 2027; k++) {
+          for(var k = this.chartData.labels[0]; k <= this.chartData.labels[this.chartData.labels.length-1]; k++) {
             var tempLocal = 0;
             var tempImport = 0;
-            for(var j = 0; j < tempTahun[k].length; j++) {
-              tempLocal += tempTahun[k][j]['Local'];
-              tempImport += tempTahun[k][j]['Import'];
+            for(var j = 0; j < tempTotal.length; j++) {
+              if(tempTotal[j]["Year"] == k) {
+                tempLocal += tempTotal[j]['Local'];
+                tempImport += tempTotal[j]['Import'];
+              }
             }
             if(this.chartData.datasets[i].label == 'Local') {
               this.chartData.datasets[i].data.push(tempLocal);
@@ -222,13 +207,13 @@ export default {
           scales: {
             xAxes: [
               {
-                stacked: true,
+                stacked: false,
                 gridLines: false,
               },
             ],
             yAxes: [
               {
-                stacked: true,
+                stacked: false,
                 ticks: {
                   userCallback(label) {
                     return label > 999 ? `${(label / 1000).toFixed(0)}k` : label;

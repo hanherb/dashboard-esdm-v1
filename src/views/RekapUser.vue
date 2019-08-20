@@ -1,20 +1,33 @@
 <template>
   <d-container fluid class="main-content-container px-4">
-    <d-row class="mt-4">
-      <d-col lg="4" sm="12">
-        <up-user-details />
-        <up-user-activity />
+    <d-row>
+      <d-col md="1" class="form-group">
+        <d-button theme="primary" v-on:click="printKeuangan">Print Keuangan</d-button>
       </d-col>
-
-      <d-col lg="8">
-        <d-alert show v-if="session.role == 'user'">Download Format CSV - <a class="alert-link" href="/admin/downloads/FormatCSV.rar">Click Here</a></d-alert> 
+    </d-row>
+    <d-row class="mt-4" id="printKeuangan">
+      <d-col lg="6" sm="12">
         <up-user-laba-rugi v-if="user.role == 'user' || user.role == 'admin'" />
         <up-user-neraca v-if="user.role == 'user' || user.role == 'admin'" />
+      </d-col>
+
+      <d-col lg="6">
         <up-user-rasio-keuangan v-if="user.role == 'user' || user.role == 'admin'" />
-        <up-user-goods v-if="user.role == 'supplier' || user.role == 'admin'" />
-        <ao-neraca v-if="user.role == 'user' || user.role == 'admin'" />
-        <ao-laba-rugi v-if="user.role == 'user' || user.role == 'admin'" />
-        <ao-penerimaan-negara v-if="user.role == 'user' || user.role == 'admin'" />
+      </d-col>
+    </d-row>
+    <d-row>
+      <d-col md="1" class="form-group">
+        <d-button theme="primary" v-on:click="printBarang">Print Barang</d-button>
+      </d-col>
+    </d-row>
+    <d-row class="mt-4" id="printBarang">
+      <d-col lg="6">
+        <ao-neraca />
+        <ao-laba-rugi />
+      </d-col>
+      <d-col lg="6">
+        <ao-penerimaan-negara />
+        <as-barang />
       </d-col>
     </d-row>
   </d-container>
@@ -27,33 +40,30 @@ import basicFunction from '@/basicFunction';
 import address from '@/address';
 import headers from '@/headers';
 
-import UserDetails from '@/components/user-profile/UserDetails.vue';
-import UserActivity from '@/components/user-profile/UserActivity.vue';
 import UserLabaRugi from '@/components/user-profile/UserLabaRugi.vue';
 import UserNeraca from '@/components/user-profile/UserNeraca.vue';
 import UserRasioKeuangan from '@/components/user-profile/UserRasioKeuangan.vue';
-import UserGoods from '@/components/user-profile/UserGoods.vue';
 import NeracaChart from '@/components/user-profile/NeracaChart.vue';
 import LabaRugiChart from '@/components/user-profile/LabaRugiChart.vue';
 import PenerimaanNegaraChart from '@/components/user-profile/PenerimaanNegaraChart.vue';
+import ChartBarang from '@/components/belanja-barang/ChartBarang.vue';
 
 export default {
-  name: 'user-profile',
+  name: 'rekap-user',
   components: {
-    upUserDetails: UserDetails,
-    upUserActivity: UserActivity,
     upUserLabaRugi: UserLabaRugi,
     upUserNeraca: UserNeraca,
     upUserRasioKeuangan: UserRasioKeuangan,
-    upUserGoods: UserGoods,
     aoNeraca: NeracaChart,
     aoLabaRugi: LabaRugiChart,
     aoPenerimaanNegara: PenerimaanNegaraChart,
+    asBarang: ChartBarang,
   },
   data(){
     return{
       user: {},
       session: {},
+      output: null,
     }
   },
 
@@ -75,6 +85,18 @@ export default {
           this.user = result.user;
         });
       })
+    },
+    printKeuangan() {
+      // Pass the element id here
+      this.$htmlToPaper('printKeuangan', () => {
+        console.log('Printing done or got cancelled!');
+      });
+    },
+    printBarang() {
+      // Pass the element id here
+      this.$htmlToPaper('printBarang', () => {
+        console.log('Printing done or got cancelled!');
+      });
     },
   }
 };

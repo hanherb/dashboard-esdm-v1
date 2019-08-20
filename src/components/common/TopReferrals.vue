@@ -13,7 +13,7 @@
       <d-list-group flush class="list-group-small">
         <d-list-group-item v-for="(item, idx) in topImport" :key="idx" class="d-flex px-3">
           <span class="text-semibold text-fiord-blue">{{ item.name }}</span>
-          <span class="ml-auto text-right text-semibold text-reagent-gray">{{ item.qty }}</span>
+          <span class="ml-auto text-right text-semibold text-reagent-gray">{{ item.price.toLocaleString() }}</span>
         </d-list-group-item>
       </d-list-group>
 
@@ -78,7 +78,7 @@ export default {
                 if(this.topImport.length < 20) {
                   this.topImport.push({
                     "name": response.data[i].data[j]["Jenis Barang"],
-                    "qty": response.data[i].data[j]["Kuantitas"]
+                    "price": response.data[i].data[j]["Total Price (US$)"]
                   });
                 }
                 else {
@@ -88,7 +88,7 @@ export default {
             }
           }
         }
-        this.topImport.sort(function(a, b){return b.qty-a.qty});
+        this.topImport.sort(function(a, b){return b.price-a.price});
       });
     },
   }

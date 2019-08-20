@@ -276,6 +276,16 @@ export default new Router({
       component: () => import('./views/RekapSumberPembiayaan.vue'),
     },
     {
+      path: '/rekap-user',
+      name: 'rekap-user',
+      component: () => import('./views/RekapUser.vue'),
+    },
+    {
+      path: '/verifikasi-barang',
+      name: 'verifikasi-barang',
+      component: () => import('./views/VerifikasiBarang.vue'),
+    },
+    {
       path: '/commerce',
       name: 'commerce',
       component: () => import('./plugins/commerce/views/Commerce.vue'),

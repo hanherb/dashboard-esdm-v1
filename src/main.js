@@ -5,6 +5,7 @@ import VueAnalytics from 'vue-analytics';
 import axios from 'axios';
 import VueAxios from 'vue-axios';
 import VueSession from 'vue-session';
+import VueHtmlToPaper from 'vue-html-to-paper';
 
 // Styles
 import 'bootstrap/dist/css/bootstrap.css';
@@ -24,6 +25,19 @@ import IconSidebar from '@/layouts/IconSidebar.vue';
 
 const isProd = process.env.NODE_ENV === 'production';
 
+const options = {
+  name: '_blank',
+  specs: [
+    'fullscreen=yes',
+    'titlebar=yes',
+    'scrollbars=yes'
+  ],
+  styles: [
+    'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css',
+    'https://unpkg.com/kidlat-css/css/kidlat.css'
+  ]
+}
+
 ShardsVue.install(Vue);
 
 Vue.component('default-layout', Default);
@@ -37,6 +51,7 @@ Vue.prototype.$eventHub = new Vue();
 
 Vue.use(VueAxios, axios);
 Vue.use(VueSession);
+Vue.use(VueHtmlToPaper, options);
 
 // Analytics
 Vue.use(VueAnalytics, {
