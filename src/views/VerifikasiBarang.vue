@@ -73,12 +73,13 @@ export default {
 
   created: function()
   {
-      this.fetchItems();
-      this.fetchBelanjaBarang();
+      this.fetchItems(() => {
+        this.fetchBelanjaBarang();
+      });
   },
 
   methods: {
-    fetchItems() {
+    fetchItems(cb) {
       this.axios.get(address + ":3000/get-commerce", headers).then((response) => {
         let query = gql.allCommerce;
         graphqlFunction.graphqlFetchAll(query, (result) => {
@@ -97,6 +98,8 @@ export default {
             }
           }
         });
+        if(cb)
+          return cb();
       });
     },
     fetchBelanjaBarang() {
