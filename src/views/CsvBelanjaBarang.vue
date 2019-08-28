@@ -232,17 +232,6 @@ export default {
         }
       }
 
-      function prodDiv(colname) {
-        for(var i = 1; i < result.length-1; i++) {
-          if(result[i]["Self Assessment"]) {
-            result[i][colname] = (parseInt(result[i]["Total Price (US$)"]) / parseInt(result[result.length-1]["Total Price (US$)"]) * result[i]["Self Assessment"]).toFixed(2);
-          }
-          else if(result[i]["Surveyor"]) {
-            result[i][colname] = (parseInt(result[i]["Total Price (US$)"]) / parseInt(result[result.length-1]["Total Price (US$)"]) * result[i]["Surveyor"]).toFixed(2);
-          }
-        }
-      }
-
       for(var i = 1; i < result.length-1; i++) {
         if(result[i]["Nasional"]) {
           if(result[i]["Provinsi"] || result[i]["Kabupaten"] ||result[i]["Negara"]) {
@@ -300,7 +289,6 @@ export default {
       }
 
       prod("Total Price (US$)");
-      prodDiv("Bobot Tertimbang (%)");
       sum("Kuantitas");
       sum("Cost, Insurance, & Freight");
       sum("On Site");
