@@ -133,13 +133,19 @@ export default {
           parseInt(result[17][colname]);
       }
       function div(colname) {
+        if(colname.split("% ")[1] == "REALISASI") {
+          var tahun = colname.split("% REALISASI TERHADAP RENCANA TAHUN ")[1];
+        }
+        else {
+          var tahun = colname.split("TERHADAP RENCANA TAHUN ")[1];
+        }
         for(var i = 1; i <= 18; i++) {
           if(i != 11) {
-            if(colname == "% REALISASI TERHADAP RENCANA TAHUN 2018") {
-              result[i][colname] = result[i]["REALISASI TAHUN 2018"] / result[i]["RENCANA TAHUN 2018"] * 100;
+            if(colname == "% REALISASI TERHADAP RENCANA TAHUN " + tahun) {
+              result[i][colname] = (result[i]["REALISASI TAHUN " + tahun] / result[i]["RENCANA TAHUN " + tahun] * 100).toFixed(1);
             }
-            else if(colname == "% RENCANA TAHUN 2019 TERHADAP RENCANA TAHUN 2018") {
-              result[i][colname] = result[i]["RENCANA TAHUN 2019"] / result[i]["RENCANA TAHUN 2018"] * 100;
+            else if(colname == "% RENCANA TAHUN " + (parseInt(tahun)+1) + " TERHADAP RENCANA TAHUN " + tahun) {
+              result[i][colname] = (result[i]["RENCANA TAHUN " + (parseInt(tahun) + 1)] / result[i]["RENCANA TAHUN " + tahun] * 100).toFixed(1);
             }
           }
         }
