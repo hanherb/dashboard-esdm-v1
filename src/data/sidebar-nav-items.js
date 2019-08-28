@@ -23,14 +23,14 @@ export default function () {
         role: 'admin'
       },
     }, {
-      title: 'Companies',
+      title: 'Perusahaan',
       htmlBefore: '<i class="material-icons">&#xE7FD;</i>',
       to: {
         name: 'company-list',
         role: 'admin'
       },
     }, {
-      title: 'Supplier',
+      title: 'Produsen',
       htmlBefore: '<i class="material-icons">&#xE7FD;</i>',
       to: {
         name: 'supplier-list',

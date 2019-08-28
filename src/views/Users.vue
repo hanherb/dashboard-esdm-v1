@@ -1,6 +1,11 @@
 <template lang="pug">
   <d-container fluid class="main-content-container px-4 pb-4">
     <v-client-table class="dataTables_wrapper" :data="tableData" :columns="columns" :options="clientTableOptions">
+      <d-container slot="role" slot-scope="props" size="small" class="d-flex justify-content-center">
+        <span v-if="props.row.role == 'user'">perusahaan</span>
+        <span v-else-if="props.row.role == 'supplier'">produsen</span>
+        <span v-else="props.row.role == 'supplier'">{{props.row.role}}</span>
+      </d-container>
       <!-- Actions Column Slot -->
       <d-button-group slot="actions" slot-scope="props" size="small" class="d-flex justify-content-center">
         <d-link :to="'/user-profile?id=' + props.row._id">
