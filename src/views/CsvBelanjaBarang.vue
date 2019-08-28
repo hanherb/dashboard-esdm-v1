@@ -236,7 +236,7 @@ export default {
         for(var i = 1; i < result.length-1; i++) {
           if(result[i]["Self Assessment"]) {
             console.log(parseInt(result[i]["Total Price (US$)"]))
-            console.log(parseInt(result[result.length-2]["Total Price (US$)"]))
+            console.log(parseInt(result[result.length-1]["Total Price (US$)"]))
             console.log(parseInt(result[i]["Self Assessment"]))
             result[i][colname] = (parseInt(result[i]["Total Price (US$)"]) / parseInt(result[result.length-1]["Total Price (US$)"]) * result[i]["Self Assessment"]).toFixed(2);
           }
@@ -303,12 +303,12 @@ export default {
       }
 
       prod("Total Price (US$)");
-      prodDiv("Bobot Tertimbang (%)");
       sum("Kuantitas");
       sum("Cost, Insurance, & Freight");
       sum("On Site");
       sum("Total Price (US$)");
       sum("Bobot Tertimbang (%)");
+      prodDiv("Bobot Tertimbang (%)");
 
       return result // JavaScript object
     },
