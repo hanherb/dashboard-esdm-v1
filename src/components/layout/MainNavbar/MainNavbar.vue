@@ -10,13 +10,13 @@
 </template>
 
 <script>
-import NavbarSearch from './NavbarSearch.vue';
+//import NavbarSearch from './NavbarSearch.vue';
 import NavbarNav from './NavbarNav.vue';
 import NavbarToggle from './NavbarToggle.vue';
 
 export default {
   components: {
-    NavbarSearch,
+    //NavbarSearch,
     NavbarNav,
     NavbarToggle,
   },

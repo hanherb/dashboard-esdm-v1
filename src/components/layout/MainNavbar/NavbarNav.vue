@@ -132,9 +132,13 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
   .nav-link:hover {
     cursor: pointer;
+  }
+
+  .navbar{
+    padding:0;
   }
 
   /* IE11 Navbar flex fix. */

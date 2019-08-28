@@ -32,9 +32,6 @@
               <label for="exampleInputPassword2">Repeat Password</label>
               <d-input type="password" v-model='input.confirm_password' id="exampleInputPassword2" placeholder="Repeat Password" />
             </div>
-            <div class="form-group mb-3 d-table mx-auto">
-              <d-checkbox value="agree_tc">I agree with the <a href="#">Terms & Conditions</a>.</d-checkbox>
-            </div>
             <d-button pill v-on:click="register" class="btn-accent d-table mx-auto">Create Account</d-button>
           </d-card-body>
         </d-card>

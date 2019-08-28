@@ -1,15 +1,17 @@
 <template>
   <aside :class="['main-sidebar', 'col-12', 'col-md-3', 'col-lg-2', 'px-0', sidebarVisible ? 'open' : '']">
       <div class="main-navbar">
-        <nav class="navbar align-items-stretch navbar-light bg-white flex-md-nowrap border-bottom p-0">
-          <a class="navbar-brand w-100 mr-0" v-if="role == 'admin'" href="/admin/analytics" style="line-height: 25px;">
+        <nav class="navbar align-items-stretch navbar-light flex-md-nowrap p-0">
+          <a class="navbar-brand w-100 mr-0 " v-if="role == 'admin'" href="/admin/analytics" style="line-height: 25px;">
             <div class="d-table m-auto">
-              <span v-if="!hideLogoText" class="d-none d-md-inline ml-1">SIKEMBAR beta v0.6.1</span>
+              <img id="main-logo" class="d-inline-block align-top mr-1 ml-3" style="max-width: 25px;" src="@/assets/images/shards-dashboards-logo.svg" alt="Sikembar">
+              <span v-if="!hideLogoText" class="d-none d-md-inline ml-1">SIKEMBAR <span class="">beta v.0.6.5</span></span>
             </div>
           </a>
           <a class="navbar-brand w-100 mr-0" v-else="role == 'user'" :href="'/admin/user-profile?id=' + id" style="line-height: 25px;">
             <div class="d-table m-auto">
-              <span v-if="!hideLogoText" class="d-none d-md-inline ml-1">SIKEMBAR beta v0.6.1</span>
+              <img id="main-logo" class="d-inline-block align-top mr-1 ml-3" style="max-width: 25px;" src="@/assets/images/shards-dashboards-logo.svg" alt="Sikembar">
+              <span v-if="!hideLogoText" class="d-none d-md-inline ml-1">SIKEMBAR <span class="">beta v.0.6.5</span></span>
             </div>
           </a>
           <a class="toggle-sidebar d-sm-inline d-md-none d-lg-none" @click="handleToggleSidebar()">
@@ -99,6 +101,12 @@ export default {
     }
     .dropdown-menu {
       display: block;
+    }
+    .navbar-brand{
+      background:#f9de43;
+    }
+    .navbar-light .navbar-brand{
+      color:#353535;
     }
   }
 </style>

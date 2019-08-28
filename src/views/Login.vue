@@ -13,16 +13,13 @@
             <!-- Form Fields -->
             <div class="form-group">
               <label for="exampleInputEmail1">Email address</label>
-              <d-input type="email" v-model="input.email" id="exampleInputEmail1" placeholder="Enter email" />
+              <d-input type="email" v-model="input.email" v-on:keyup.enter="trigger" id="exampleInputEmail1" placeholder="Enter email" />
             </div>
             <div class="form-group">
               <label for="exampleInputPassword1">Password</label>
-              <d-input type="password" v-model="input.password" id="exampleInputPassword1" placeholder="Password" />
+              <d-input type="password" v-on:keyup.enter="trigger" v-model="input.password" id="exampleInputPassword1" placeholder="Password" />
             </div>
-            <div class="form-group mb-3 d-table mx-auto">
-              <d-checkbox value="remember">Remember me for 30 days.</d-checkbox>
-            </div>
-            <d-button pill v-on:click="login" class="btn-accent d-table mx-auto">Access Account</d-button>
+            <d-button pill v-on:click="login" ref="action" class="btn-accent d-table mx-auto">Access Account</d-button>
           </d-card-body>
 
           <!-- Social Icons -->
@@ -97,14 +94,17 @@ export default {
             localStorage.setItem('user_status', this.$session.get('user').status);
           }
           else {
-            alert("Incorrect Credential");
+            alert("Incorrect combination of email and password");
           }
         });
       }
       else {
         alert("Email and password cannot be empty");
       }
-    }
+    },
+    trigger() {
+    	this.$refs.action.click()
+    },
   }
 };
 </script>
