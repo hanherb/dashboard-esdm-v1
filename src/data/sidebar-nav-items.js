@@ -230,27 +230,5 @@ export default function () {
         role: 'supplier'
       },
     }],
-  }, {
-    title: 'Miscellaneous',
-    items: [{
-      title: 'Overview',
-      htmlBefore: '<i class="material-icons">view_module</i>',
-      to: {
-        name: 'components-overview',
-      },
-    }, {
-      title: 'Add New Post',
-      htmlBefore: '<i class="material-icons">note_add</i>',
-      to: {
-        name: 'add-new-post',
-      },
-    }, {
-      title: 'Blog Posts',
-      htmlBefore: '<i class="material-icons">vertical_split</i>',
-      to: {
-        name: 'blog-posts',
-      },
-    }],
-  },
-  ];
+  }];
 }
