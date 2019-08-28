@@ -1,5 +1,11 @@
 <template lang="pug">
   <d-container fluid class="main-content-container px-4 pb-4">
+    <label>Filter Tahun: </label>
+    <d-row>
+      <d-col md="1" class="form-group">
+         <d-form-select :options="belanjaBarang.tahun" @change="filterTahun($event)"></d-form-select>
+      </d-col>
+    </d-row>
     <d-button-group class="">
       <d-button size="sm" type="button" class="btn-white" v-on:click="toggleAll">Show All</d-button>
       <d-button size="sm" type="button" class="btn-white" v-on:click="toggleRealisasi">Rencana</d-button>
@@ -37,6 +43,8 @@ export default {
       belanjaBarang: {
         columns: ['', 'Kategori', 'Impor_1', 'Local Content_1', 'Local Expenditure_1', 'Impor_2', 'Local Content_2', 'Local Expenditure_2'],
         tableData: [],
+        tahun: [],
+        filterTahun: null,
         clientTableOptions: {
           headings: {
             'Impor_1': 'Rencana Impor', 
@@ -69,12 +77,14 @@ export default {
 
   created: function()
   {
+    var d = new Date();
+    this.belanjaBarang.filterTahun = d.getFullYear();
     var vm = this;
     this.fetchBelanjaBarang(() => {
       setTimeout(function() {
         vm.coloring();
       }, 1000);
-    });
+    }, this.belanjaBarang.filterTahun);
   },
 
   methods: {
@@ -116,7 +126,7 @@ export default {
           'Local Expenditure_1': 0, 
           'Impor_2': 0, 
           'Local Content_2': 0, 
-          'Local Expenditure_2': 0, 
+          'Local Expenditure_2': 0
         });
       }
     },
@@ -125,18 +135,23 @@ export default {
       if(cb)
         return cb();
     },
-    fetchBelanjaBarang(cb) {
+    fetchBelanjaBarang(cb, filterTahun) {
       var id = window.location.href.split("?id=")[1];
       this.belanjaBarang.tableData = [];
       this.presetTable();
       this.axios.get(address + ":3000/get-belanja-barang", headers).then((response) => {
-        var totalImpor1 = 0;
-        var totalLocalContent1 = 0;
-        var totalLocalExpenditure1 = 0;
-        var totalImpor2 = 0;
-        var totalLocalContent2 = 0;
-        var totalLocalExpenditure2 = 0;
+        var temp = [];
+        var total = {};
+        var persentase = {};
         for(var i = 0; i < response.data.length; i++) {
+          var tahun = response.data[i].data[0]["Tahun"];
+          if(!this.belanjaBarang.tahun.includes(tahun)) {
+            this.belanjaBarang.tahun.push(tahun);
+            this.belanjaBarang.tahun.sort(function(a, b){return a-b});
+          }
+        }
+        for(var i = 0; i < response.data.length; i++) {
+          var tahun = response.data[i].data[0]["Tahun"];
           if(response.data[i].upload_by == id) {
             if(response.data[i].data[0]["Rencana/Realisasi"] == "Rencana") {
               var status = "rencana";
@@ -151,73 +166,107 @@ export default {
             for(var j = 0; j < response.data[i].data.length; j++) {
               if(response.data[i].data[j]["Negara"]) {
                 impor += response.data[i].data[j]["Total Price (US$)"];
-                if(status == "rencana") {
-                  totalImpor1 += response.data[i].data[j]["Total Price (US$)"];
-                }
-                else {
-                  totalImpor2 += response.data[i].data[j]["Total Price (US$)"];
-                }
               }
               else if(response.data[i].data[j]["Produsen/Suplier"] == "Produsen") {
                 localContent += response.data[i].data[j]["Total Price (US$)"];
-                if(status == "rencana") {
-                  totalLocalContent1 += response.data[i].data[j]["Total Price (US$)"];
-                }
-                else {
-                  totalLocalContent2 += response.data[i].data[j]["Total Price (US$)"];
-                }
               }
               else if(response.data[i].data[j]["Produsen/Suplier"] == "Suplier") {
                 localExpenditure += response.data[i].data[j]["Total Price (US$)"];
-                if(status == "rencana") {
-                  totalLocalExpenditure1 += response.data[i].data[j]["Total Price (US$)"];
-                }
-                else {
-                  totalLocalExpenditure2 += response.data[i].data[j]["Total Price (US$)"];
-                }
               }
             }
-            for(var k = 0; k < this.belanjaBarang.tableData.length; k++) {
-              if(kategori == this.belanjaBarang.tableData[k]["Kategori"]) {
-                if(status == "rencana") {
-                  this.belanjaBarang.tableData[k]["Impor_1"] = impor.toLocaleString();
-                  this.belanjaBarang.tableData[k]["Local Content_1"] = localContent.toLocaleString();
-                  this.belanjaBarang.tableData[k]["Local Expenditure_1"] = localExpenditure.toLocaleString();
+            for(var k = this.belanjaBarang.tahun[0]; k <= this.belanjaBarang.tahun[this.belanjaBarang.tahun.length-1]; k++) {
+              if(k == tahun) {
+                temp.push({
+                  "kategori": kategori,
+                  "impor": impor,
+                  "localContent": localContent,
+                  "localExpenditure": localExpenditure,
+                  "tahun": tahun,
+                  "status": status
+                });
+              }
+            }
+          }
+        }
+
+        //calculate total & persentase
+        for(var i = this.belanjaBarang.tahun[0]; i <= this.belanjaBarang.tahun[this.belanjaBarang.tahun.length-1]; i++) {
+          var tempTotalImpor1 = 0;
+          var tempTotalLocalContent1 = 0;
+          var tempTotalLocaExpenditure1 = 0;
+          var tempTotalImpor2 = 0;
+          var tempTotalLocalContent2 = 0;
+          var tempTotalLocaExpenditure2 = 0;
+          for(var j = 0; j < temp.length; j++) {
+            if(temp[j].tahun == i) {
+              if(temp[j].status == "rencana") {
+                tempTotalImpor1 += temp[j]["impor"];
+                tempTotalLocalContent1 += temp[j]["localContent"];
+                tempTotalLocaExpenditure1 += temp[j]["localExpenditure"];
+              }
+              else {
+                tempTotalImpor2 += temp[j]["impor"];
+                tempTotalLocalContent2 += temp[j]["localContent"];
+                tempTotalLocaExpenditure2 += temp[j]["localExpenditure"];
+              }
+            }
+          }
+
+          var tahun = String(i);
+          total[tahun] = {};
+          persentase[tahun] = {};
+
+          total[tahun]["impor1"] = tempTotalImpor1;
+          total[tahun]["localContent1"] = tempTotalLocalContent1;
+          total[tahun]["localExpenditure1"] = tempTotalLocaExpenditure1;
+          total[tahun]["impor2"] = tempTotalImpor2;
+          total[tahun]["localContent2"] = tempTotalLocalContent2;
+          total[tahun]["localExpenditure2"] = tempTotalLocaExpenditure2;
+          persentase[tahun]["impor1"] = (tempTotalImpor1 / (tempTotalImpor1 + tempTotalLocalContent1 + tempTotalLocaExpenditure1)) * 100;
+          persentase[tahun]["localContent1"] = (tempTotalLocalContent1 / (tempTotalImpor1 + tempTotalLocalContent1 + tempTotalLocaExpenditure1)) * 100;
+          persentase[tahun]["localExpenditure1"] = (tempTotalLocaExpenditure1 / (tempTotalImpor1 + tempTotalLocalContent1 + tempTotalLocaExpenditure1)) * 100;
+          persentase[tahun]["impor2"] = (tempTotalImpor2 / (tempTotalImpor2 + tempTotalLocalContent2 + tempTotalLocaExpenditure2)) * 100;
+          persentase[tahun]["localContent2"] = (tempTotalLocalContent2 / (tempTotalImpor2 + tempTotalLocalContent2 + tempTotalLocaExpenditure2)) * 100;
+          persentase[tahun]["localExpenditure2"] = (tempTotalLocaExpenditure2 / (tempTotalImpor2 + tempTotalLocalContent2 + tempTotalLocaExpenditure2)) * 100;
+        }
+
+        //mengisi tabel
+        for(var i = 0; i < this.belanjaBarang.tableData.length; i++) {
+          for(var j = 0; j < temp.length; j++) {
+            if(temp[j]["tahun"] == filterTahun) {
+              if(temp[j]["kategori"] == this.belanjaBarang.tableData[i]["Kategori"]) {
+                if(temp[j]["status"] == "rencana") {
+                  this.belanjaBarang.tableData[i]["Impor_1"] = temp[j]["impor"].toLocaleString();
+                  this.belanjaBarang.tableData[i]["Local Content_1"] = temp[j]["localContent"].toLocaleString();
+                  this.belanjaBarang.tableData[i]["Local Expenditure_1"] = temp[j]["localExpenditure"].toLocaleString();
                 }
                 else {
-                  this.belanjaBarang.tableData[k]["Impor_2"] = impor.toLocaleString();
-                  this.belanjaBarang.tableData[k]["Local Content_2"] = localContent.toLocaleString();
-                  this.belanjaBarang.tableData[k]["Local Expenditure_2"] = localExpenditure.toLocaleString();
+                  this.belanjaBarang.tableData[i]["Impor_2"] = temp[j]["impor"].toLocaleString();
+                  this.belanjaBarang.tableData[i]["Local Content_2"] = temp[j]["localContent"].toLocaleString();
+                  this.belanjaBarang.tableData[i]["Local Expenditure_2"] = temp[j]["localExpenditure"].toLocaleString();
                 }
               }
             }
           }
         }
 
-        var persentaseImpor1 = (totalImpor1 / (totalImpor1 + totalLocalContent1 + totalLocalExpenditure1)) * 100;
-        var persentaseLocalContent1 = (totalLocalContent1 / (totalImpor1 + totalLocalContent1 + totalLocalExpenditure1)) * 100;
-        var persentaseLocalExpenditure1 = (totalLocalExpenditure1 / (totalImpor1 + totalLocalContent1 + totalLocalExpenditure1)) * 100;
-        var persentaseImpor2 = (totalImpor2 / (totalImpor2 + totalLocalContent2 + totalLocalExpenditure2)) * 100;
-        var persentaseLocalContent2 = (totalLocalContent2 / (totalImpor2 + totalLocalContent2 + totalLocalExpenditure2)) * 100;
-        var persentaseLocalExpenditure2 = (totalLocalExpenditure2 / (totalImpor2 + totalLocalContent2 + totalLocalExpenditure2)) * 100;
-
         this.belanjaBarang.tableData.push({
           'Kategori': 'Total',
-          'Impor_1': totalImpor1.toLocaleString(),
-          'Local Content_1': totalLocalContent1.toLocaleString(),
-          'Local Expenditure_1': totalLocalExpenditure1.toLocaleString(),
-          'Impor_2': totalImpor2.toLocaleString(),
-          'Local Content_2': totalLocalContent2.toLocaleString(),
-          'Local Expenditure_2': totalLocalExpenditure2.toLocaleString(),
+          'Impor_1': total[filterTahun]["impor1"].toLocaleString(),
+          'Local Content_1': total[filterTahun]["localContent1"].toLocaleString(),
+          'Local Expenditure_1': total[filterTahun]["localExpenditure1"].toLocaleString(),
+          'Impor_2': total[filterTahun]["impor2"].toLocaleString(),
+          'Local Content_2': total[filterTahun]["localContent2"].toLocaleString(),
+          'Local Expenditure_2': total[filterTahun]["localExpenditure2"].toLocaleString(),
         });
         this.belanjaBarang.tableData.push({
           'Kategori': 'Persentase (%)',
-          'Impor_1': persentaseImpor1.toFixed(2),
-          'Local Content_1': persentaseLocalContent1.toFixed(2),
-          'Local Expenditure_1': persentaseLocalExpenditure1.toFixed(2),
-          'Impor_2': persentaseImpor2.toFixed(2),
-          'Local Content_2': persentaseLocalContent2.toFixed(2),
-          'Local Expenditure_2': persentaseLocalExpenditure2.toFixed(2),
+          'Impor_1': persentase[filterTahun]["impor1"].toLocaleString(),
+          'Local Content_1': persentase[filterTahun]["localContent1"].toLocaleString(),
+          'Local Expenditure_1': persentase[filterTahun]["localExpenditure1"].toLocaleString(),
+          'Impor_2': persentase[filterTahun]["impor2"].toLocaleString(),
+          'Local Content_2': persentase[filterTahun]["localContent2"].toLocaleString(),
+          'Local Expenditure_2': persentase[filterTahun]["localExpenditure2"].toLocaleString(),
         });
         if(cb)
           return cb();
@@ -266,6 +315,15 @@ export default {
           this.belanjaBarang.columns.splice(i, 3);
         }
       }
+    },
+    filterTahun(tahun) {
+      this.belanjaBarang.filterTahun = tahun;
+      var vm = this;
+      this.fetchBelanjaBarang(() => {
+        setTimeout(function() {
+          vm.coloring();
+        }, 1000);
+      }, this.belanjaBarang.filterTahun);
     },
   }
 }

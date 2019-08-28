@@ -1,5 +1,5 @@
 <template>
-  <d-navbar-nav class="flex-row">
+  <d-navbar-nav class="navbar flex-row">
     <li v-if="session" class="nav-item border-left border-right dropdown notifications">
       <a class="nav-link nav-link-icon text-center" v-d-toggle.notifications>
         <div class="nav-link-icon__wrapper" v-on:click="checkNotifClick">
@@ -22,10 +22,10 @@
         <d-dropdown-item class="notification__all text-center">View all Notifications</d-dropdown-item>
       </d-collapse>
     </li>
-    <li class="nav-item dropdown" v-if="!session">
+    <li class="nav-item" v-if="!session">
       <router-link class="nav-link text-nowrap px-3" to="/login">Login</router-link>
     </li>
-    <li class="nav-item dropdown" v-if="!session">
+    <li class="nav-item" v-if="!session">
       <router-link class="nav-link text-nowrap px-3" to="/register">Register</router-link>
     </li>
     <li class="nav-item dropdown" v-if="session">
@@ -97,15 +97,15 @@ export default {
             }
             var temp = {
               id: "notif_format_csv",
-              category: "Import CSV",
-              description: "Click here to download CSV Format",
+              category: "Import Spreadsheet",
+              description: "Click here to download Spreadsheet Format",
               href: "/admin/downloads/FormatCSV.rar",
               read: 0,
             }
             var temp2 = {
               id: "notif_active",
               category: "Profile",
-              description: "Your profile is <span class='text-success text-semibold'>complete</span>, you can upload CSV files now",
+              description: "Your profile is <span class='text-success text-semibold'>complete</span>, you can upload Spreadsheet files now",
               href: "/admin/csv-neraca-"+tk,
               read: 0,
             }

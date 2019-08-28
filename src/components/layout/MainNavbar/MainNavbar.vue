@@ -1,6 +1,6 @@
 <template>
-  <div :class="['main-navbar', 'bg-white', stickyTop ? 'sticky-top' : '']">
-    <d-navbar type="light" class="align-items-stretch justify-content-end flex-reverse-row flex-md-nowrap p-0">
+  <div :class="['main-navbar', 'bg-dark', stickyTop ? 'sticky-top' : '']">
+    <d-navbar type="dark" class="align-items-stretch justify-content-end flex-reverse-row flex-md-nowrap p-0">
       <slot/>
       <!-- <navbar-search /> -->
       <navbar-nav />
@@ -34,6 +34,8 @@ export default {
 
 <style lang="scss">
 .main-navbar {
+  border-bottom: solid 2px #caae11; 
+
   .dropdown-menu {
     display: block;
   }

@@ -58,6 +58,7 @@ export default {
       sortKey: '',
       columns: [],
       tableData: [],
+      dataToDb: {},
       filter: {
         kategori: "All",
         rencana_realisasi: "All",
@@ -149,6 +150,17 @@ export default {
             if((kategori == response.data[i].data[0]["Jenis Barang"] || kategori == 'All') &&
               (rencana_realisasi == response.data[i].data[0]["Rencana/Realisasi"] || rencana_realisasi == 'All') &&
               (tahun == response.data[i].data[0]["Tahun"] || tahun == 'All')) {
+              for(var j = 0; j < response.data[i].data.length; j++) {
+                if(response.data[i].data[j]["Cost, Insurance, & Freight"]) {
+                  response.data[i].data[j]["Cost, Insurance, & Freight"] = parseInt(response.data[i].data[j]["Cost, Insurance, & Freight"]).toLocaleString();
+                }
+                if(response.data[i].data[j]["On Site"]) {
+                  response.data[i].data[j]["On Site"] = parseInt(response.data[i].data[j]["On Site"]).toLocaleString();
+                }
+                if(response.data[i].data[j]["Total Price (US$)"]) {
+                  response.data[i].data[j]["Total Price (US$)"] = parseInt(response.data[i].data[j]["Total Price (US$)"]).toLocaleString();
+                }
+              }
               this.tableData.push({"data": response.data[i].data});
             }
           }
@@ -283,7 +295,6 @@ export default {
       sum("Total Price (US$)");
       sum("Bobot Tertimbang (%)");
 
-      console.log(result);
       return result // JavaScript object
     },
     loadCSV(e) {
@@ -294,8 +305,8 @@ export default {
         // Handle errors load
         reader.onload = function(event) {
           var csv = event.target.result;
-          vm.tableData.push({"data": vm.csvJSON(csv)});
-          
+          vm.dataToDb = vm.csvJSON(csv);
+          vm.loadToTable(vm.csvJSON(csv));
         };
         reader.onerror = function(evt) {
           if(evt.target.error.name == "NotReadableError") {
@@ -306,9 +317,23 @@ export default {
         alert('FileReader are not supported in this browser.');
       }
     },
+    loadToTable(data) {
+      for(var i = 0; i < data.length; i++) {
+        if(data[i]["Cost, Insurance, & Freight"]) {
+          data[i]["Cost, Insurance, & Freight"] = parseInt(data[i]["Cost, Insurance, & Freight"]).toLocaleString();
+        }
+        if(data[i]["On Site"]) {
+          data[i]["On Site"] = parseInt(data[i]["On Site"]).toLocaleString();
+        }
+        if(data[i]["Total Price (US$)"]) {
+          data[i]["Total Price (US$)"] = parseInt(data[i]["Total Price (US$)"]).toLocaleString();
+        }
+      }
+      this.tableData.push({"data": data});
+    },
     addBelanjaBarang() {
       let postObj = {
-        data: this.tableData[this.tableData.length-1].data,
+        data: this.dataToDb,
         upload_by: this.$session.get('user')._id,
       };
       if(this.validation) {

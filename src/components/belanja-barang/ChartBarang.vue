@@ -215,6 +215,7 @@ export default {
               {
                 stacked: false,
                 ticks: {
+                  beginAtZero: true,
                   userCallback(label) {
                     return label > 999 ? `${(label / 1000).toFixed(0)}k` : label;
                   },

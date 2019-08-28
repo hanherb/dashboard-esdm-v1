@@ -46,6 +46,8 @@ export default {
       },
       komoditasGroup: KomoditasGroup,
       komoditasCard: [],
+      tahunNeraca: [],
+      tahunLabaRugi: [],
       totalAset: [],
       totalPenjualan: [],
       totalAsetEksplorasi: [],
@@ -62,8 +64,11 @@ export default {
 
   created: function()
   {
-    this.createKomoditasCard();
-    this.calculateSummary();
+    this.createKomoditasCard(() => {
+      this.calculateSummary(() => {
+        this.fillKomoditasCard();
+      });
+    });
   },
 
   methods: {
@@ -77,7 +82,7 @@ export default {
         }
       }
     },
-    createKomoditasCard() {
+    createKomoditasCard(cb) {
       var arrKeys = Object.keys(this.komoditasGroup);
       for(var i = 0; i < arrKeys.length; i++) {
         if(arrKeys[i] != 'Mineral Logam Lainnya' &&
@@ -107,32 +112,34 @@ export default {
           });
         }
       }
+      if(cb)
+        return cb();
     },
     fillKomoditasCard() {
       for(var i = 0; i < this.komoditasCard.length; i++) {
         for(var j = 0; j < this.totalAset.length; j++) {
           if(this.komoditasCard[i].label == this.totalAset[j].komoditas) {
-            this.komoditasCard[i].value.totalAset = this.totalAset[j].value;  
+            this.komoditasCard[i].value.totalAset = "$ " + this.totalAset[j].value.toLocaleString();  
           }
         }
         for(var j = 0; j < this.totalPenjualan.length; j++) {
           if(this.komoditasCard[i].label == this.totalPenjualan[j].komoditas) {
-            this.komoditasCard[i].value.totalPenjualan = this.totalPenjualan[j].value;  
+            this.komoditasCard[i].value.totalPenjualan = "$ " + this.totalPenjualan[j].value.toLocaleString(); 
           }
         }
         for(var j = 0; j < this.totalAsetEksplorasi.length; j++) {
           if(this.komoditasCard[i].label == this.totalAsetEksplorasi[j].komoditas) {
-            this.komoditasCard[i].value.totalAsetEksplorasi = this.totalAsetEksplorasi[j].value;  
+            this.komoditasCard[i].value.totalAsetEksplorasi = "$ " + this.totalAsetEksplorasi[j].value.toLocaleString();  
           }
         }
         for(var j = 0; j < this.totalDER.length; j++) {
           if(this.komoditasCard[i].label == this.totalDER[j].komoditas) {
-            this.komoditasCard[i].value.totalDER = this.totalDER[j].value;  
+            this.komoditasCard[i].value.totalDER = this.totalDER[j].value + " %";  
           }
         }
         for(var j = 0; j < this.totalNPM.length; j++) {
           if(this.komoditasCard[i].label == this.totalNPM[j].komoditas) {
-            this.komoditasCard[i].value.totalNPM = this.totalNPM[j].value;  
+            this.komoditasCard[i].value.totalNPM = this.totalNPM[j].value + " %";  
           }
         }
       }
@@ -148,9 +155,27 @@ export default {
       document.getElementById(id).classList.add("active");
       this.activeCard = id;
     },
-    calculateSummary() {
+    calculateSummary(cb) {
       this.axios.get(address + ":3000/get-neraca-public").then((response) => {
         for(var i = 0; i < response.data.length; i++) {
+          var keys = Object.keys(response.data[i].data[0]);
+          for(var k = 0; k < keys.length; k++) {
+            if(keys[k].split(' ')[0] == "REALISASI") {
+              if(!this.tahunNeraca.includes(keys[k].split('REALISASI TAHUN ')[1])) {
+                this.tahunNeraca.push(keys[k].split('REALISASI TAHUN ')[1]);
+              }
+            }
+          }
+        }
+        for(var i = 0; i < response.data.length; i++) {
+          var keys = Object.keys(response.data[i].data[0]);
+          for(var k = 0; k < keys.length; k++) {
+            if(keys[k].split(' ')[0] == "REALISASI") {
+              if(!this.tahunNeraca.includes(keys[k].split('REALISASI TAHUN ')[1])) {
+                this.tahunNeraca.push(keys[k].split('REALISASI TAHUN ')[1]);
+              }
+            }
+          }
           var aktivaLancar = 0;
           var aktivaTidakLancar = 0;
           var jumlahKewajiban = 0;
@@ -158,38 +183,39 @@ export default {
           var totalAsetEksplorasi = 0;
           var komoditas = this.fetchKomoditasGroup(response.data[i].komoditas);
           for(var j = 0; j < response.data[i].data.length; j++) {
+            var tahun = this.tahunNeraca[this.tahunNeraca.length-1];
             if(response.data[i].data[j]["URAIAN"] == "Jumlah Aktiva Lancar") {
-              aktivaLancar += response.data[i].data[j]["REALISASI TAHUN 2018"];
+              aktivaLancar += parseInt(response.data[i].data[j]["REALISASI TAHUN " + tahun]);
             }
             else if(response.data[i].data[j]["URAIAN"] == "Jumlah Aktiva Tidak Lancar") {
-              aktivaTidakLancar += response.data[i].data[j]["REALISASI TAHUN 2018"];
+              aktivaTidakLancar += parseInt(response.data[i].data[j]["REALISASI TAHUN " + tahun]);
             }
             else if(response.data[i].data[j]["URAIAN"] == "Aktiva Eksplorasi dan Evaluasi") {
-              totalAsetEksplorasi += response.data[i].data[j]["REALISASI TAHUN 2018"];
+              totalAsetEksplorasi += parseInt(response.data[i].data[j]["REALISASI TAHUN " + tahun]);
             }
-            else if(response.data[i].data[j]["URAIAN"] == "Jumlah Kewajiban") {
-              jumlahKewajiban += response.data[i].data[j]["REALISASI TAHUN 2018"];
+            else if(response.data[i].data[j]["URAIAN"] == "Jumlah Kewajiban" || response.data[i].data[j]["URAIAN"] == "Jumlah Kewajiban ") {
+              jumlahKewajiban += parseInt(response.data[i].data[j]["REALISASI TAHUN " + tahun]);
             }
             else if(response.data[i].data[j]["URAIAN"] == "Ekuitas") {
-              ekuitas += response.data[i].data[j]["REALISASI TAHUN 2018"];
+              ekuitas += parseInt(response.data[i].data[j]["REALISASI TAHUN " + tahun]);
             }
           }
           if(this.totalAset.length == 0) {
             this.totalAset.push({
               "komoditas": komoditas,
-              "value": aktivaLancar + aktivaTidakLancar
+              "value": parseInt(aktivaLancar) + parseInt(aktivaTidakLancar)
             });    
           }
           else {
             for(var j = 0; j < this.totalAset.length; j++) {
               if(this.totalAset[j].komoditas == komoditas) {
-                this.totalAset[j].value += aktivaLancar + aktivaTidakLancar;
+                this.totalAset[j].value += parseInt(aktivaLancar) + parseInt(aktivaTidakLancar);
                 break;
               }
               if(j == this.totalAset.length-1) {
                 this.totalAset.push({
                   "komoditas": komoditas,
-                  "value": aktivaLancar + aktivaTidakLancar
+                  "value": parseInt(aktivaLancar) + parseInt(aktivaTidakLancar)
                 });
                 break;
               }
@@ -198,19 +224,19 @@ export default {
           if(this.totalDER.length == 0) {
             this.totalDER.push({
               "komoditas": komoditas,
-              "value": jumlahKewajiban / ekuitas
+              "value": (parseInt(jumlahKewajiban) / parseInt(ekuitas)).toFixed(3)
             });    
           }
           else {
             for(var j = 0; j < this.totalDER.length; j++) {
               if(this.totalDER[j].komoditas == komoditas) {
-                this.totalDER[j].value += jumlahKewajiban / ekuitas;
+                this.totalDER[j].value += (parseInt(jumlahKewajiban) / parseInt(ekuitas)).toFixed(3);
                 break;
               }
               if(j == this.totalDER.length-1) {
                 this.totalDER.push({
                   "komoditas": komoditas,
-                  "value": jumlahKewajiban / ekuitas
+                  "value": (parseInt(jumlahKewajiban) / parseInt(ekuitas)).toFixed(3)
                 });
                 break;
               }
@@ -219,85 +245,96 @@ export default {
           if(this.totalAsetEksplorasi.length == 0) {
             this.totalAsetEksplorasi.push({
               "komoditas": komoditas,
-              "value": totalAsetEksplorasi
+              "value": parseInt(totalAsetEksplorasi)
             });    
           }
           else {
             for(var j = 0; j < this.totalAsetEksplorasi.length; j++) {
               if(this.totalAsetEksplorasi[j].komoditas == komoditas) {
-                this.totalAsetEksplorasi[j].value += totalAsetEksplorasi
+                this.totalAsetEksplorasi[j].value += parseInt(totalAsetEksplorasi)
                 break;
               }
               if(j == this.totalAsetEksplorasi.length-1) {
                 this.totalAsetEksplorasi.push({
                   "komoditas": komoditas,
-                  "value": totalAsetEksplorasi
+                  "value": parseInt(totalAsetEksplorasi)
                 });
                 break;
               }
             }
           }
         }
-      });
+        this.axios.get(address + ":3000/get-laba-rugi-public").then((response) => {
+          for(var i = 0; i < response.data.length; i++) {
+            var keys = Object.keys(response.data[i].data[0]);
+            for(var k = 0; k < keys.length; k++) {
+              if(keys[k].split(' ')[0] == "REALISASI") {
+                if(!this.tahunLabaRugi.includes(keys[k].split('REALISASI TAHUN ')[1])) {
+                  this.tahunLabaRugi.push(keys[k].split('REALISASI TAHUN ')[1]);
+                }
+              }
+            }
+          }
+          for(var i = 0; i < response.data.length; i++) {
+            var penjualan = 0;
+            var labaBersih = 0;
+            var komoditas = this.fetchKomoditasGroup(response.data[i].komoditas);
+            for(var j = 0; j < response.data[i].data.length; j++) {
+              var tahun = this.tahunLabaRugi[this.tahunLabaRugi.length-1];
+              if(response.data[i].data[j]["URAIAN"] == "Penjualan") {
+                penjualan += parseInt(response.data[i].data[j]["REALISASI TAHUN " + tahun]);
+              }
+              else if(response.data[i].data[j]["URAIAN"] == "Laba/ (Rugi) Bersih" || response.data[i].data[j]["URAIAN"] == "Laba/(Rugi) Bersih") {
+                labaBersih += parseInt(response.data[i].data[j]["REALISASI TAHUN " + tahun]);
+              }
+            }
 
-      this.axios.get(address + ":3000/get-laba-rugi-public").then((response) => {
-        for(var i = 0; i < response.data.length; i++) {
-          var penjualan = 0;
-          var labaBersih = 0;
-          var komoditas = this.fetchKomoditasGroup(response.data[i].komoditas);
-          for(var j = 0; j < response.data[i].data.length; j++) {
-            if(response.data[i].data[j]["URAIAN"] == "Penjualan") {
-              penjualan += response.data[i].data[j]["REALISASI TAHUN 2018"];
+            if(this.totalPenjualan.length == 0) {
+              this.totalPenjualan.push({
+                "komoditas": komoditas,
+                "value": parseInt(penjualan)
+              });    
             }
-            else if(response.data[i].data[j]["URAIAN"] == "Laba/ (Rugi) Bersih") {
-              labaBersih += response.data[i].data[j]["REALISASI TAHUN 2018"];
-            }
-          }
-
-          if(this.totalPenjualan.length == 0) {
-            this.totalPenjualan.push({
-              "komoditas": komoditas,
-              "value": penjualan
-            });    
-          }
-          else {
-            for(var j = 0; j < this.totalPenjualan.length; j++) {
-              if(this.totalPenjualan[j].komoditas == komoditas) {
-                this.totalPenjualan[j].value += penjualan
-                break;
-              }
-              if(j == this.totalPenjualan.length-1) {
-                this.totalPenjualan.push({
-                  "komoditas": komoditas,
-                  "value": penjualan
-                });
-                break;
+            else {
+              for(var j = 0; j < this.totalPenjualan.length; j++) {
+                if(this.totalPenjualan[j].komoditas == komoditas) {
+                  this.totalPenjualan[j].value += parseInt(penjualan)
+                  break;
+                }
+                if(j == this.totalPenjualan.length-1) {
+                  this.totalPenjualan.push({
+                    "komoditas": komoditas,
+                    "value": parseInt(penjualan)
+                  });
+                  break;
+                }
               }
             }
-          }
-          if(this.totalNPM.length == 0) {
-            this.totalNPM.push({
-              "komoditas": komoditas,
-              "value": labaBersih / penjualan
-            });    
-          }
-          else {
-            for(var j = 0; j < this.totalNPM.length; j++) {
-              if(this.totalNPM[j].komoditas == komoditas) {
-                this.totalNPM[j].value += labaBersih / penjualan
-                break;
-              }
-              if(j == this.totalNPM.length-1) {
-                this.totalNPM.push({
-                  "komoditas": komoditas,
-                  "value": labaBersih / penjualan
-                });
-                break;
+            if(this.totalNPM.length == 0) {
+              this.totalNPM.push({
+                "komoditas": komoditas,
+                "value": (parseInt(labaBersih) / parseInt(penjualan)).toFixed(3)
+              });    
+            }
+            else {
+              for(var j = 0; j < this.totalNPM.length; j++) {
+                if(this.totalNPM[j].komoditas == komoditas) {
+                  this.totalNPM[j].value += (parseInt(labaBersih) / parseInt(penjualan)).toFixed(3)
+                  break;
+                }
+                if(j == this.totalNPM.length-1) {
+                  this.totalNPM.push({
+                    "komoditas": komoditas,
+                    "value": (parseInt(labaBersih) / parseInt(penjualan)).toFixed(3)
+                  });
+                  break;
+                }
               }
             }
           }
-        }
-        this.fillKomoditasCard();
+          if(cb)
+            return cb();
+        });
       });
     }
   }

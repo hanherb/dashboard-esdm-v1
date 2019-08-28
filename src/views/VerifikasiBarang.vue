@@ -18,6 +18,7 @@
               <th class="text-center">Qty</th>
               <th class="text-center">Harga</th>
               <th class="text-center">Kategori</th>
+              <th class="text-center">Spesifikasi</th>
               <th class="text-center">Negara Asal</th>
               <th class="text-center">Supplier Yang Menjual</th>
             </tr>
@@ -28,6 +29,7 @@
               <td class="lo-stats__items text-center">{{ barang.qty }}</td>
               <td class="lo-stats__total text-center text-success">$ {{ barang.harga.toLocaleString() }}</td>
               <td class="lo-stats__total text-center">{{ barang.kategori }}</td>
+              <td class="lo-stats__total text-center">{{ barang.spesifikasi }}</td>
               <td class="lo-stats__total text-center">{{ barang.negara_asal }}</td>
                 <td class="lo-stats__total text-center">
                   <d-link :to="'/user-profile?id=' + barang.supplier_id">{{ barang.supplier }}</d-link>
@@ -132,6 +134,7 @@ export default {
                             this.belanjaBarang.push({
                               "nama": response.data[i].data[j]["Jenis Barang"],
                               "kategori": kategori,
+                              "spesifikasi": response.data[i].data[j]["Spesifikasi"],
                               "harga": response.data[i].data[j]["Total Price (US$)"],
                               "qty": response.data[i].data[j]["Kuantitas"],
                               "negara_asal": response.data[i].data[j]["Negara"],

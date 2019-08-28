@@ -3,7 +3,7 @@
     <d-row>
       <main class="main-content col-lg-12 col-md-12 col-sm-12 p-0">
         <!-- Main Navbar -->
-        <div :class="['main-navbar', 'bg-white']">
+        <div :class="['main-navbar', 'bg-black']">
           <d-container class="p-0">
             <d-navbar type="light" class="align-items-stretch flex-md-nowrap p-0">
               <a class="navbar-brand" href="#" style="line-height: 25px;">
