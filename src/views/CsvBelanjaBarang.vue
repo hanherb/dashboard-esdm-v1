@@ -307,8 +307,8 @@ export default {
       sum("Cost, Insurance, & Freight");
       sum("On Site");
       sum("Total Price (US$)");
-      sum("Bobot Tertimbang (%)");
       prodDiv("Bobot Tertimbang (%)");
+      sum("Bobot Tertimbang (%)");
 
       return result // JavaScript object
     },
