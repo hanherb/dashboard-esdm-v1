@@ -126,7 +126,43 @@ let query = {
           name
           status
         }
-  	}`
+  	}`,
+
+  	allAnggaranBelanja: `query getAllAnggaranBelanja {
+      	anggaranBelanjas {
+	        _id
+	        kantor_penghasilan_karyawan
+	  		kantor_kesejahteraan_karyawan
+	  		kantor_komisi_penjualan
+	  		kantor_pemeliharaan_kantor
+	  		kantor_depresiasi_dan_amortisasi
+	  		kantor_promosi_dan_publikasi
+	  		kantor_sewa_alat
+	  		kantor_pengiriman_barang_perjalanan_dan_komunikasi
+	  		kantor_konsultan
+	  		kantor_keuangan
+	  		kantor_umum_dan_administrasi
+	  		kantor_pengembangan_masyarakat
+	  		kantor_biaya_lain_lain
+	  		site_penghasilan_karyawan
+	  		site_pemeliharaan_kantor
+	  		site_pengiriman_barang_perjalanan_dan_komunikasi
+	  		site_umum_dan_administrasi
+	  		site_biaya_analisa_mineral_logam
+	  		site_biaya_lain_lain
+	  		bangunan
+	  		sarana_dan_prasarana
+	  		mesin
+	  		peralatan
+	  		kendaraan_dan_angkutan
+	  		peralatan_eksplorasi
+	  		kapal
+	  		alat_alat_perabotan
+	  		status_dan_tahun
+	  		upload_by
+	  		tahapan_kegiatan
+      	}
+    }`,
 }
 
 export default query;

@@ -47,6 +47,7 @@ export default {
       sortKey: '',
       columns: [],
       tableData: [],
+      rangeTahun: [],
       clientTableOptions: {
         perPage: 50,
         recordsPerPage: [10, 25, 50, 100],
@@ -176,7 +177,13 @@ export default {
           parseInt(result[40][colname]);
       }
       
-      for(var i = 2018; i <= 2020; i++) {
+      for(var i = 0; i < Object.keys(result[0]).length; i++) {
+        if(Object.keys(result[0])[i].split(" ")[0] == "REALISASI") {
+          this.rangeTahun.push(Object.keys(result[0])[i].split("REALISASI TAHUN ")[1]);
+        }
+      }  
+
+      for(var i = this.rangeTahun[0]; i <= this.rangeTahun[this.rangeTahun.length-1]; i++) {
         sum("RENCANA TAHUN " + i);
         sum("REALISASI TAHUN "+ i);
       }
@@ -193,7 +200,6 @@ export default {
         reader.onload = function(event) {
           var csv = event.target.result;
           vm.tableData = vm.csvJSON(csv)
-          
         };
         reader.onerror = function(evt) {
           if(evt.target.error.name == "NotReadableError") {

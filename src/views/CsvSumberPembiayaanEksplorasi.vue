@@ -47,6 +47,7 @@ export default {
       sortKey: '',
       columns: [],
       tableData: [],
+      rangeTahun: [],
       clientTableOptions: {
         perPage: 10,
         recordsPerPage: [10, 25, 50, 100],
@@ -124,9 +125,16 @@ export default {
         }
       }
 
-      sum("RENCANA TAHUN 2018");
-      sum("REALISASI TAHUN 2018");
-      sum("RENCANA TAHUN 2019");
+      for(var i = 0; i < Object.keys(result[0]).length; i++) {
+        if(Object.keys(result[0])[i].split(" ")[0] == "REALISASI") {
+          this.rangeTahun.push(Object.keys(result[0])[i].split("REALISASI TAHUN ")[1]);
+        }
+      }  
+
+      for(var i = this.rangeTahun[0]; i <= this.rangeTahun[this.rangeTahun.length-1]; i++) {
+        sum("RENCANA TAHUN " + i);
+        sum("REALISASI TAHUN "+ i);
+      }
 
       console.log(result);
       return result // JavaScript object

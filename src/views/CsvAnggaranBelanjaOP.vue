@@ -32,9 +32,7 @@ import headers from '../headers';
 import Vue from 'vue';
 import { ClientTable } from 'vue-tables-2';
 import '@/assets/scss/vue-tables.scss';
-
 Vue.use(ClientTable);
-
 export default {
   name: 'csv-sumber-pembiayaan-op',
   components: {
@@ -47,6 +45,7 @@ export default {
       sortKey: '',
       columns: [],
       tableData: [],
+      rangeTahun: [],
       clientTableOptions: {
         perPage: 40,
         recordsPerPage: [10, 25, 50, 100],
@@ -101,7 +100,6 @@ export default {
         csvHeaders.map(function(header, indexHeader){
           obj[header] = currentline[indexHeader]
         })
-
         result.push(obj)
       })
       this.axios.post(address + ':3000/import-csv', {}, headers)
@@ -110,7 +108,6 @@ export default {
       });
       result.pop() // remove the last item because undefined values
       this.columns = Object.keys(result[0]);
-
       function sum(colname) {
         //Sub Total (1)
         for(var i = 1; i < 14; i++) {
@@ -121,7 +118,6 @@ export default {
             parseInt(result[14][colname]) + 
             parseInt(result[i][colname]);
         }
-
         //Sub Total (2)
         for(var i = 16; i < 22; i++) {
           if(!result[i][colname] || result[i][colname] == ' - ') {
@@ -131,7 +127,6 @@ export default {
             parseInt(result[22][colname]) + 
             parseInt(result[i][colname]);
         }
-
         //Sub Total (3)
         for(var i = 24; i < 32; i++) {
           if(!result[i][colname] || result[i][colname] == ' - ') {
@@ -141,14 +136,12 @@ export default {
             parseInt(result[32][colname]) + 
             parseInt(result[i][colname]);
         }
-
         //Jumlah
         result[33][colname] =
           parseInt(result[14][colname]) +
           parseInt(result[22][colname]) +
           parseInt(result[32][colname]);
       }
-
       function div(colname) {
         for(var i = 1; i <= 14; i++) {
           if(colname == "% REALISASI TERHADAP RENCANA TAHUN 2018") {
@@ -158,7 +151,6 @@ export default {
             result[i][colname] = result[i]["RENCANA TAHUN 2019"] / result[i]["RENCANA TAHUN 2018"] * 100;
           }
         }
-
         for(var i = 16; i <= 22; i++) {
           if(colname == "% REALISASI TERHADAP RENCANA TAHUN 2018") {
             result[i][colname] = result[i]["REALISASI TAHUN 2018"] / result[i]["RENCANA TAHUN 2018"] * 100;
@@ -167,7 +159,6 @@ export default {
             result[i][colname] = result[i]["RENCANA TAHUN 2019"] / result[i]["RENCANA TAHUN 2018"] * 100;
           }
         }
-
         for(var i = 24; i <= 33; i++) {
           if(colname == "% REALISASI TERHADAP RENCANA TAHUN 2018") {
             result[i][colname] = result[i]["REALISASI TAHUN 2018"] / result[i]["RENCANA TAHUN 2018"] * 100;
@@ -178,12 +169,18 @@ export default {
         }
       }
 
-      sum("RENCANA TAHUN 2018");
-      sum("REALISASI TAHUN 2018");
-      sum("RENCANA TAHUN 2019");
-      div("% REALISASI TERHADAP RENCANA TAHUN 2018");
-      div("% RENCANA TAHUN 2019 TERHADAP RENCANA TAHUN 2018");
-
+      for(var i = 0; i < Object.keys(result[0]).length; i++) {
+        if(Object.keys(result[0])[i].split(" ")[0] == "REALISASI") {
+          this.rangeTahun.push(Object.keys(result[0])[i].split("REALISASI TAHUN ")[1]);
+        }
+      }  
+      
+      for(var i = this.rangeTahun[0]; i <= this.rangeTahun[this.rangeTahun.length-1]; i++) {
+        sum("RENCANA TAHUN " + i);
+        sum("REALISASI TAHUN " + i);
+        div("% REALISASI TERHADAP RENCANA TAHUN " + i);
+        div("% RENCANA TAHUN " + (parseInt(i)+1) + " TERHADAP RENCANA TAHUN " + i);
+      }
       console.log(result);
       return result // JavaScript object
     },

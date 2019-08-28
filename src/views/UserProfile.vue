@@ -7,7 +7,7 @@
       </d-col>
 
       <d-col lg="8">
-        <d-alert show v-if="session.role == 'user'">Download Format CSV - <a class="alert-link" href="/admin/downloads/FormatCSV.rar">Click Here</a></d-alert> 
+        <d-alert show v-if="session.role == 'user'">Download Format Spreadsheet - <a class="alert-link" href="/admin/downloads/FormatCSV.rar">Click Here</a></d-alert> 
         <up-user-laba-rugi v-if="user.role == 'user' || user.role == 'admin'" />
         <up-user-neraca v-if="user.role == 'user' || user.role == 'admin'" />
         <up-user-rasio-keuangan v-if="user.role == 'user' || user.role == 'admin'" />

@@ -47,6 +47,7 @@ export default {
       sortKey: '',
       columns: [],
       tableData: [],
+      rangeTahun: [],
       clientTableOptions: {
         perPage: 40,
         recordsPerPage: [10, 25, 50, 100],
@@ -124,8 +125,16 @@ export default {
         }
       }
 
-      div("% REALISASI TERHADAP RENCANA TAHUN 2018");
-      div("% RENCANA TAHUN 2019 TERHADAP RENCANA TAHUN 2018");
+      for(var i = 0; i < Object.keys(result[0]).length; i++) {
+        if(Object.keys(result[0])[i].split(" ")[0] == "REALISASI") {
+          this.rangeTahun.push(Object.keys(result[0])[i].split("REALISASI TAHUN ")[1]);
+        }
+      }  
+      
+      for(var i = this.rangeTahun[0]; i <= this.rangeTahun[this.rangeTahun.length-1]; i++) {
+        div("% REALISASI TERHADAP RENCANA TAHUN " + i);
+        div("% RENCANA TAHUN " + (parseInt(i)+1) + " TERHADAP RENCANA TAHUN " + i);
+      }
 
       console.log(result);
       return result // JavaScript object
