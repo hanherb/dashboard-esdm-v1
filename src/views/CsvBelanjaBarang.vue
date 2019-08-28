@@ -235,6 +235,9 @@ export default {
       function prodDiv(colname) {
         for(var i = 1; i < result.length-1; i++) {
           if(result[i]["Self Assessment"]) {
+            console.log(parseInt(result[i]["Total Price (US$)"]))
+            console.log(parseInt(result[result.length-1]["Total Price (US$)"]))
+            console.log(parseInt(result[i]["Self Assessment"]))
             result[i][colname] = (parseInt(result[i]["Total Price (US$)"]) / parseInt(result[result.length-1]["Total Price (US$)"]) * result[i]["Self Assessment"]).toFixed(2);
           }
           else if(result[i]["Surveyor"]) {
