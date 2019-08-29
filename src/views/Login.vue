@@ -13,13 +13,13 @@
             <!-- Form Fields -->
             <div class="form-group">
               <label for="exampleInputEmail1">Email address</label>
-              <d-input type="email" v-model="input.email" v-on:keyup.enter="trigger" id="exampleInputEmail1" placeholder="Enter email" />
+              <d-input type="email" v-model="input.email" @keyup.enter="login" id="exampleInputEmail1" placeholder="Enter email" />
             </div>
             <div class="form-group">
               <label for="exampleInputPassword1">Password</label>
-              <d-input type="password" v-on:keyup.enter="trigger" v-model="input.password" id="exampleInputPassword1" placeholder="Password" />
+              <d-input type="password" v-model="input.password" id="exampleInputPassword1" placeholder="Password" />
             </div>
-            <d-button pill v-on:click="login" ref="action" class="btn-accent d-table mx-auto">Access Account</d-button>
+            <d-button pill v-on:click="login" class="btn-accent d-table mx-auto">Access Account</d-button>
           </d-card-body>
 
           <!-- Social Icons -->
@@ -66,7 +66,7 @@ export default {
         .then((response) => {
           console.log(response.data.response);
           if(response.data.token) {
-            alert("Login Success");
+            // alert("Login Success");
             if(response.data.response.status != 'wait-profile') {
               if(response.data.response.role == "admin") {
                 this.$router.push('/analytics');
@@ -101,10 +101,7 @@ export default {
       else {
         alert("Email and password cannot be empty");
       }
-    },
-    trigger() {
-    	this.$refs.action.click()
-    },
+    }
   }
 };
 </script>

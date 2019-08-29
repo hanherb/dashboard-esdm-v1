@@ -4,7 +4,7 @@
       <d-link class="navbar-brand ml-3 mr-auto" to="/" style="line-height: 25px;">
         <div class="d-table m-auto">
           <img id="main-logo" class="d-inline-block align-top mr-1" style="max-width: 25px;" src="@/assets/images/shards-dashboards-logo.svg" alt="Sikembar">
-          <span class="d-md-inline ml-1">SIKEMBAR</span>
+          <a href="/admin" class="d-md-inline ml-1">SIKEMBAR <span class="title-version">beta v.0.6.5</span></a>
         </div>
       </d-link>
     </main-navbar>

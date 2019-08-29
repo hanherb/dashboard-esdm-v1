@@ -5,13 +5,13 @@
           <a class="navbar-brand w-100 mr-0 " v-if="role == 'admin'" href="/admin/analytics" style="line-height: 25px;">
             <div class="d-table m-auto">
               <img id="main-logo" class="d-inline-block align-top mr-1 ml-3" style="max-width: 25px;" src="@/assets/images/shards-dashboards-logo.svg" alt="Sikembar">
-              <span v-if="!hideLogoText" class="d-none d-md-inline ml-1">SIKEMBAR <span class="">beta v.0.6.5</span></span>
+              <span v-if="!hideLogoText" class="d-none d-md-inline ml-1">SIKEMBAR <span class="title-version">beta v.0.6.5</span></span>
             </div>
           </a>
           <a class="navbar-brand w-100 mr-0" v-else="role == 'user'" :href="'/admin/user-profile?id=' + id" style="line-height: 25px;">
             <div class="d-table m-auto">
               <img id="main-logo" class="d-inline-block align-top mr-1 ml-3" style="max-width: 25px;" src="@/assets/images/shards-dashboards-logo.svg" alt="Sikembar">
-              <span v-if="!hideLogoText" class="d-none d-md-inline ml-1">SIKEMBAR <span class="">beta v.0.6.5</span></span>
+              <span v-if="!hideLogoText" class="d-none d-md-inline ml-1">SIKEMBAR <span class="title-version">beta v.0.6.5</span></span>
             </div>
           </a>
           <a class="toggle-sidebar d-sm-inline d-md-none d-lg-none" @click="handleToggleSidebar()">

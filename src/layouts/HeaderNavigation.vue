@@ -9,7 +9,7 @@
               <a class="navbar-brand" href="#" style="line-height: 25px;">
                 <div class="d-table m-auto">
                   <img id="main-logo" class="d-inline-block align-top mr-1 ml-3" style="max-width: 25px;" src="@/assets/images/shards-dashboards-logo.svg" alt="Sikembar">
-                  <span class="d-none d-md-inline ml-1">SIKEMBAR <span class="">beta v.0.6.5</span></span>
+                  <span class="d-none d-md-inline ml-1">SIKEMBAR <span class="title-version">beta v.0.6.5</span></span>
                 </div>
               </a>
               <navbar-search />
