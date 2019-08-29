@@ -13,24 +13,24 @@ export default function () {
     }],
   },
   {
-    title: 'Data',
+    title: 'Users',
     role: 'admin',
     items: [{
-      title: 'Users',
+      title: 'Staff',
       htmlBefore: '<i class="material-icons">&#xE7FD;</i>',
       to: {
         name: 'users',
         role: 'admin'
       },
     }, {
-      title: 'Perusahaan',
+      title: 'Companies',
       htmlBefore: '<i class="material-icons">&#xE7FD;</i>',
       to: {
         name: 'company-list',
         role: 'admin'
       },
     }, {
-      title: 'Produsen',
+      title: 'Producer',
       htmlBefore: '<i class="material-icons">&#xE7FD;</i>',
       to: {
         name: 'supplier-list',
@@ -38,7 +38,7 @@ export default function () {
       },
     }],
   }, {
-    title: 'Keuangan',
+    title: 'MineFin',
     role: 'user',
     items: [{
       title: 'Asumsi Keuangan',
@@ -194,7 +194,7 @@ export default function () {
       },
     }],
   }, {
-    title: 'Barang',
+    title: 'MinePedia',
     items: [{
       title: 'Input Belanja Barang',
       htmlBefore: '<i class="material-icons">&#xE7FD;</i>',

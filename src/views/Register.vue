@@ -13,11 +13,11 @@
             <!-- Form Fields -->
             <div class="form-group">
               <label for="exampleInputEmail1">Email address</label>
-              <d-input type="email" v-model='input.email' id="exampleInputEmail1" placeholder="Enter email" />
+              <input class="form-control" type="email" v-model='input.email' id="exampleInputEmail1" placeholder="Enter email" />
             </div>
             <div class="form-group">
               <label for="exampleInputFullname1">Fullname</label>
-              <d-input type="text" v-model='input.fullname' id="exampleInputFullname1" placeholder="Enter fullname" />
+              <input class="form-control" type="text" v-model='input.fullname' id="exampleInputFullname1" placeholder="Enter fullname" />
             </div>
             <div class="form-group">
               <label for='Role'> Role</label>
@@ -26,11 +26,11 @@
             </div>
             <div class="form-group">
               <label for="exampleInputPassword1">Password</label>
-              <d-input type="password" v-model='input.password' id="exampleInputPassword1" placeholder="Password" />
+              <input class="form-control" type="password" v-model='input.password' id="exampleInputPassword1" placeholder="Password" />
             </div>
             <div class="form-group">
               <label for="exampleInputPassword2">Repeat Password</label>
-              <d-input type="password" v-model='input.confirm_password' id="exampleInputPassword2" placeholder="Repeat Password" />
+              <input class="form-control" type="password" v-model='input.confirm_password' id="exampleInputPassword2" placeholder="Repeat Password" />
             </div>
             <d-button pill v-on:click="register" class="btn-accent d-table mx-auto">Create Account</d-button>
           </d-card-body>

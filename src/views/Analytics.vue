@@ -95,7 +95,7 @@ export default {
   },
   computed: {
     // Small Stats Components Data
-    smallStats() {
+/*     smallStats() {
       return [{
         label: 'Users',
         value: this.users.length,
@@ -153,7 +153,7 @@ export default {
           data: [0, 9, 3, 3, 3],
         }],
       }];
-    },
+    }, */
     komoditasStats() {
       return this.komoditasCard;
     },
