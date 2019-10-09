@@ -184,22 +184,22 @@ export default {
               tempTahun.push(temp);
             }
 
-            for(var i = 0; i < this.chartData.datasets.length; i++) {
+            for(var k = 0; k < this.chartData.datasets.length; k++) {
               for(var j = 0; j < tempTahun.length; j++) {
-                if(this.chartData.datasets[i].label == 'Royalti') {
-                  this.chartData.datasets[i].data.push(tempTahun[j]['Royalti']);
+                if(this.chartData.datasets[k].label == 'Royalti') {
+                  this.chartData.datasets[k].data.push(tempTahun[j]['Royalti']);
                 }
-                if(this.chartData.datasets[i].label == 'Deadrent') {
-                  this.chartData.datasets[i].data.push(tempTahun[j]['Deadrent']);
+                if(this.chartData.datasets[k].label == 'Deadrent') {
+                  this.chartData.datasets[k].data.push(tempTahun[j]['Deadrent']);
                 }
-                if(this.chartData.datasets[i].label == 'Jumlah Pajak') {
-                  this.chartData.datasets[i].data.push(tempTahun[j]['Jumlah Pajak']);
+                if(this.chartData.datasets[k].label == 'Jumlah Pajak') {
+                  this.chartData.datasets[k].data.push(tempTahun[j]['Jumlah Pajak']);
                 }
-                if(this.chartData.datasets[i].label == 'Pajak Penghasilan') {
-                  this.chartData.datasets[i].data.push(tempTahun[j]['Biaya Pajak Penghasilan']);
+                if(this.chartData.datasets[k].label == 'Pajak Penghasilan') {
+                  this.chartData.datasets[k].data.push(tempTahun[j]['Biaya Pajak Penghasilan']);
                 }
-                if(this.chartData.datasets[i].label == 'Pajak Daerah') {
-                  this.chartData.datasets[i].data.push(tempTahun[j]['Pajak-pajak daerah']);
+                if(this.chartData.datasets[k].label == 'Pajak Daerah') {
+                  this.chartData.datasets[k].data.push(tempTahun[j]['Pajak-pajak daerah']);
                 }
               }
             }
