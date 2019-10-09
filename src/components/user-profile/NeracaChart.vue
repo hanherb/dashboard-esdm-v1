@@ -197,22 +197,22 @@ export default {
               tempTahun.push(temp);
             }
 
-            for(var i = 0; i < this.chartData.datasets.length; i++) {
+            for(var k = 0; k < this.chartData.datasets.length; k++) {
               for(var j = 0; j < tempTahun.length; j++) {
-                if(this.chartData.datasets[i].label == 'Aktiva Tetap') {
-                  this.chartData.datasets[i].data.push(tempTahun[j]['Aktiva Tetap']);
+                if(this.chartData.datasets[k].label == 'Aktiva Tetap') {
+                  this.chartData.datasets[k].data.push(tempTahun[j]['Aktiva Tetap']);
                 }
-                if(this.chartData.datasets[i].label == 'Total Aktiva') {
-                  this.chartData.datasets[i].data.push(tempTahun[j]['JUMLAH AKTIVA']);
+                if(this.chartData.datasets[k].label == 'Total Aktiva') {
+                  this.chartData.datasets[k].data.push(tempTahun[j]['JUMLAH AKTIVA']);
                 }
-                if(this.chartData.datasets[i].label == 'Aktiva Eksplorasi dan Evaluasi') {
-                  this.chartData.datasets[i].data.push(tempTahun[j]['Aktiva Eksplorasi dan Evaluasi']);
+                if(this.chartData.datasets[k].label == 'Aktiva Eksplorasi dan Evaluasi') {
+                  this.chartData.datasets[k].data.push(tempTahun[j]['Aktiva Eksplorasi dan Evaluasi']);
                 }
-                if(this.chartData.datasets[i].label == 'Kewajiban Jangka Pendek') {
-                  this.chartData.datasets[i].data.push(tempTahun[j]['Jumlah Kewajiban Jangka Pendek']);
+                if(this.chartData.datasets[k].label == 'Kewajiban Jangka Pendek') {
+                  this.chartData.datasets[k].data.push(tempTahun[j]['Jumlah Kewajiban Jangka Pendek']);
                 }
-                if(this.chartData.datasets[i].label == 'Kewajiban Jangka Panjang') {
-                  this.chartData.datasets[i].data.push(tempTahun[j]['Jumlah Kewajiban Jangka Panjang']);
+                if(this.chartData.datasets[k].label == 'Kewajiban Jangka Panjang') {
+                  this.chartData.datasets[k].data.push(tempTahun[j]['Jumlah Kewajiban Jangka Panjang']);
                 }
               }
             }

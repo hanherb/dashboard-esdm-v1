@@ -43,6 +43,13 @@
 
                 <d-form-row>
                   <d-col md="12" class="form-group">
+                    <label>TKDN</label>
+                    <d-input v-model="input.tkdn" type="number" placeholder="TKDN" />
+                  </d-col>
+                </d-form-row>
+
+                <d-form-row>
+                  <d-col md="12" class="form-group">
                     <label>Description</label>
                     <textarea v-model="input.description" placeholder="Description" rows="10" wrap="soft" class="form-control form-control-lg" />
                   </d-col>
@@ -82,6 +89,7 @@ export default {
           name: "",
           price: "",
           qty: "",
+          tkdn: "",
           description: "",
           image: "",
           category: "",
@@ -99,6 +107,7 @@ export default {
           name: this.input.name,
           price: parseInt(this.input.price),
           qty: parseInt(this.input.qty),
+          tkdn: parseInt(this.input.qty),
           description: this.input.description,
           category: this.input.category,
           image: this.input.image,

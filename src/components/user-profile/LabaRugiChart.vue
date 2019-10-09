@@ -197,22 +197,22 @@ export default {
               tempTahun.push(temp);
             }
 
-            for(var i = 0; i < this.chartData.datasets.length; i++) {
+            for(var k = 0; k < this.chartData.datasets.length; k++) {
               for(var j = 0; j < tempTahun.length; j++) {
-                if(this.chartData.datasets[i].label == 'Penjualan') {
-                  this.chartData.datasets[i].data.push(tempTahun[j]['Penjualan']);
+                if(this.chartData.datasets[k].label == 'Penjualan') {
+                  this.chartData.datasets[k].data.push(tempTahun[j]['Penjualan']);
                 }
-                if(this.chartData.datasets[i].label == 'HPP') {
-                  this.chartData.datasets[i].data.push(tempTahun[j]['Harga Pokok Penjualan']);
+                if(this.chartData.datasets[k].label == 'HPP') {
+                  this.chartData.datasets[k].data.push(tempTahun[j]['Harga Pokok Penjualan']);
                 }
-                if(this.chartData.datasets[i].label == 'Beban Operasi') {
-                  this.chartData.datasets[i].data.push(tempTahun[j]['Jumlah Beban Operasi']);
+                if(this.chartData.datasets[k].label == 'Beban Operasi') {
+                  this.chartData.datasets[k].data.push(tempTahun[j]['Jumlah Beban Operasi']);
                 }
-                if(this.chartData.datasets[i].label == 'Pajak Penghasilan') {
-                  this.chartData.datasets[i].data.push(tempTahun[j]['Biaya Pajak Penghasilan']);
+                if(this.chartData.datasets[k].label == 'Pajak Penghasilan') {
+                  this.chartData.datasets[k].data.push(tempTahun[j]['Biaya Pajak Penghasilan']);
                 }
-                if(this.chartData.datasets[i].label == 'Laba Bersih') {
-                  this.chartData.datasets[i].data.push(tempTahun[j]['Laba/(Rugi) Bersih']);
+                if(this.chartData.datasets[k].label == 'Laba Bersih') {
+                  this.chartData.datasets[k].data.push(tempTahun[j]['Laba/(Rugi) Bersih']);
                 }
               }
             }
