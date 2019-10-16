@@ -85,27 +85,32 @@ export default {
       },
 
       addUser() {
-        let postObj = {
-          email: this.input.email, 
-          fullname: this.input.fullname,
-          role: this.input.role,
-          authority: this.input.authority,
-          password: this.input.password,
-          status: "wait-profile",
-        };
-        this.axios.post(address + ':3000/create-user', postObj, headers)
-        .then((response) => {
-          postObj._id = response.data.insertedIds[0];
-          let query = gql.addUser;
-          let variables = {
-            input: postObj
-          }
-          graphqlFunction.graphqlMutation(query, variables, (result) => {
-            alert("Add User Success");
-            this.$router.push('/users');
-          });
+        if(this.input.password != this.input.confirm_password) {
+          alert("Password tidak sama");
+        }
+        else {
+          let postObj = {
+            email: this.input.email, 
+            fullname: this.input.fullname,
+            role: this.input.role,
+            authority: this.input.authority,
+            password: this.input.password,
+            status: "wait-profile",
+          };
+          this.axios.post(address + ':3000/create-user', postObj, headers)
+          .then((response) => {
+            postObj._id = response.data.insertedIds[0];
+            let query = gql.addUser;
+            let variables = {
+              input: postObj
+            }
+            graphqlFunction.graphqlMutation(query, variables, (result) => {
+              alert("Add User Success");
+              this.$router.push('/users');
+            });
 
-        });
+          });
+        }
       }
   }
 };

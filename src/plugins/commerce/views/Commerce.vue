@@ -62,7 +62,7 @@
       <d-row>
 
         <!-- Time Frame -->
-        <d-col>
+        <d-col v-if="session.role != 'admin'">
           <d-link to="/add-commerce">
             <d-button size="sm" type="button" class="btn-white">Add</d-button>
           </d-link>
@@ -86,6 +86,7 @@ export default {
   data(){
       return{
           commerces: [],
+          session: {},
           status: 'Available'
       }
   },
@@ -93,9 +94,13 @@ export default {
   created: function()
   {
       this.fetchItems();
+      this.fetchSession();
   },
 
   methods: {
+    fetchSession() {
+      this.session = this.$session.get('user');
+    },
     fetchItems() {
       this.axios.get(address + ":3000/get-commerce", headers).then((response) => {
         let query = gql.allCommerce;

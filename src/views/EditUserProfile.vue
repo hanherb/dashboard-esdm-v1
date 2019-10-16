@@ -379,6 +379,7 @@ export default {
       },
 
       updateUser() {
+        this.updateFullname(this.input.fullname);
         if(this.status == "wait-profile"){
           this.status = "active";
           localStorage.setItem('user_status', 'active');
@@ -414,6 +415,7 @@ export default {
             input: postObj
           }
           graphqlFunction.graphqlMutation(query, variables, (result) => {
+            this.$router.push('/user-profile?id=' + this.id);
             location.reload();
             alert("Update User Success");
           });
@@ -426,7 +428,14 @@ export default {
         temp.profile_picture = picture;
         temp.status = 'active';
         this.$session.set('user', temp);
-      }
+      },
+
+      updateFullname(fullname) {
+        var temp = this.$session.get('user');
+        temp.fullname = fullname;
+        temp.status = 'active';
+        this.$session.set('user', temp);
+      },
   }
 };
 </script>
