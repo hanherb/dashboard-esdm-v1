@@ -29,7 +29,7 @@ export default {
 
   methods: {
       fetchUser() {
-        let id = window.location.href.split("?id=")[1];
+        var id = parseInt(window.location.href.split("?id=")[1]);
         this.axios.get(address + ":3000/get-user", headers).then((response) => {
           let query = gql.singleUser;
           let variable = {
@@ -43,15 +43,16 @@ export default {
 
       deleteUser() {
         let postObj = {
-          email: this.user.email
+          user_id: this.user.user_id
         };
         this.axios.post(address + ':3000/delete-user', postObj, headers)
         .then((response) => {
           let query = gql.deleteUser;
           let variables = {
-            userEmail: this.user.email
+            userId: this.user.user_id
           }
           graphqlFunction.graphqlMutation(query, variables, (result) => {
+            console.log(result)
             alert("Delete User Success");
             this.$router.push('/users');
           });

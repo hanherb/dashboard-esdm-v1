@@ -8,17 +8,17 @@
       </d-container>
       <!-- Actions Column Slot -->
       <d-button-group slot="actions" slot-scope="props" size="small" class="d-flex justify-content-center">
-        <d-link :to="'/user-profile?id=' + props.row._id">
+        <d-link :to="'/user-profile?id=' + props.row.user_id">
           <d-button class="btn-white" v-d-tooltip.hover="'Visit Profile'">
             <i class="material-icons">&#xe7fd;</i>
           </d-button>
         </d-link>
-        <d-link :to="'/update-user?id=' + props.row._id">
+        <d-link :to="'/update-user?id=' + props.row.user_id">
           <d-button class="btn-white" v-d-tooltip.hover="'Edit'">
             <i class="material-icons">&#xE254;</i>
           </d-button>
         </d-link>
-        <d-link :to="'/delete-user?id=' + props.row._id">
+        <d-link :to="'/delete-user?id=' + props.row.user_id">
           <d-button class="btn-white" v-d-tooltip.hover="'Delete'">
             <i class="material-icons">&#xE872;</i>
           </d-button>
@@ -51,7 +51,7 @@ export default {
   },
   data(){
     return{
-      columns: ['fullname', 'email', 'role', 'status', 'actions'],
+      columns: ['username', 'fullname', 'role', 'actions'],
       tableData: [],
       clientTableOptions: {
         perPage: 10,

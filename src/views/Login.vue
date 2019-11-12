@@ -12,8 +12,8 @@
 
             <!-- Form Fields -->
             <div class="form-group">
-              <label for="exampleInputEmail1">Email address</label>
-              <input class="form-control" type="email" v-model="input.email" @keyup.enter="login" id="exampleInputEmail1" placeholder="Enter email" />
+              <label for="exampleInputUsername1">Username</label>
+              <input class="form-control" type="username" v-model="input.username" @keyup.enter="login" id="exampleInputUsername1" placeholder="Enter username" />
             </div>
             <div class="form-group">
               <label for="exampleInputPassword1">Password</label>
@@ -50,7 +50,7 @@ export default {
   data(){
       return {
         input: {
-          email: "",
+          username: "",
           password: ""
         }
       }
@@ -58,9 +58,9 @@ export default {
 
   methods: {
     login() {
-      if(this.input.email != "" && this.input.password != "") {
+      if(this.input.username != "" && this.input.password != "") {
         this.axios.post(address + ':3000/login-user', {
-          email: this.input.email, 
+          username: this.input.username, 
           password: this.input.password
         })
         .then((response) => {
@@ -72,7 +72,7 @@ export default {
                 this.$router.push('/analytics');
               }
               else {
-                this.$router.push('/user-profile?id=' + response.data.response._id);
+                this.$router.push('/user-profile?id=' + response.data.response.user_id);
               }
             }
             else {
@@ -86,7 +86,7 @@ export default {
             this.$session.start();
             this.$session.set('user', response.data.response);
             document.cookie = "token=" + response.data.token;
-            document.cookie = "user_session=" + this.$session.get('user')._id;
+            document.cookie = "user_session=" + this.$session.get('user').user_id;
             document.cookie = "user_authority=" + this.$session.get('user').authority;
             document.cookie = "user_status=" + this.$session.get('user').status;
             localStorage.setItem('user_role', this.$session.get('user').role);
@@ -94,7 +94,7 @@ export default {
             localStorage.setItem('user_status', this.$session.get('user').status);
           }
           else {
-            alert("Incorrect combination of email and password");
+            alert("Incorrect combination of username and password");
           }
         });
       }

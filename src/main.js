@@ -89,48 +89,33 @@ router.beforeEach((to, from, next) => {
     }
     else {
         if(to.path == '/add-user') {
-            for(var i = 0; i <= user_authority.length; i++) {
-                if(i == user_authority.length) {
-                    next({
-                        path: '/not-authenticated',
-                    })
-                }
-                else {
-                    if(user_authority[i] == 'create') {
-                        next();
-                        break;
-                    }
-                }
+            if(user_role != 'admin') {
+                next({
+                    path: '/not-authenticated',
+                })
+            }
+            else {
+                next();
             }
         }
         else if(to.path == '/update-user') {
-            for(var i = 0; i <= user_authority.length; i++) {
-                if(i == user_authority.length) {
-                    next({
-                        path: '/not-authenticated',
-                    })
-                }
-                else {
-                    if(user_authority[i] == 'update') {
-                        next();
-                        break;
-                    }
-                }
+            if(user_role != 'admin') {
+                next({
+                    path: '/not-authenticated',
+                })
+            }
+            else {
+                next();
             }
         }
         else if(to.path == '/delete-user') {
-            for(var i = 0; i <= user_authority.length; i++) {
-                if(i == user_authority.length) {
-                    next({
-                        path: '/not-authenticated',
-                    })
-                }
-                else {
-                    if(user_authority[i] == 'delete') {
-                        next();
-                        break;
-                    }
-                }
+            if(user_role != 'admin') {
+                next({
+                    path: '/not-authenticated',
+                })
+            }
+            else {
+                next();
             }
         }
         else {

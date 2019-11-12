@@ -2,8 +2,8 @@
   d-row.h-100(align-v='center', align-h='center')
     d-form
       .form-group
-        label Email
-        d-input( type="text" v-model="input.email" placeholder="Email")
+        label Username
+        d-input( type="text" v-model="input.username" placeholder="Username")
       .form-group
         label Full Name
         d-input( type="text" v-model="input.fullname" placeholder="Full Name")
@@ -41,7 +41,7 @@ export default {
   data(){
       return{
         input:{
-          email: "",
+          username: "",
           fullname: "",
           role: "",
           authority: [],
@@ -90,7 +90,7 @@ export default {
         }
         else {
           let postObj = {
-            email: this.input.email, 
+            username: this.input.username, 
             fullname: this.input.fullname,
             role: this.input.role,
             authority: this.input.authority,
@@ -99,7 +99,6 @@ export default {
           };
           this.axios.post(address + ':3000/create-user', postObj, headers)
           .then((response) => {
-            postObj._id = response.data.insertedIds[0];
             let query = gql.addUser;
             let variables = {
               input: postObj

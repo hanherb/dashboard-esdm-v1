@@ -1,71 +1,41 @@
 let query = {
 	allUser: `query getAllUser {
       users {
-        _id
+        user_id
+        username
         fullname
-        email
+        password
+        company_type
         role
-        status
-        authority
-        badan_usaha
-        izin
-        generasi
-        tahapan_kegiatan
-        komoditas
-        alamat_kantor
-        telepon
-        fax
-        website
-        npwp
-        lokasi_tambang
-        siup
-        tdp
-        skt_minerba
-        profile_picture
       }
     }`,
 
-	singleUser: `query getSingleUser($userId: String!) {
-      user(_id: $userId) {
-        _id
+	singleUser: `query getSingleUser($userId: Int!) {
+      user(user_id: $userId) {
+        user_id
+        username
         fullname
-        email
+        password
+        company_type
         role
-        status
-        authority
-        badan_usaha
-        izin
-        generasi
-        tahapan_kegiatan
-        komoditas
-        alamat_kantor
-        telepon
-        fax
-        website
-        npwp
-        lokasi_tambang
-        siup
-        tdp
-        skt_minerba
-        profile_picture
       }
     }`,
 
-    addUser: `mutation createSingleUser($input:PersonInput) {
+    addUser: `mutation createSingleUser($input:UsersInput) {
           createUser(input: $input) {
               fullname
           }
   	}`,
 
-  	updateUser: `mutation updateSingleUser($userEmail:String!, $input:PersonInput) {
-          updateUser(email: $userEmail, input: $input) {
-              fullname
+  	updateUser: `mutation updateSingleUser($userId: Int!, $input:UsersInput) {
+          updateUser(user_id: $userId, input: $input) {
+              user_id
           }
   	}`,
 
-  	deleteUser: `mutation deleteSingleUser($userEmail:String!) {
-	      deleteUser(email: $userEmail) {
-	          fullname
+  	deleteUser: `mutation deleteSingleUser($userId: Int!) {
+	      deleteUser(user_id: $userId) {
+	          user_id
 	      }
   	}`,
 
@@ -128,41 +98,42 @@ let query = {
         }
   	}`,
 
-  	allAnggaranBelanja: `query getAllAnggaranBelanja {
-      	anggaranBelanjas {
-	        _id
-	        kantor_penghasilan_karyawan
-	  		kantor_kesejahteraan_karyawan
-	  		kantor_komisi_penjualan
-	  		kantor_pemeliharaan_kantor
-	  		kantor_depresiasi_dan_amortisasi
-	  		kantor_promosi_dan_publikasi
-	  		kantor_sewa_alat
-	  		kantor_pengiriman_barang_perjalanan_dan_komunikasi
-	  		kantor_konsultan
-	  		kantor_keuangan
-	  		kantor_umum_dan_administrasi
-	  		kantor_pengembangan_masyarakat
-	  		kantor_biaya_lain_lain
-	  		site_penghasilan_karyawan
-	  		site_pemeliharaan_kantor
-	  		site_pengiriman_barang_perjalanan_dan_komunikasi
-	  		site_umum_dan_administrasi
-	  		site_biaya_analisa_mineral_logam
-	  		site_biaya_lain_lain
-	  		bangunan
-	  		sarana_dan_prasarana
-	  		mesin
-	  		peralatan
-	  		kendaraan_dan_angkutan
-	  		peralatan_eksplorasi
-	  		kapal
-	  		alat_alat_perabotan
-	  		status_dan_tahun
-	  		upload_by
-	  		tahapan_kegiatan
-      	}
-    }`,
+  	allReport: `query getAllReport {
+	    reports {
+	        report_id
+	        user_id
+	        year
+	        term
+	        report_type
+	        currency
+	        rate
+	        approved
+	        flagged_for_deletion
+	    }
+  	}`,
+
+  	allBalance: `query getAllBalance {
+	    balances {
+	        balance_id
+	        report_id
+	        detail
+	        value
+	        category
+	        sub_category
+	    }
+  	}`,
+
+  	addBalance: `mutation createSingleBalance($input:BalancesInput) {
+	      createBalance(input: $input) {
+	          balance_id
+	      }
+  	}`,
+
+  	deleteBalance: `mutation deleteSingleBalance($balanceId: Int!) {
+	      deleteBalance(balance_id: $balanceId) {
+	          balance_id
+	      }
+  	}`,
 }
 
 export default query;

@@ -7,39 +7,6 @@
     </d-card-header>
 
     <d-card-body class="pt-0">
-      <!-- <d-row class="border-bottom py-2 bg-light">
-        <d-col col sm="6" class="d-flex mb-2 mb-sm-0">
-          <d-button-group>
-            <d-btn class="btn-white" active>Hour</d-btn>
-            <d-btn class="btn-white">Day</d-btn>
-            <d-btn class="btn-white">Week</d-btn>
-            <d-btn class="btn-white">Month</d-btn>
-          </d-button-group>
-        </d-col>
-
-        <d-col col sm="6">
-          <d-input-group size="sm" class="date-range d-flex justify-content-end">
-            <d-datepicker
-              v-model="dateRange.from"
-              :highlighted="{ from: dateRange.from, to: dateRange.to || new Date() }"
-              placeholder="Start date"
-              small
-              typeable
-            />
-            <d-datepicker
-              v-model="dateRange.to"
-              :highlighted="{ from: dateRange.from, to: dateRange.to || new Date() }"
-              placeholder="End date"
-              small
-              typeable
-            />
-            <d-input-group-text slot="append">
-              <i class="material-icons">&#xE916;</i>
-            </d-input-group-text>
-          </d-input-group>
-        </d-col>
-      </d-row> -->
-
       <!-- Chart -->
       <div ref="legend"></div>
       <canvas
@@ -53,6 +20,7 @@
 </template>
 
 <script>
+import gql from '@/gql';
 import graphqlFunction from '@/graphqlFunction';
 import basicFunction from '@/basicFunction';
 import address from '@/address';
@@ -93,6 +61,10 @@ export default {
   },
   data() {
     return {
+      reports: [],
+      balances: [],
+      showBalance: [],
+      years: [],
       dateRange: {
         from: null,
         to: null,
@@ -111,7 +83,7 @@ export default {
             borderWidth: 1.5,
           },
           {
-            label: 'Total Aktiva',
+            label: 'Jumlah Aktiva',
             fill: 'start',
             data: [],
             backgroundColor: colors.salmon.toRGBA(0.1),
@@ -121,7 +93,7 @@ export default {
             borderWidth: 1.5,
           },
           {
-            label: 'Aktiva Eksplorasi dan Evaluasi',
+            label: 'Aktiva Eksplorasi',
             fill: 'start',
             data: [],
             backgroundColor: colors.green.toRGBA(0.1),
@@ -131,7 +103,7 @@ export default {
             borderWidth: 1.5,
           },
           {
-            label: 'Kewajiban Jangka Pendek',
+            label: 'Jumlah Kewajiban Jangka Pendek',
             fill: 'start',
             data: [],
             backgroundColor: colors.yellow.toRGBA(0.1),
@@ -141,7 +113,7 @@ export default {
             borderWidth: 1.5,
           },
           {
-            label: 'Kewajiban Jangka Panjang',
+            label: 'Jumlah Kewajiban Jangka Panjang',
             fill: 'start',
             data: [],
             backgroundColor: colors.purple.toRGBA(0.1),
@@ -157,70 +129,84 @@ export default {
 
   created: function()
   {
-    this.fetchNeraca(() => {
-      this.mountChart();
-    });
+    this.fetchReport();
   },
 
   methods: {
+    fetchReport() {
+      var id = parseInt(window.location.href.split("?id=")[1]);
+      this.axios.get(address + ":3000/get-report", headers).then((response) => {
+        let query = gql.allReport;
+        graphqlFunction.graphqlFetchAll(query, (result) => {
+          for(var i = 0; i < result.reports.length; i++) {
+            if(result.reports[i].user_id == id) {
+              this.reports.push(result.reports[i]);
+              if(!this.years.includes(this.reports[i].year)) {
+                this.years.push(this.reports[i].year);
+                this.years.sort(function(a, b){return b-a});
+                this.chartData.labels = this.years;
+              }
+            }
+          }
+          this.fetchNeraca(() => {
+            console.log(this.chartData.datasets)
+            this.mountChart();
+          });
+        });
+      })
+    },
     fetchNeraca(cb) {
-      var id = window.location.href.split("?id=")[1];
+      var id = parseInt(window.location.href.split("?id=")[1]);
       this.axios.get(address + ":3000/get-neraca", headers).then((response) => {
-        for(let i = 0; i < response.data.length; i++) {
-          if(response.data[i].upload_by == id) {
-            var keys = Object.keys(response.data[i].data[0]);
-            for(var k = 0; k < keys.length; k++) {
-              if(keys[k].split(' ')[0] == "REALISASI") {
-                this.chartData.labels.push(keys[k].split('REALISASI TAHUN ')[1]);
-              }
-            }
-            var tempTahun = [];
-            for(var k = this.chartData.labels[0]; k <= this.chartData.labels[this.chartData.labels.length-1]; k++) {
-              var temp = {};
-              for(let j = 0; j < response.data[i].data.length; j++) {
-                if(response.data[i].data[j]["URAIAN"] == "Aktiva Tetap") {
-                  temp["Aktiva Tetap"] = response.data[i].data[j]["REALISASI TAHUN " + k];
-                }
-                if(response.data[i].data[j]["URAIAN"] == "JUMLAH AKTIVA") {
-                  temp["JUMLAH AKTIVA"] = response.data[i].data[j]["REALISASI TAHUN " + k];
-                }
-                if(response.data[i].data[j]["URAIAN"] == "Aktiva Eksplorasi dan Evaluasi") {
-                  temp["Aktiva Eksplorasi dan Evaluasi"] = response.data[i].data[j]["REALISASI TAHUN " + k];
-                }
-                if(response.data[i].data[j]["URAIAN"] == "Jumlah Kewajiban Jangka Pendek") {
-                  temp["Jumlah Kewajiban Jangka Pendek"] = response.data[i].data[j]["REALISASI TAHUN " + k];
-                }
-                if(response.data[i].data[j]["URAIAN"] == "Jumlah Kewajiban Jangka Panjang") {
-                  temp["Jumlah Kewajiban Jangka Panjang"] = response.data[i].data[j]["REALISASI TAHUN " + k];
-                }
-              }
-              tempTahun.push(temp);
-            }
-
-            for(var k = 0; k < this.chartData.datasets.length; k++) {
-              for(var j = 0; j < tempTahun.length; j++) {
-                if(this.chartData.datasets[k].label == 'Aktiva Tetap') {
-                  this.chartData.datasets[k].data.push(tempTahun[j]['Aktiva Tetap']);
-                }
-                if(this.chartData.datasets[k].label == 'Total Aktiva') {
-                  this.chartData.datasets[k].data.push(tempTahun[j]['JUMLAH AKTIVA']);
-                }
-                if(this.chartData.datasets[k].label == 'Aktiva Eksplorasi dan Evaluasi') {
-                  this.chartData.datasets[k].data.push(tempTahun[j]['Aktiva Eksplorasi dan Evaluasi']);
-                }
-                if(this.chartData.datasets[k].label == 'Kewajiban Jangka Pendek') {
-                  this.chartData.datasets[k].data.push(tempTahun[j]['Jumlah Kewajiban Jangka Pendek']);
-                }
-                if(this.chartData.datasets[k].label == 'Kewajiban Jangka Panjang') {
-                  this.chartData.datasets[k].data.push(tempTahun[j]['Jumlah Kewajiban Jangka Panjang']);
+        let query = gql.allBalance;
+        graphqlFunction.graphqlFetchAll(query, (result) => {
+          for(var j = 0; j < this.reports.length; j++) {
+            for(var i = 0; i < result.balances.length; i++) {
+              if(this.reports[j].report_id == result.balances[i].report_id) {
+                if(result.balances[i].detail == 'Aktiva Tetap' ||
+                  result.balances[i].detail == 'Jumlah Aktiva' ||
+                  result.balances[i].detail == 'Aktiva Eksplorasi' ||
+                  result.balances[i].detail == 'Jumlah Kewajiban Jangka Pendek' ||
+                  result.balances[i].detail == 'Jumlah Kewajiban Jangka Panjang') {
+                  result.balances[i].year = this.reports[j].year;
+                  this.balances.push(result.balances[i]);
                 }
               }
             }
           }
-        }
-        if(cb)
-          return cb();
-      });
+          for(var k = 0; k < this.chartData.datasets.length; k++) {
+            for(var j = 0; j < this.balances.length; j++) {
+              if(this.chartData.datasets[k].label == 'Aktiva Tetap') {
+                if(this.balances[j]['detail'] == 'Aktiva Tetap') {
+                  this.chartData.datasets[k].data.push(this.balances[j]['value']);
+                }
+              }
+              if(this.chartData.datasets[k].label == 'Jumlah Aktiva') {
+                if(this.balances[j]['detail'] == 'Jumlah Aktiva') {
+                  this.chartData.datasets[k].data.push(this.balances[j]['value']);
+                }
+              }
+              if(this.chartData.datasets[k].label == 'Aktiva Eksplorasi') {
+                if(this.balances[j]['detail'] == 'Aktiva Eksplorasi') {
+                  this.chartData.datasets[k].data.push(this.balances[j]['value']);
+                }
+              }
+              if(this.chartData.datasets[k].label == 'Jumlah Kewajiban Jangka Pendek') {
+                if(this.balances[j]['detail'] == 'Jumlah Kewajiban Jangka Pendek') {
+                  this.chartData.datasets[k].data.push(this.balances[j]['value']);
+                }
+              }
+              if(this.chartData.datasets[k].label == 'Jumlah Kewajiban Jangka Panjang') {
+                if(this.balances[j]['detail'] == 'Jumlah Kewajiban Jangka Panjang') {
+                  this.chartData.datasets[k].data.push(this.balances[j]['value']);
+                }
+              }
+            }
+          }
+          if(cb)
+            return cb();
+        });
+      })
     },
     mountChart() {
       const chartOptions = {
@@ -239,7 +225,7 @@ export default {
                 gridLines: false,
                 ticks: {
                   callback(tick, index) {
-                    return index % 1 ? '' : tick;
+                    return index % 2 === 0 ? '' : tick;
                   },
                 },
               },
@@ -273,6 +259,7 @@ export default {
       // Hide initially the first and last analytics overview chart points.
       // They can still be triggered on hover.
       const meta = AnalyticsOverviewChart.getDatasetMeta(0);
+      console.log(meta)
       meta.data[0]._model.radius = 0;
       meta.data[this.chartData.datasets[0].data.length - 1]._model.radius = 0;
 

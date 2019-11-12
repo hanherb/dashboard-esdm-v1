@@ -35,7 +35,7 @@
         <div v-if="items" v-for="(nav, navIdx) in items" :key="navIdx">
           <h6 v-if="nav.role == role || !nav.role" class="main-sidebar__nav-title">{{ nav.title }}</h6>
           <d-nav v-if="typeof nav.items !== 'undefined' && nav.items.length" class="nav--no-borders flex-column">
-            <li v-for="(item, navItemIdx) in nav.items" :key="navItemIdx" v-if="(item.to.tahapan_kegiatan == tahapan_kegiatan || !item.to.tahapan_kegiatan) && (item.to.role == role || !item.to.role) && (item.to.forbidden != role || !item.to.forbidden)" class="nav-item dropdown">
+            <li v-for="(item, navItemIdx) in nav.items" :key="navItemIdx" v-if="(item.to.company_type == company_type || !item.to.company_type) && (item.to.role == role || !item.to.role) && (item.to.forbidden != role || !item.to.forbidden)" class="nav-item dropdown">
               <d-link :class="['nav-link', item.items && item.items.length ? 'dropdown-toggle' : '']" :to="item.to" v-d-toggle="`snc-${navIdx}-${navItemIdx}`">
                 <div class="item-icon-wrapper" v-if="item.htmlBefore" v-html="item.htmlBefore" />
                 <span v-if="item.title">{{ item.title }}</span>
@@ -75,7 +75,7 @@ export default {
   data() {
     return {
       sidebarVisible: false,
-      tahapan_kegiatan: this.$session.get('user').tahapan_kegiatan,
+      company_type: this.$session.get('user').company_type,
       id: this.$session.get('user')._id,
       role: this.$session.get('user').role,
     };

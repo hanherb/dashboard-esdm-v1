@@ -8,13 +8,13 @@
 
       <d-col lg="8">
         <d-alert show v-if="session.role == 'user'">Download Format Spreadsheet - <a class="alert-link" href="/admin/downloads/FormatCSV.rar">Click Here</a></d-alert> 
-        <up-user-laba-rugi v-if="user.role == 'user' || user.role == 'admin'" />
+        <!-- <up-user-laba-rugi v-if="user.role == 'user' || user.role == 'admin'" /> -->
         <up-user-neraca v-if="user.role == 'user' || user.role == 'admin'" />
-        <up-user-rasio-keuangan v-if="user.role == 'user' || user.role == 'admin'" />
-        <up-user-goods v-if="user.role == 'supplier' || user.role == 'admin'" />
+        <!-- <up-user-rasio-keuangan v-if="user.role == 'user' || user.role == 'admin'" />
+        <up-user-goods v-if="user.role == 'supplier' || user.role == 'admin'" /> -->
         <ao-neraca v-if="user.role == 'user' || user.role == 'admin'" />
-        <ao-laba-rugi v-if="user.role == 'user' || user.role == 'admin'" />
-        <ao-penerimaan-negara v-if="user.role == 'user' || user.role == 'admin'" />
+        <!-- <ao-laba-rugi v-if="user.role == 'user' || user.role == 'admin'" />
+        <ao-penerimaan-negara v-if="user.role == 'user' || user.role == 'admin'" /> -->
       </d-col>
     </d-row>
   </d-container>
@@ -65,7 +65,7 @@ export default {
 
   methods: {
     fetchUser() {
-      var id = window.location.href.split("?id=")[1];
+      var id = parseInt(window.location.href.split("?id=")[1]);
       this.axios.get(address + ":3000/get-user", headers).then((response) => {
         let query = gql.singleUser;
         let variable = {

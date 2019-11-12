@@ -6,26 +6,34 @@
       div( class="panel-body")
         div( class="form-group")
           div( class="col-sm-9")
-            input( type="file" id="csv_file" name="csv_file" class="form-control" @change="loadCSV($event)")
+            input( type="file" id="file" ref="file" v-on:change="loadCSV($event)")
         div( class="col-sm-offset-3 col-sm-9")
           div( class="checkbox-inline")
             label( for="header_rows") 
         d-container( fluid class="main-content-container px-4 pb-4")
-          v-client-table( class="dataTables_wrapper" :data="tableData" :columns="columns" :options="clientTableOptions")
-              table( class="table mb-0")
-                thead( class="bg-light")
-                  tr
-                    th( v-for="key in parse_header" @click="sortBy(key)" :class="{ active: sortKey == key }") {{ key | capitalize }}
-                      span( class="arrow" :class="sortOrders[key] > 0 ? 'asc' : 'dsc'")
-                tbody
-                  tr( v-for="csv in tableData")
-                    td( v-for="key in parse_header") {{csv[key]}}
+          table( v-if="reports[0]" class="table table-bordered bg-light text-dark mb-0")
+            thead( class="py-2 bg-light text-semibold border-bottom")
+              tr
+                th( class="text-center") Kategori
+                th( class="text-center") Sub-Kategori
+                th( class="text-center") Uraian
+                th( class="text-center") Nilai
+            tbody
+              tr( v-for="balance in balances")
+                td( class="lo-stats__total text-center") {{ balance.Kategori }}
+                td( class="lo-stats__total text-center") {{ balance['Sub-Kategori'] }}
+                td( class="lo-stats__total text-center") {{ balance.Uraian }}
+                td( class="lo-stats__total text-center") {{ balance.Nilai.toLocaleString() }}
           br
-          div( align='center' v-if="tableData[0]")
-            d-button( theme="primary" v-on:click="addNeraca") Submit
+          div( v-for="c in calculated")
+            p {{c.Uraian}} = {{c.Nilai.toLocaleString()}}
+          div( align='center' v-if="reports[0]")
+            d-button( theme="primary" v-on:click="addReport") Submit
 </template>
 
 <script>
+import XLSX from 'xlsx';
+import gql from '@/gql';
 import graphqlFunction from '../graphqlFunction';
 import address from '../address';
 import headers from '../headers';
@@ -42,30 +50,10 @@ export default {
   },
   data() {
     return {
-      parse_header: [],
-      sortOrders:{},
-      sortKey: '',
-      columns: [],
-      tableData: [],
-      rangeTahun: [],
-      clientTableOptions: {
-        perPage: 50,
-        recordsPerPage: [10, 25, 50, 100],
-        skin: 'transaction-history table dataTable',
-        sortIcon: {
-          base: 'fas float-right mt-1 text-muted',
-          up: 'fa-caret-up',
-          down: 'fa-caret-down',
-        },
-        texts: {
-          filterPlaceholder: '',
-          limit: 'Show',
-        },
-        pagination: {
-          edge: true,
-          nav: 'scroll',
-        },
-      },
+      contoh: "",
+      balances: [],
+      reports: [],
+      calculated: [],
     };
   },
   filters: {
@@ -75,164 +63,219 @@ export default {
   },
   created: function()
   {
-    this.fetchNeraca();
+    this.fetchReport();
   },
   methods: {
-    sortBy: function (key) {
-      var vm = this
-      vm.sortKey = key
-      vm.sortOrders[key] = vm.sortOrders[key] * -1
-    },
-    csvJSON(csv){
-      var vm = this
-      var lines = csv.split(/\r\n|\n|\r/);
-      var result = []
-      var csvHeaders = lines[0].split(";")
-      vm.parse_header = lines[0].split(";") 
-      lines[0].split(",").forEach(function (key) {
-        vm.sortOrders[key] = 1
-      })
-      lines.map(function(line, indexLine){
-        if (indexLine < 1) return // Jump header line
-        
-        var obj = {}
-        var currentline = line.split(";")
-        
-        csvHeaders.map(function(header, indexHeader){
-          obj[header] = currentline[indexHeader]
-        })
+    loadCSV(e) {
+      var vm = this;
+      var files = e.target.files, f = files[0];
+      var reader = new FileReader();
+      reader.onload = function(event) {
+        var data = new Uint8Array(event.target.result);
+        var workbook = XLSX.read(data, {type: 'array'});
+        let reportConfig = workbook.SheetNames[0]
+        let sheetName = workbook.SheetNames[1]
 
-        result.push(obj)
-      })
-      this.axios.post(address + ':3000/import-csv', {}, headers)
+        let worksheetConfig = workbook.Sheets[reportConfig];
+        let worksheet = workbook.Sheets[sheetName];
+        vm.reports = XLSX.utils.sheet_to_json(worksheetConfig);
+        vm.balances = XLSX.utils.sheet_to_json(worksheet);
+        vm.spliceArray(vm.balances);
+        vm.normalizeCategory(vm.balances);
+        vm.calculateNeraca(vm.balances);
+      };
+      reader.readAsArrayBuffer(f);
+
+      this.axios.post(address + ':3000/import-csv', {})
       .then((response) => {
         console.log(response);
       });
-      result.pop() // remove the last item because undefined values
-      this.columns = Object.keys(result[0]);
-
-      function sum(colname) {
-        //Jumlah Aktiva Lancar
-        for(var i = 2; i < 7; i++) {
-          if(!result[i][colname] || result[i][colname] == ' - ') {
-            result[i][colname] = 0;
-          }
-          result[7][colname] = 
-            parseInt(result[7][colname]) + 
-            parseInt(result[i][colname]);
-        }
-
-        //Jumlah Aktiva Tidak Lancar
-        for(var i = 9; i < 16; i++) {
-          if(!result[i][colname] || result[i][colname] == ' - ') {
-            result[i][colname] = 0;
-          }
-          result[16][colname] = 
-            parseInt(result[16][colname]) + 
-            parseInt(result[i][colname]);
-        }
-
-        //Jumlah Aktiva
-        result[17][colname] =
-          parseInt(result[7][colname]) +
-          parseInt(result[16][colname]);
-
-        //Jumlah Kewajiban Jangka Pendek
-        for(var i = 20; i < 26; i++) {
-          if(!result[i][colname] || result[i][colname] == ' - ') {
-            result[i][colname] = 0;
-          }
-          result[26][colname] = 
-            parseInt(result[26][colname]) + 
-            parseInt(result[i][colname]);
-        }
-
-        //Jumlah Kewajiban Jangka Panjang
-        for(var i = 28; i < 34; i++) {
-          if(!result[i][colname] || result[i][colname] == ' - ') {
-            result[i][colname] = 0;
-          }
-          result[34][colname] = 
-            parseInt(result[34][colname]) + 
-            parseInt(result[i][colname]);
-        }
-
-        //Jumlah Kewajiban
-        result[35][colname] =
-          parseInt(result[26][colname]) +
-          parseInt(result[34][colname]);
-
-        //Ekuitas
-        for(var i = 37; i < 40; i++) {
-          if(!result[i][colname] || result[i][colname] == ' - ') {
-            result[i][colname] = 0;
-          }
-          result[40][colname] = 
-            parseInt(result[40][colname]) + 
-            parseInt(result[i][colname]);
-        }
-
-        result[41][colname] =
-          parseInt(result[35][colname]) +
-          parseInt(result[40][colname]);
-      }
-      
-      for(var i = 0; i < Object.keys(result[0]).length; i++) {
-        if(Object.keys(result[0])[i].split(" ")[0] == "REALISASI") {
-          this.rangeTahun.push(Object.keys(result[0])[i].split("REALISASI TAHUN ")[1]);
-        }
-      }  
-
-      for(var i = this.rangeTahun[0]; i <= this.rangeTahun[this.rangeTahun.length-1]; i++) {
-        sum("RENCANA TAHUN " + i);
-        sum("REALISASI TAHUN "+ i);
-      }
-
-      console.log(result);
-      return result // JavaScript object
     },
-    loadCSV(e) {
-      var vm = this
-      if (window.FileReader) {
-        var reader = new FileReader();
-        reader.readAsText(e.target.files[0]);
-        // Handle errors load
-        reader.onload = function(event) {
-          var csv = event.target.result;
-          vm.tableData = vm.csvJSON(csv)
-        };
-        reader.onerror = function(evt) {
-          if(evt.target.error.name == "NotReadableError") {
-            alert("Canno't read file !");
+    fetchReport() {
+      var id = this.$session.get('user').user_id;
+      this.axios.get(address + ":3000/get-report", headers).then((response) => {
+        let query = gql.allReport;
+        graphqlFunction.graphqlFetchAll(query, (result) => {
+          for(var i = 0; i < result.reports.length; i++) {
+            if(result.reports[i].user_id == id) {
+              this.reports.push(result.reports[i]);
+            }
           }
-        };
-      } else {
-        alert('FileReader are not supported in this browser.');
-      }
-    },
-    fetchNeraca() {
-      this.axios.get(address + ":3000/get-neraca", headers).then((response) => {
-        for(var i = 0; i < response.data.length; i++) {
-          if (response.data[i].upload_by == this.$session.get('user')._id) {
-            this.columns = Object.keys(response.data[i].data[0]);
-            this.tableData = response.data[i].data;
-          }
-        }
+          this.fetchNeraca();
+        });
       })
     },
-    addNeraca() {
+    addReport() {
       let postObj = {
-        data: this.tableData,
-        upload_by: this.$session.get('user')._id,
-        tahapan_kegiatan: this.$session.get('user').tahapan_kegiatan,
-        komoditas: this.$session.get('user').komoditas,
+        user_id: this.$session.get('user').user_id,
+        year: this.reports[0]["Tahun"],
+        term: this.reports[0]["Termin"],
+        report_type: this.$session.get('user').company_type,
+        currency: this.reports[0]["Mata Uang"],
+        rate: this.reports[0]["Kurs"],
+        approved: 0,
+        flagged_for_deletion: 0
+      };
+      this.axios.post(address + ':3000/add-report', postObj, headers)
+      .then((response) => {
+        console.log(response);
+        this.balances = this.balances.concat(this.calculated);
+        for(var i = 0; i < this.balances.length; i++) {
+          this.addNeraca(response.data.insertId, this.balances[i], this.balances.length, i);
+        }
+      });
+    },
+    fetchNeraca() {
+      var id = this.$session.get('user').user_id;
+      var lastReport = this.reports[this.reports.length-1];
+      this.axios.get(address + ":3000/get-neraca", headers).then((response) => {
+        let query = gql.allBalance;
+        graphqlFunction.graphqlFetchAll(query, (result) => {
+          for(var i = 0; i < result.balances.length; i++) {
+            if(result.balances[i].report_id == lastReport.report_id) {
+              this.balances.push({
+                'balance_id': result.balances[i].balance_id,
+                'report_id': result.balances[i].report_id,
+                'Kategori': result.balances[i].category,
+                'Sub-Kategori': result.balances[i].sub_category,
+                'Uraian': result.balances[i].detail,
+                'Nilai': result.balances[i].value,
+              });
+            }
+          }
+        });
+      })
+    },
+    calculateNeraca(balances) {
+      var jumlahAktivaLancar = 0;
+      var jumlahAktivaTidakLancar = 0;
+      var jumlahKewajibanJangkaPendek = 0;
+      var jumlahKewajibanJangkaPanjang = 0;
+      var jumlahEkuitas = 0;
+      for(var i = 0; i < balances.length; i++) {
+        if(balances[i]["Uraian"] == "Kas dan Bank" || 
+          balances[i]["Uraian"] == "Piutang Usaha" || 
+          balances[i]["Uraian"] == "Pajak dibayar dimuka" || 
+          balances[i]["Uraian"] == "Piutang lain-lain dan biaya dibayar dimuka" || 
+          balances[i]["Uraian"] == "Persediaan") {
+          jumlahAktivaLancar += balances[i]["Nilai"];
+        }
+        if(balances[i]["Uraian"] == "Aktiva Tetap" ||
+          balances[i]["Uraian"] == "Beban ditangguhkan" ||
+          balances[i]["Uraian"] == "Amortisasi" || 
+          balances[i]["Uraian"] =="Depresiasi") {
+          jumlahAktivaTidakLancar += balances[i]["Nilai"];
+        }
+        if((balances[i]["Uraian"] == "Hutang Usaha" || 
+          balances[i]["Uraian"] == "Hutang Bank" || 
+          balances[i]["Uraian"] == "Hutang Akrual" || 
+          balances[i]["Uraian"] == "Hutang Afiliasi" || 
+          balances[i]["Uraian"] == "Hutang Pajak" || 
+          balances[i]["Uraian"] == "Hutang lain-lain") &&
+          balances[i]["Sub-Kategori"] == "Kewajiban Jangka Pendek") {
+          jumlahKewajibanJangkaPendek += balances[i]["Nilai"];
+        }
+        if((balances[i]["Uraian"] == "Hutang Bank" || 
+          balances[i]["Uraian"] == "Hutang Pajak" || 
+          balances[i]["Uraian"] == "Hutang Leasing" || 
+          balances[i]["Uraian"] == "Hutang Afiliasi" || 
+          balances[i]["Uraian"] == "Hutang lain-lain") &&
+          balances[i]["Sub-Kategori"] == "Kewajiban Jangka Panjang") {
+          jumlahKewajibanJangkaPanjang += balances[i]["Nilai"];
+        }
+        if(balances[i]["Uraian"] == "Modal Yang Disetor" ||
+          balances[i]["Uraian"] == "Laba (rugi) ditahan" ||
+          balances[i]["Uraian"] == "Lain-lain") {
+          jumlahEkuitas += balances[i]["Nilai"];
+        }
+      }
+      var jumlahAktiva = jumlahAktivaLancar + jumlahAktivaTidakLancar;
+      var jumlahKewajiban = jumlahKewajibanJangkaPendek + jumlahKewajibanJangkaPanjang;
+      var jumlahKewajibanDanEkuitas = jumlahKewajiban + jumlahEkuitas;
+
+      this.calculated.push({
+          'Kategori': 'NERACA',
+          'Sub-Kategori': 'Aktiva Lancar',
+          'Uraian': 'Jumlah Aktiva Lancar',
+          'Nilai': jumlahAktivaLancar 
+        }, {
+          'Kategori': 'NERACA',
+          'Sub-Kategori': 'Aktiva Tidak Lancar',
+          'Uraian': 'Jumlah Aktiva Tidak Lancar',
+          'Nilai': jumlahAktivaTidakLancar 
+        }, {
+          'Kategori': 'NERACA',
+          'Sub-Kategori': '-',
+          'Uraian': 'Jumlah Aktiva',
+          'Nilai': jumlahAktiva 
+        }, {
+          'Kategori': 'HUTANG DAN MODAL',
+          'Sub-Kategori': 'Kewajiban Jangka Pendek',
+          'Uraian': 'Jumlah Kewajiban Jangka Pendek',
+          'Nilai': jumlahKewajibanJangkaPendek 
+        }, {
+          'Kategori': 'HUTANG DAN MODAL',
+          'Sub-Kategori': 'Kewajiban Jangka Panjang',
+          'Uraian': 'Jumlah Kewajiban Jangka Panjang',
+          'Nilai': jumlahKewajibanJangkaPanjang
+        }, {
+          'Kategori': 'HUTANG DAN MODAL',
+          'Sub-Kategori': '-',
+          'Uraian': 'Jumlah Kewajiban',
+          'Nilai': jumlahKewajiban
+        }, {
+          'Kategori': 'HUTANG DAN MODAL',
+          'Sub-Kategori': 'Modal Saham',
+          'Uraian': 'Jumlah Ekuitas',
+          'Nilai': jumlahEkuitas
+        }, {
+          'Kategori': 'HUTANG DAN MODAL',
+          'Sub-Kategori': '-',
+          'Uraian': 'Jumlah Kewajiban dan Ekuitas',
+          'Nilai': jumlahKewajibanDanEkuitas
+        }
+      );
+    },
+    addNeraca(report_id, balances, length, i) {
+      let postObj = {
+        report_id: report_id,
+        detail: balances["Uraian"],
+        value: balances["Nilai"],
+        category: balances["Kategori"],
+        sub_category: balances["Sub-Kategori"],
       };
       this.axios.post(address + ':3000/add-neraca', postObj, headers)
       .then((response) => {
-        location.reload();
-        alert("Add Neraca Success");
+        if(i == length-1) {
+          location.reload();
+        }
       });
-    }
+    },
+    spliceArray(spliceFile) {
+      for(var i = 0; i < spliceFile.length; i++) {
+        if(!spliceFile[i].hasOwnProperty('No.')) {
+          spliceFile.splice(i, 1);
+        }
+      }
+    },
+    normalizeCategory(normalizeFile) {
+      var category = normalizeFile[0]['Kategori'];
+      var sub = normalizeFile[0]['Sub-Kategori'];
+      for(var i = 0; i < normalizeFile.length; i++) {
+        if(!normalizeFile[i]['Kategori']) {
+          normalizeFile[i]['Kategori'] = category;
+        }
+        else {
+          category = normalizeFile[i]['Kategori'];
+        }
+        if(!normalizeFile[i]['Sub-Kategori']) {
+          normalizeFile[i]['Sub-Kategori'] = sub;
+        }
+        else {
+          sub = normalizeFile[i]['Sub-Kategori'];
+        }
+      }
+    },
   }
 };
 </script>

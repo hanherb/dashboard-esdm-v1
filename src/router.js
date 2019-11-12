@@ -384,6 +384,11 @@ export default new Router({
       component: () => import('./views/NotAuthenticated.vue'),
     },
     {
+      path: '/xls-test',
+      name: 'xls-test',
+      component: () => import('./views/XlsTest.vue'),
+    },
+    {
       path: '*',
       redirect: '/errors',
     },

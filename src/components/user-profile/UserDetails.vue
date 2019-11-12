@@ -30,8 +30,8 @@
       <div class="user-details__user-data border-top border-bottom p-4">
         <div class="row mb-3">
           <div class="col w-50">
-            <span>Email</span>
-            <span>{{ user.email }}</span>
+            <span>Username</span>
+            <span>{{ user.username }}</span>
           </div>
           <div class="col w-50">
             <span>Location</span>
@@ -136,13 +136,14 @@ export default {
 
   methods: {
     fetchUser() {
-      var id = window.location.href.split("?id=")[1];
+      var id = parseInt(window.location.href.split("?id=")[1]);
       this.axios.get(address + ":3000/get-user", headers).then((response) => {
         let query = gql.singleUser;
         let variable = {
           userId: id
         };
         graphqlFunction.graphqlFetchOne(query, variable, (result) => {
+          console.log(result.user);
           this.user = result.user;
           this.avatarImg = require('@/assets/images/uploads/' + this.user.profile_picture + '.png');
           for(var i = 0; i < this.tags.length; i++) {

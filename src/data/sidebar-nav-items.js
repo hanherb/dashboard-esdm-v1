@@ -45,7 +45,7 @@ export default function () {
       htmlBefore: '<i class="material-icons">&#xE7FD;</i>',
       to: {
         name: 'csv-asumsi-keuangan-op',
-        tahapan_kegiatan: 'Operasi Produksi',
+        company_type: 'Operasi Produksi',
         forbidden: 'admin'
       },
     }, {
@@ -53,7 +53,7 @@ export default function () {
       htmlBefore: '<i class="material-icons">&#xE7FD;</i>',
       to: {
         name: 'csv-neraca-op',
-        tahapan_kegiatan: 'Operasi Produksi',
+        company_type: 'Operasi Produksi',
         forbidden: 'admin'
       },
     }, {
@@ -61,7 +61,7 @@ export default function () {
       htmlBefore: '<i class="material-icons">&#xE7FD;</i>',
       to: {
         name: 'csv-laba-rugi-op',
-        tahapan_kegiatan: 'Operasi Produksi',
+        company_type: 'Operasi Produksi',
         forbidden: 'admin'
       },
     }, {
@@ -69,7 +69,7 @@ export default function () {
       htmlBefore: '<i class="material-icons">&#xE7FD;</i>',
       to: {
         name: 'csv-harga-pokok-op',
-        tahapan_kegiatan: 'Operasi Produksi',
+        company_type: 'Operasi Produksi',
         forbidden: 'admin'
       },
     }, {
@@ -77,7 +77,7 @@ export default function () {
       htmlBefore: '<i class="material-icons">&#xE7FD;</i>',
       to: {
         name: 'csv-arus-kas-op',
-        tahapan_kegiatan: 'Operasi Produksi',
+        company_type: 'Operasi Produksi',
         forbidden: 'admin'
       },
     }, {
@@ -85,7 +85,7 @@ export default function () {
       htmlBefore: '<i class="material-icons">&#xE7FD;</i>',
       to: {
         name: 'csv-investasi-op',
-        tahapan_kegiatan: 'Operasi Produksi',
+        company_type: 'Operasi Produksi',
         forbidden: 'admin'
       },
     }, {
@@ -93,7 +93,7 @@ export default function () {
       htmlBefore: '<i class="material-icons">&#xE7FD;</i>',
       to: {
         name: 'csv-penerimaan-negara-op',
-        tahapan_kegiatan: 'Operasi Produksi',
+        company_type: 'Operasi Produksi',
         forbidden: 'admin'
       },
     }, {
@@ -101,7 +101,7 @@ export default function () {
       htmlBefore: '<i class="material-icons">&#xE7FD;</i>',
       to: {
         name: 'csv-keuangan-lainnya-op',
-        tahapan_kegiatan: 'Operasi Produksi',
+        company_type: 'Operasi Produksi',
         forbidden: 'admin'
       },
     }, {
@@ -109,7 +109,7 @@ export default function () {
       htmlBefore: '<i class="material-icons">&#xE7FD;</i>',
       to: {
         name: 'csv-sumber-pembiayaan-op',
-        tahapan_kegiatan: 'Operasi Produksi',
+        company_type: 'Operasi Produksi',
         forbidden: 'admin'
       },
     }, {
@@ -117,7 +117,7 @@ export default function () {
       htmlBefore: '<i class="material-icons">&#xE7FD;</i>',
       to: {
         name: 'csv-anggaran-belanja-op',
-        tahapan_kegiatan: 'Operasi Produksi',
+        company_type: 'Operasi Produksi',
         forbidden: 'admin'
       },
     }, {
@@ -125,7 +125,7 @@ export default function () {
       htmlBefore: '<i class="material-icons">&#xE7FD;</i>',
       to: {
         name: 'csv-asumsi-keuangan-eksplorasi',
-        tahapan_kegiatan: 'Eksplorasi',
+        company_type: 'Eksplorasi',
         forbidden: 'admin'
       },
     }, {
@@ -133,7 +133,7 @@ export default function () {
       htmlBefore: '<i class="material-icons">&#xE7FD;</i>',
       to: {
         name: 'csv-neraca-eksplorasi',
-        tahapan_kegiatan: 'Eksplorasi',
+        company_type: 'Eksplorasi',
         forbidden: 'admin'
       },
     }, {
@@ -141,7 +141,7 @@ export default function () {
       htmlBefore: '<i class="material-icons">&#xE7FD;</i>',
       to: {
         name: 'csv-laba-rugi-eksplorasi',
-        tahapan_kegiatan: 'Eksplorasi',
+        company_type: 'Eksplorasi',
         forbidden: 'admin'
       },
     }, {
@@ -149,7 +149,7 @@ export default function () {
       htmlBefore: '<i class="material-icons">&#xE7FD;</i>',
       to: {
         name: 'csv-arus-kas-eksplorasi',
-        tahapan_kegiatan: 'Eksplorasi',
+        company_type: 'Eksplorasi',
         forbidden: 'admin'
       },
     }, {
@@ -157,7 +157,7 @@ export default function () {
       htmlBefore: '<i class="material-icons">&#xE7FD;</i>',
       to: {
         name: 'csv-investasi-eksplorasi',
-        tahapan_kegiatan: 'Eksplorasi',
+        company_type: 'Eksplorasi',
         forbidden: 'admin'
       },
     }, {
@@ -165,7 +165,7 @@ export default function () {
       htmlBefore: '<i class="material-icons">&#xE7FD;</i>',
       to: {
         name: 'csv-penerimaan-negara-eksplorasi',
-        tahapan_kegiatan: 'Eksplorasi',
+        company_type: 'Eksplorasi',
         forbidden: 'admin'
       },
     }, {
@@ -173,7 +173,7 @@ export default function () {
       htmlBefore: '<i class="material-icons">&#xE7FD;</i>',
       to: {
         name: 'csv-keuangan-lainnya-eksplorasi',
-        tahapan_kegiatan: 'Eksplorasi',
+        company_type: 'Eksplorasi',
         forbidden: 'admin'
       },
     }, {
@@ -181,7 +181,7 @@ export default function () {
       htmlBefore: '<i class="material-icons">&#xE7FD;</i>',
       to: {
         name: 'csv-anggaran-belanja-eksplorasi',
-        tahapan_kegiatan: 'Eksplorasi',
+        company_type: 'Eksplorasi',
         forbidden: 'admin'
       },
     }, {
@@ -189,7 +189,7 @@ export default function () {
       htmlBefore: '<i class="material-icons">&#xE7FD;</i>',
       to: {
         name: 'csv-sumber-pembiayaan-eksplorasi',
-        tahapan_kegiatan: 'Eksplorasi',
+        company_type: 'Eksplorasi',
         forbidden: 'admin'
       },
     }],

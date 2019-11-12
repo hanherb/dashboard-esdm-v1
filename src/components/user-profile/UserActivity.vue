@@ -57,12 +57,14 @@ export default {
 
   methods: {
     fetchLogger() {
-      var id = window.location.href.split("?id=")[1];
+      var id = parseInt(window.location.href.split("?id=")[1]);
       this.axios.get(address + ":3000/get-log", headers).then((response) => {
         response.data.reverse();
-        for(let i = 0; i < 10; i++) {
-          if(response.data[i].userId == id) {
-            this.activities.push(response.data[i]);
+        if(response.data.length != 0) {
+          for(let i = 0; i < 10; i++) {
+            if(response.data[i].user_id == id) {
+              this.activities.push(response.data[i]);
+            }
           }
         }
       });
