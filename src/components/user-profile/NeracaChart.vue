@@ -143,7 +143,7 @@ export default {
               this.reports.push(result.reports[i]);
               if(!this.years.includes(this.reports[i].year)) {
                 this.years.push(this.reports[i].year);
-                this.years.sort(function(a, b){return b-a});
+                this.years.sort(function(a, b){return a-b});
                 this.chartData.labels = this.years;
               }
             }
@@ -175,30 +175,34 @@ export default {
             }
           }
           for(var k = 0; k < this.chartData.datasets.length; k++) {
-            for(var j = 0; j < this.balances.length; j++) {
-              if(this.chartData.datasets[k].label == 'Aktiva Tetap') {
-                if(this.balances[j]['detail'] == 'Aktiva Tetap') {
-                  this.chartData.datasets[k].data.push(this.balances[j]['value']);
-                }
-              }
-              if(this.chartData.datasets[k].label == 'Jumlah Aktiva') {
-                if(this.balances[j]['detail'] == 'Jumlah Aktiva') {
-                  this.chartData.datasets[k].data.push(this.balances[j]['value']);
-                }
-              }
-              if(this.chartData.datasets[k].label == 'Aktiva Eksplorasi') {
-                if(this.balances[j]['detail'] == 'Aktiva Eksplorasi') {
-                  this.chartData.datasets[k].data.push(this.balances[j]['value']);
-                }
-              }
-              if(this.chartData.datasets[k].label == 'Jumlah Kewajiban Jangka Pendek') {
-                if(this.balances[j]['detail'] == 'Jumlah Kewajiban Jangka Pendek') {
-                  this.chartData.datasets[k].data.push(this.balances[j]['value']);
-                }
-              }
-              if(this.chartData.datasets[k].label == 'Jumlah Kewajiban Jangka Panjang') {
-                if(this.balances[j]['detail'] == 'Jumlah Kewajiban Jangka Panjang') {
-                  this.chartData.datasets[k].data.push(this.balances[j]['value']);
+            for(var i = 0; i < this.years.length; i++) {
+              for(var j = 0; j < this.balances.length; j++) {
+                if(this.years[i] == this.balances[j].year) {
+                  if(this.chartData.datasets[k].label == 'Aktiva Tetap') {
+                    if(this.balances[j]['detail'] == 'Aktiva Tetap') {
+                      this.chartData.datasets[k].data.push(this.balances[j]['value']);
+                    }
+                  }
+                  if(this.chartData.datasets[k].label == 'Jumlah Aktiva') {
+                    if(this.balances[j]['detail'] == 'Jumlah Aktiva') {
+                      this.chartData.datasets[k].data.push(this.balances[j]['value']);
+                    }
+                  }
+                  if(this.chartData.datasets[k].label == 'Aktiva Eksplorasi') {
+                    if(this.balances[j]['detail'] == 'Aktiva Eksplorasi') {
+                      this.chartData.datasets[k].data.push(this.balances[j]['value']);
+                    }
+                  }
+                  if(this.chartData.datasets[k].label == 'Jumlah Kewajiban Jangka Pendek') {
+                    if(this.balances[j]['detail'] == 'Jumlah Kewajiban Jangka Pendek') {
+                      this.chartData.datasets[k].data.push(this.balances[j]['value']);
+                    }
+                  }
+                  if(this.chartData.datasets[k].label == 'Jumlah Kewajiban Jangka Panjang') {
+                    if(this.balances[j]['detail'] == 'Jumlah Kewajiban Jangka Panjang') {
+                      this.chartData.datasets[k].data.push(this.balances[j]['value']);
+                    }
+                  }
                 }
               }
             }
@@ -225,7 +229,7 @@ export default {
                 gridLines: false,
                 ticks: {
                   callback(tick, index) {
-                    return index % 2 === 0 ? '' : tick;
+                    return index % 1 ? '' : tick;
                   },
                 },
               },
