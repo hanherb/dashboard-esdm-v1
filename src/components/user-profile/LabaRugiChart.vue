@@ -7,39 +7,6 @@
     </d-card-header>
 
     <d-card-body class="pt-0">
-      <!-- <d-row class="border-bottom py-2 bg-light">
-        <d-col col sm="6" class="d-flex mb-2 mb-sm-0">
-          <d-button-group>
-            <d-btn class="btn-white" active>Hour</d-btn>
-            <d-btn class="btn-white">Day</d-btn>
-            <d-btn class="btn-white">Week</d-btn>
-            <d-btn class="btn-white">Month</d-btn>
-          </d-button-group>
-        </d-col>
-
-        <d-col col sm="6">
-          <d-input-group size="sm" class="date-range d-flex justify-content-end">
-            <d-datepicker
-              v-model="dateRange.from"
-              :highlighted="{ from: dateRange.from, to: dateRange.to || new Date() }"
-              placeholder="Start date"
-              small
-              typeable
-            />
-            <d-datepicker
-              v-model="dateRange.to"
-              :highlighted="{ from: dateRange.from, to: dateRange.to || new Date() }"
-              placeholder="End date"
-              small
-              typeable
-            />
-            <d-input-group-text slot="append">
-              <i class="material-icons">&#xE916;</i>
-            </d-input-group-text>
-          </d-input-group>
-        </d-col>
-      </d-row> -->
-
       <!-- Chart -->
       <div ref="legend"></div>
       <canvas
@@ -53,6 +20,7 @@
 </template>
 
 <script>
+import gql from '@/gql';
 import graphqlFunction from '@/graphqlFunction';
 import basicFunction from '@/basicFunction';
 import address from '@/address';
@@ -93,6 +61,10 @@ export default {
   },
   data() {
     return {
+      reports: [],
+      profit_losses: [],
+      showProfitLoss: [],
+      years: [],
       dateRange: {
         from: null,
         to: null,
@@ -157,70 +129,87 @@ export default {
 
   created: function()
   {
-    this.fetchLabaRugi(() => {
-      this.mountChart();
-    });
+    this.fetchReport();
   },
 
   methods: {
+    fetchReport() {
+      var id = parseInt(window.location.href.split("?id=")[1]);
+      this.axios.get(address + ":3000/get-report", headers).then((response) => {
+        let query = gql.allReport;
+        graphqlFunction.graphqlFetchAll(query, (result) => {
+          for(var i = 0; i < result.reports.length; i++) {
+            if(result.reports[i].user_id == id) {
+              this.reports.push(result.reports[i]);
+              if(!this.years.includes(this.reports[i].year)) {
+                this.years.push(this.reports[i].year);
+                this.years.sort(function(a, b){return a-b});
+                this.chartData.labels = this.years;
+              }
+            }
+          }
+          this.fetchLabaRugi(() => {
+            this.mountChart();
+          });
+        });
+      })
+    },
     fetchLabaRugi(cb) {
-      var id = window.location.href.split("?id=")[1];
+      var id = parseInt(window.location.href.split("?id=")[1]);
       this.axios.get(address + ":3000/get-laba-rugi", headers).then((response) => {
-        for(let i = 0; i < response.data.length; i++) {
-          if(response.data[i].upload_by == id) {
-            var keys = Object.keys(response.data[i].data[0]);
-            for(var k = 0; k < keys.length; k++) {
-              if(keys[k].split(' ')[0] == "REALISASI") {
-                this.chartData.labels.push(keys[k].split('REALISASI TAHUN ')[1]);
-              }
-            }
-            var tempTahun = [];
-            for(var k = this.chartData.labels[0]; k <= this.chartData.labels[this.chartData.labels.length-1]; k++) {
-              var temp = {};
-              for(let j = 0; j < response.data[i].data.length; j++) {
-                if(response.data[i].data[j]["URAIAN"] == "Penjualan") {
-                  temp["Penjualan"] = response.data[i].data[j]["REALISASI TAHUN " + k];
-                }
-                if(response.data[i].data[j]["URAIAN"] == "Harga Pokok Penjualan") {
-                  temp["Harga Pokok Penjualan"] = response.data[i].data[j]["REALISASI TAHUN " + k];
-                }
-                if(response.data[i].data[j]["URAIAN"] == "Jumlah Beban Operasi") {
-                  temp["Jumlah Beban Operasi"] = response.data[i].data[j]["REALISASI TAHUN " + k];
-                }
-                if(response.data[i].data[j]["URAIAN"] == "Biaya Pajak Penghasilan") {
-                  temp["Biaya Pajak Penghasilan"] = response.data[i].data[j]["REALISASI TAHUN " + k];
-                }
-                if(response.data[i].data[j]["URAIAN"] == "Laba/(Rugi) Bersih") {
-                  temp["Laba/(Rugi) Bersih"] = response.data[i].data[j]["REALISASI TAHUN " + k];
-                }
-              }
-              tempTahun.push(temp);
-            }
-
-            for(var k = 0; k < this.chartData.datasets.length; k++) {
-              for(var j = 0; j < tempTahun.length; j++) {
-                if(this.chartData.datasets[k].label == 'Penjualan') {
-                  this.chartData.datasets[k].data.push(tempTahun[j]['Penjualan']);
-                }
-                if(this.chartData.datasets[k].label == 'HPP') {
-                  this.chartData.datasets[k].data.push(tempTahun[j]['Harga Pokok Penjualan']);
-                }
-                if(this.chartData.datasets[k].label == 'Beban Operasi') {
-                  this.chartData.datasets[k].data.push(tempTahun[j]['Jumlah Beban Operasi']);
-                }
-                if(this.chartData.datasets[k].label == 'Pajak Penghasilan') {
-                  this.chartData.datasets[k].data.push(tempTahun[j]['Biaya Pajak Penghasilan']);
-                }
-                if(this.chartData.datasets[k].label == 'Laba Bersih') {
-                  this.chartData.datasets[k].data.push(tempTahun[j]['Laba/(Rugi) Bersih']);
+        let query = gql.allProfitLoss;
+        graphqlFunction.graphqlFetchAll(query, (result) => {
+          for(var j = 0; j < this.reports.length; j++) {
+            for(var i = 0; i < result.profit_losses.length; i++) {
+              if(this.reports[j].report_id == result.profit_losses[i].report_id) {
+                if(result.profit_losses[i].detail == 'Penjualan' ||
+                  result.profit_losses[i].detail == 'Harga Pokok Penjualan' ||
+                  result.profit_losses[i].detail == 'Beban Operasi' ||
+                  result.profit_losses[i].detail == 'Biaya Pajak Penghasilan' ||
+                  result.profit_losses[i].detail == 'Laba Rugi Bersih') {
+                  result.profit_losses[i].year = this.reports[j].year;
+                  this.profit_losses.push(result.profit_losses[i]);
                 }
               }
             }
           }
-        }
-        if(cb)
-          return cb();
-      });
+          for(var k = 0; k < this.chartData.datasets.length; k++) {
+            for(var i = 0; i < this.years.length; i++) {
+              for(var j = 0; j < this.profit_losses.length; j++) {
+                if(this.years[i] == this.profit_losses[j].year) {
+                  if(this.chartData.datasets[k].label == 'Penjualan') {
+                    if(this.profit_losses[j]['detail'] == 'Penjualan') {
+                      this.chartData.datasets[k].data.push(this.profit_losses[j]['value']);
+                    }
+                  }
+                  if(this.chartData.datasets[k].label == 'HPP') {
+                    if(this.profit_losses[j]['detail'] == 'Harga Pokok Penjualan') {
+                      this.chartData.datasets[k].data.push(this.profit_losses[j]['value']);
+                    }
+                  }
+                  if(this.chartData.datasets[k].label == 'Beban Operasi') {
+                    if(this.profit_losses[j]['detail'] == 'Beban Operasi') {
+                      this.chartData.datasets[k].data.push(this.profit_losses[j]['value']);
+                    }
+                  }
+                  if(this.chartData.datasets[k].label == 'Pajak Penghasilan') {
+                    if(this.profit_losses[j]['detail'] == 'Biaya Pajak Penghasilan') {
+                      this.chartData.datasets[k].data.push(this.profit_losses[j]['value']);
+                    }
+                  }
+                  if(this.chartData.datasets[k].label == 'Laba Bersih') {
+                    if(this.profit_losses[j]['detail'] == 'Laba Rugi Bersih') {
+                      this.chartData.datasets[k].data.push(this.profit_losses[j]['value']);
+                    }
+                  }
+                }
+              }
+            }
+          }
+          if(cb)
+            return cb();
+        });
+      })
     },
     mountChart() {
       const chartOptions = {

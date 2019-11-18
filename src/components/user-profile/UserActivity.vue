@@ -61,7 +61,13 @@ export default {
       this.axios.get(address + ":3000/get-log", headers).then((response) => {
         response.data.reverse();
         if(response.data.length != 0) {
-          for(let i = 0; i < 10; i++) {
+          if(response.data.length > 10) {
+            var length = 10;
+          }
+          else {
+            var length = response.data.length;
+          }
+          for(let i = 0; i < length; i++) {
             if(response.data[i].user_id == id) {
               this.activities.push(response.data[i]);
             }
@@ -72,11 +78,11 @@ export default {
     loadMore() {
       this.activities = [];
       this.loaded = 1;
-      var id = window.location.href.split("?id=")[1];
+      var id = parseInt(window.location.href.split("?id=")[1]);
       this.axios.get(address + ":3000/get-log", headers).then((response) => {
         response.data.reverse();
         for(let i = 0; i < response.data.length; i++) {
-          if(response.data[i].userId == id) {
+          if(response.data[i].user_id == id) {
             this.activities.push(response.data[i]);
           }
         }

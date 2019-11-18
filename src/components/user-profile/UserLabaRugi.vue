@@ -5,25 +5,36 @@
     <d-card-header class="border-bottom">
       <h6 class="m-0">{{ title }}</h6>
       <div class="block-handle"></div>
+      <select v-model="input.year" v-on:change="filterYear()">
+        <option v-for="year in years">{{year}}</option>
+      </select>
     </d-card-header>
 
     <!-- Activity Items -->
-    <v-client-table class="dataTables_wrapper" :data="tableData" :columns="columns" :options="clientTableOptions">
-      <!-- Actions Column Slot -->
-    </v-client-table>
+    <table class="table bg-light text-dark mb-0">
+      <thead class="py-2 bg-light text-semibold border-bottom">
+        <tr>
+          <th class="text-center"> Uraian </th>
+          <th class="text-center"> Nilai </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="profit_loss in showProfitLoss">
+          <td class="lo-stats__total text-center"> {{ profit_loss.detail }} </td>
+          <td class="lo-stats__total text-center"> {{ profit_loss.value.toLocaleString() }} </td>
+        </tr>
+      </tbody>
+    </table>
   </d-card>
 </template>
 
 <script>
+import gql from '@/gql';
 import graphqlFunction from '@/graphqlFunction';
 import basicFunction from '@/basicFunction';
 import address from '@/address';
 import headers from '@/headers';
 import Vue from 'vue';
-import { ClientTable } from 'vue-tables-2';
-import '@/assets/scss/vue-tables.scss';
-
-Vue.use(ClientTable);
 
 export default {
   name: 'user-laba-rugi',
@@ -37,134 +48,81 @@ export default {
     },
   },
   components: {
-    ClientTable,
   },
   data() {
     return {
-      columns: [],
-      tableData: [],
-      clientTableOptions: {
-        perPage: 10,
-        recordsPerPage: [10, 25, 50, 100],
-        skin: 'transaction-history table dataTable',
-        sortIcon: {
-          base: 'fas float-right mt-1 text-muted',
-          up: 'fa-caret-up',
-          down: 'fa-caret-down',
-        },
-        texts: {
-          filterPlaceholder: '',
-          limit: 'Show',
-        },
-        pagination: {
-          edge: true,
-          nav: 'scroll',
-        },
+      reports: [],
+      profit_losses: [],
+      showProfitLoss: [],
+      years: [],
+      input: {
+        filterYear: null,
       },
-      tahun: [],
-      uraian: [],
-      labaRugi: [],
     }
   },
 
   created: function()
   {
-      this.fetchLabaRugi();
+      this.fetchReport();
   },
 
   methods: {
+    fetchReport() {
+      var id = parseInt(window.location.href.split("?id=")[1]);
+      this.axios.get(address + ":3000/get-report", headers).then((response) => {
+        let query = gql.allReport;
+        graphqlFunction.graphqlFetchAll(query, (result) => {
+          for(var i = 0; i < result.reports.length; i++) {
+            if(result.reports[i].user_id == id) {
+              this.reports.push(result.reports[i]);
+              if(!this.years.includes(this.reports[i].year)) {
+                this.years.push(this.reports[i].year);
+                this.years.sort(function(a, b){return a-b});
+              }
+            }
+          }
+          this.fetchLabaRugi();
+        });
+      })
+    },
     fetchLabaRugi() {
-      this.columns.push('Uraian');
-      var id = window.location.href.split("?id=")[1];
+      var id = parseInt(window.location.href.split("?id=")[1]);
       this.axios.get(address + ":3000/get-laba-rugi", headers).then((response) => {
-        for(let i = 0; i < response.data.length; i++) {
-          if(response.data[i].upload_by == id) {
-            var keys = Object.keys(response.data[i].data[0]);
-            for(var k = 0; k < keys.length; k++) {
-              if(keys[k].split(' ')[0] == "REALISASI") {
-                this.tahun.push(keys[k].split('REALISASI TAHUN ')[1]);
-              }
-            }
-            for(var k = this.tahun[0]; k <= this.tahun[this.tahun.length-1]; k++) {
-              this.columns.push(String(k));
-              for(let j = 0; j < response.data[i].data.length; j++) {
-                if(response.data[i].data[j]["URAIAN"] == "Penjualan") {
-                  if(k == this.tahun[0]) {
-                    this.uraian.push(response.data[i].data[j]["URAIAN"]);
-                  }
-                  this.labaRugi.push({
-                    "uraian": response.data[i].data[j]["URAIAN"],
-                    "tahun": k,
-                    "value": response.data[i].data[j]["REALISASI TAHUN "+k]
-                  });
-                }
-                else if(response.data[i].data[j]["URAIAN"] == "Harga Pokok Penjualan") {
-                  if(k == this.tahun[0]) {
-                    this.uraian.push(response.data[i].data[j]["URAIAN"]);
-                  }
-                  this.labaRugi.push({
-                    "uraian": response.data[i].data[j]["URAIAN"],
-                    "tahun": k,
-                    "value": response.data[i].data[j]["REALISASI TAHUN "+k]
-                  });
-                }
-                else if(response.data[i].data[j]["URAIAN"] == "Laba (Rugi) kotor") {
-                  if(k == this.tahun[0]) {
-                    this.uraian.push(response.data[i].data[j]["URAIAN"]);
-                  }
-                  this.labaRugi.push({
-                    "uraian": response.data[i].data[j]["URAIAN"],
-                    "tahun": k,
-                    "value": response.data[i].data[j]["REALISASI TAHUN "+k]
-                  });
-                }
-                else if(response.data[i].data[j]["URAIAN"] == "Laba/ (Rugi) Operasi") {
-                  if(k == this.tahun[0]) {
-                    this.uraian.push(response.data[i].data[j]["URAIAN"]);
-                  }
-                  this.labaRugi.push({
-                    "uraian": response.data[i].data[j]["URAIAN"],
-                    "tahun": k,
-                    "value": response.data[i].data[j]["REALISASI TAHUN "+k]
-                  });
-                }
-                else if(response.data[i].data[j]["URAIAN"] == "Laba/(Rugi) sebelum Pajak") {
-                  if(k == this.tahun[0]) {
-                    this.uraian.push(response.data[i].data[j]["URAIAN"]);
-                  }
-                  this.labaRugi.push({
-                    "uraian": response.data[i].data[j]["URAIAN"],
-                    "tahun": k,
-                    "value": response.data[i].data[j]["REALISASI TAHUN "+k]
-                  });
-                }
-                else if(response.data[i].data[j]["URAIAN"] == "Laba/ (Rugi) Bersih") {
-                  if(k == this.tahun[0]) {
-                    this.uraian.push(response.data[i].data[j]["URAIAN"]);
-                  }
-                  this.labaRugi.push({
-                    "uraian": response.data[i].data[j]["URAIAN"],
-                    "tahun": k,
-                    "value": response.data[i].data[j]["REALISASI TAHUN "+k]
-                  });
+        let query = gql.allProfitLoss;
+        graphqlFunction.graphqlFetchAll(query, (result) => {
+          for(var j = 0; j < this.reports.length; j++) {
+            for(var i = 0; i < result.profit_losses.length; i++) {
+              if(this.reports[j].report_id == result.profit_losses[i].report_id) {
+                if(result.profit_losses[i].detail == 'Penjualan' ||
+                  result.profit_losses[i].detail == 'Harga Pokok Penjualan' ||
+                  result.profit_losses[i].detail == 'Laba Rugi Kotor' ||
+                  result.profit_losses[i].detail == 'Laba Rugi Operasi' ||
+                  result.profit_losses[i].detail == 'Laba Rugi Sebelum Pajak' ||
+                  result.profit_losses[i].detail == 'Laba Rugi Bersih') {
+                  result.profit_losses[i].year = this.reports[j].year;
+                  this.profit_losses.push(result.profit_losses[i]);
                 }
               }
             }
           }
+          this.showLabaRugi();
+        });
+      })
+    },
+    showLabaRugi() {
+      for(var i = 0; i < this.profit_losses.length; i++) {
+        if(this.profit_losses[i].year == this.years[this.years.length-1]) {
+          this.showProfitLoss.push(this.profit_losses[i]);
         }
-        for(var k = 0; k < this.uraian.length; k++) {
-          this.tableData.push({
-            "Uraian": this.uraian[k],
-          });
+      }
+    },
+    filterYear() {
+      this.showProfitLoss = [];
+      for(var i = 0; i < this.profit_losses.length; i++) {
+        if(this.profit_losses[i].year == this.input.year) {
+          this.showProfitLoss.push(this.profit_losses[i]);
         }
-        for(var l = 0; l < this.tableData.length; l++) {
-          for(var k = 0; k < this.labaRugi.length; k++) {
-            if(this.tableData[l]["Uraian"] == this.labaRugi[k]["uraian"]) {
-              this.tableData[l][this.labaRugi[k]["tahun"]] = basicFunction.numberWithCommas(this.labaRugi[k]["value"]);
-            }
-          }
-        }
-      });
+      }
     }
   }
 };

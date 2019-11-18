@@ -149,7 +149,6 @@ export default {
             }
           }
           this.fetchNeraca(() => {
-            console.log(this.chartData.datasets)
             this.mountChart();
           });
         });
@@ -263,7 +262,6 @@ export default {
       // Hide initially the first and last analytics overview chart points.
       // They can still be triggered on hover.
       const meta = AnalyticsOverviewChart.getDatasetMeta(0);
-      console.log(meta)
       meta.data[0]._model.radius = 0;
       meta.data[this.chartData.datasets[0].data.length - 1]._model.radius = 0;
 

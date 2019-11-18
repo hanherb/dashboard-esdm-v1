@@ -15,17 +15,17 @@
             thead( class="py-2 bg-light text-semibold border-bottom")
               tr
                 th( class="text-center") Kategori
-                th( class="text-center") Sub-Kategori
+                <!-- th( class="text-center") Sub-Kategori -->
                 th( class="text-center") Uraian
                 th( class="text-center") Nilai
             tbody
-              tr( v-for="balance in balances")
-                td( class="lo-stats__total text-center") {{ balance.Kategori }}
-                td( class="lo-stats__total text-center") {{ balance['Sub-Kategori'] }}
-                td( class="lo-stats__total text-center") {{ balance.Uraian }}
-                td( class="lo-stats__total text-center") {{ balance.Nilai.toLocaleString() }}
+              tr( v-for="national_income in national_incomes")
+                td( class="lo-stats__total text-center") {{ national_income.Kategori }}
+                <!-- td( class="lo-stats__total text-center") {{ profit_loss['Sub-Kategori'] }} -->
+                td( class="lo-stats__total text-center") {{ national_income.Uraian }}
+                td( class="lo-stats__total text-center") {{ national_income.Nilai.toLocaleString() }}
           br
-          div( v-for="c in calculated")
+          div( v-for="c in calculated_national_income")
             p {{c.Uraian}} = {{c.Nilai.toLocaleString()}}
           div( align='center' v-if="reports[0]")
             d-button( theme="primary" v-on:click="addReport") Submit
@@ -52,8 +52,12 @@ export default {
     return {
       contoh: "",
       balances: [],
+      profit_losses: [],
+      national_incomes: [],
       reports: [],
-      calculated: [],
+      calculated_balance: [],
+      calculated_profit_loss: [],
+      calculated_national_income: [],
     };
   },
   filters: {
@@ -74,15 +78,27 @@ export default {
         var data = new Uint8Array(event.target.result);
         var workbook = XLSX.read(data, {type: 'array'});
         let reportConfig = workbook.SheetNames[0]
-        let sheetName = workbook.SheetNames[1]
+        let sheetNeraca = workbook.SheetNames[1]
+        let sheetLabaRugi = workbook.SheetNames[2]
+        let sheetPenerimaanNegara = workbook.SheetNames[10]
 
         let worksheetConfig = workbook.Sheets[reportConfig];
-        let worksheet = workbook.Sheets[sheetName];
+        let worksheetNeraca = workbook.Sheets[sheetNeraca];
+        let worksheetLabaRugi = workbook.Sheets[sheetLabaRugi];
+        let worksheetPenerimaanNegara = workbook.Sheets[sheetPenerimaanNegara];
         vm.reports = XLSX.utils.sheet_to_json(worksheetConfig);
-        vm.balances = XLSX.utils.sheet_to_json(worksheet);
+        vm.balances = XLSX.utils.sheet_to_json(worksheetNeraca);
+        vm.profit_losses = XLSX.utils.sheet_to_json(worksheetLabaRugi);
+        vm.national_incomes = XLSX.utils.sheet_to_json(worksheetPenerimaanNegara);
         vm.spliceArray(vm.balances);
         vm.normalizeCategory(vm.balances);
+        vm.spliceArray(vm.profit_losses);
+        vm.normalizeCategory(vm.profit_losses);
+        vm.spliceArray(vm.national_incomes);
+        vm.normalizeCategory(vm.national_incomes);
         vm.calculateNeraca(vm.balances);
+        vm.calculateLabaRugi(vm.profit_losses);
+        vm.calculatePenerimaanNegara(vm.national_incomes);
       };
       reader.readAsArrayBuffer(f);
 
@@ -118,11 +134,17 @@ export default {
       };
       this.axios.post(address + ':3000/add-report', postObj, headers)
       .then((response) => {
-        console.log(response);
-        this.balances = this.balances.concat(this.calculated);
-        for(var i = 0; i < this.balances.length; i++) {
-          this.addNeraca(response.data.insertId, this.balances[i], this.balances.length, i);
+        let query = gql.addReport;
+        postObj.report_id = response.data.insertId;
+        let variables = {
+          input: postObj
         }
+        graphqlFunction.graphqlMutation(query, variables, (result) => {
+          this.balances = this.balances.concat(this.calculated_balance);
+          this.profit_losses = this.profit_losses.concat(this.calculated_profit_loss);
+          this.addNeraca(postObj.report_id);
+          this.addLabaRugi(postObj.report_id);
+        });
       });
     },
     fetchNeraca() {
@@ -161,6 +183,7 @@ export default {
           jumlahAktivaLancar += balances[i]["Nilai"];
         }
         if(balances[i]["Uraian"] == "Aktiva Tetap" ||
+          balances[i]["Uraian"] == "Aktiva Eksplorasi" ||
           balances[i]["Uraian"] == "Beban ditangguhkan" ||
           balances[i]["Uraian"] == "Amortisasi" || 
           balances[i]["Uraian"] =="Depresiasi") {
@@ -179,6 +202,7 @@ export default {
           balances[i]["Uraian"] == "Hutang Pajak" || 
           balances[i]["Uraian"] == "Hutang Leasing" || 
           balances[i]["Uraian"] == "Hutang Afiliasi" || 
+          balances[i]["Uraian"] == "Provisi Reklamasi dan Pasca Tambang" || 
           balances[i]["Uraian"] == "Hutang lain-lain") &&
           balances[i]["Sub-Kategori"] == "Kewajiban Jangka Panjang") {
           jumlahKewajibanJangkaPanjang += balances[i]["Nilai"];
@@ -193,7 +217,7 @@ export default {
       var jumlahKewajiban = jumlahKewajibanJangkaPendek + jumlahKewajibanJangkaPanjang;
       var jumlahKewajibanDanEkuitas = jumlahKewajiban + jumlahEkuitas;
 
-      this.calculated.push({
+      this.calculated_balance.push({
           'Kategori': 'NERACA',
           'Sub-Kategori': 'Aktiva Lancar',
           'Uraian': 'Jumlah Aktiva Lancar',
@@ -236,20 +260,212 @@ export default {
         }
       );
     },
-    addNeraca(report_id, balances, length, i) {
-      let postObj = {
-        report_id: report_id,
-        detail: balances["Uraian"],
-        value: balances["Nilai"],
-        category: balances["Kategori"],
-        sub_category: balances["Sub-Kategori"],
-      };
-      this.axios.post(address + ':3000/add-neraca', postObj, headers)
-      .then((response) => {
-        if(i == length-1) {
-          location.reload();
+    addNeraca(report_id) {
+      for(var i = 0; i < this.balances.length; i++) {
+        let postObj = {
+          report_id: report_id,
+          detail: this.balances[i]["Uraian"],
+          value: this.balances[i]["Nilai"],
+          category: this.balances[i]["Kategori"],
+          sub_category: this.balances[i]["Sub-Kategori"],
+        };
+        this.axios.post(address + ':3000/add-neraca', postObj, headers)
+        .then((response) => {
+          let query = gql.addBalance;
+          postObj.balance_id = response.data.insertId;
+          let variables = {
+            input: postObj
+          }
+          graphqlFunction.graphqlMutation(query, variables, (result) => {
+            
+          });
+        });    
+      }
+    },
+    // fetchLabaRugi() {
+    //   var id = this.$session.get('user').user_id;
+    //   var lastReport = this.reports[this.reports.length-1];
+    //   this.axios.get(address + ":3000/get-laba-rugi", headers).then((response) => {
+    //     let query = gql.allBalance;
+    //     graphqlFunction.graphqlFetchAll(query, (result) => {
+    //       for(var i = 0; i < result.balances.length; i++) {
+    //         if(result.balances[i].report_id == lastReport.report_id) {
+    //           this.balances.push({
+    //             'balance_id': result.balances[i].balance_id,
+    //             'report_id': result.balances[i].report_id,
+    //             'Kategori': result.balances[i].category,
+    //             'Sub-Kategori': result.balances[i].sub_category,
+    //             'Uraian': result.balances[i].detail,
+    //             'Nilai': result.balances[i].value,
+    //           });
+    //         }
+    //       }
+    //     });
+    //   })
+    // },
+    calculateLabaRugi(profit_losses) {
+      var jumlahBebanOperasi = 0;
+      var jumlahPendapatanLainLain = 0;
+      for(var i = 0; i < profit_losses.length; i++) {
+        if(profit_losses[i]["Uraian"] == "Penjualan") {
+          var penjualan = profit_losses[i]["Nilai"];
         }
-      });
+        if(profit_losses[i]["Uraian"] == "Royalti") {
+          var royalti = profit_losses[i]["Nilai"];
+        }
+        if(profit_losses[i]["Uraian"] == "Harga Pokok Penjualan") {
+          var hpp = profit_losses[i]["Nilai"];
+        }
+        if(profit_losses[i]["Uraian"] == "Beban Penjualan" ||
+          profit_losses[i]["Uraian"] == "Beban Umum" ||
+          profit_losses[i]["Uraian"] == "Beban Lain-Lain") {
+          jumlahBebanOperasi += profit_losses[i]["Nilai"];
+        }
+        if(profit_losses[i]["Uraian"] == "Beban Bunga" || 
+          profit_losses[i]["Uraian"] == "Laba Selisih Kurs" || 
+          profit_losses[i]["Uraian"] == "Pendapatan Bunga" || 
+          profit_losses[i]["Uraian"] == "Beban Lain-Lain" || 
+          profit_losses[i]["Uraian"] == "Rugi Selisih Kurs, Bersih") {
+          jumlahPendapatanLainLain += profit_losses[i]["Nilai"];
+        }
+        if(profit_losses[i]["Uraian"] == "Biaya Pajak Penghasilan") {
+          var biayaPajakPenghasilan = profit_losses[i]["Nilai"];
+        }
+      }
+      var labaRugiKotor = penjualan - royalti - hpp;
+      var labaRugiOperasi = labaRugiKotor - jumlahBebanOperasi;
+      var labaRugiSebelumPajak = labaRugiOperasi + jumlahPendapatanLainLain;
+      var labaRugiBersih = labaRugiSebelumPajak - biayaPajakPenghasilan;
+
+      this.calculated_profit_loss.push({
+          'Kategori': 'PENDAPATAN',
+          'Uraian': 'Laba Rugi Kotor',
+          'Nilai': labaRugiKotor 
+        }, {
+          'Kategori': 'BEBAN OPERASI',
+          'Uraian': 'Jumlah Beban Operasi',
+          'Nilai': jumlahBebanOperasi 
+        }, {
+          'Kategori': 'BEBAN OPERASI',
+          'Uraian': 'Laba Rugi Operasi',
+          'Nilai': labaRugiOperasi 
+        }, {
+          'Kategori': 'PENDAPATAN/(BEBAN) LAIN-LAIN',
+          'Uraian': 'Jumlah Pendapatan Lain Lain',
+          'Nilai': jumlahPendapatanLainLain 
+        }, {
+          'Kategori': 'PENDAPATAN/(BEBAN) LAIN-LAIN',
+          'Uraian': 'Laba Rugi Sebelum Pajak',
+          'Nilai': labaRugiSebelumPajak 
+        }, {
+          'Kategori': 'PENDAPATAN/(BEBAN) LAIN-LAIN',
+          'Uraian': 'Laba Rugi Bersih',
+          'Nilai': labaRugiBersih 
+        }
+      );
+    },
+    addLabaRugi(report_id) {
+      for(var i = 0; i < this.profit_losses.length; i++) {
+        let postObj = {
+          report_id: report_id,
+          detail: this.profit_losses[i]["Uraian"],
+          value: this.profit_losses[i]["Nilai"],
+          category: this.profit_losses[i]["Kategori"]
+        };
+        this.axios.post(address + ':3000/add-laba-rugi', postObj, headers)
+        .then((response) => {
+          let query = gql.addProfitLoss;
+          postObj.profit_loss_id = response.data.insertId;
+          let variables = {
+            input: postObj
+          }
+          graphqlFunction.graphqlMutation(query, variables, (result) => {
+            
+          });
+        });
+      }
+    },
+    // fetchPenerimaanNegara() {
+    //   var id = this.$session.get('user').user_id;
+    //   var lastReport = this.reports[this.reports.length-1];
+    //   this.axios.get(address + ":3000/get-laba-rugi", headers).then((response) => {
+    //     let query = gql.allBalance;
+    //     graphqlFunction.graphqlFetchAll(query, (result) => {
+    //       for(var i = 0; i < result.balances.length; i++) {
+    //         if(result.balances[i].report_id == lastReport.report_id) {
+    //           this.balances.push({
+    //             'balance_id': result.balances[i].balance_id,
+    //             'report_id': result.balances[i].report_id,
+    //             'Kategori': result.balances[i].category,
+    //             'Sub-Kategori': result.balances[i].sub_category,
+    //             'Uraian': result.balances[i].detail,
+    //             'Nilai': result.balances[i].value,
+    //           });
+    //         }
+    //       }
+    //     });
+    //   })
+    // },
+    calculatePenerimaanNegara(national_incomes) {
+      var jumlahPajak = 0;
+      var jumlahNonPajak = 0;
+      for(var i = 0; i < national_incomes.length; i++) {
+        if(national_incomes[i]["Uraian"] == "PPH Pasal 21" || 
+          national_incomes[i]["Uraian"] == "PPH Pasal 22" || 
+          national_incomes[i]["Uraian"] == "PPH Pasal 23/26" || 
+          national_incomes[i]["Uraian"] == "PPH Pasal 25" || 
+          national_incomes[i]["Uraian"] == "PPH Pasal 29" || 
+          national_incomes[i]["Uraian"] == "PPN Masukan" || 
+          national_incomes[i]["Uraian"] == "PPN Keluaran" || 
+          national_incomes[i]["Uraian"] == "Pajak-pajak daerah" || 
+          national_incomes[i]["Uraian"] == "Lumpsum Payment") {
+          jumlahPajak += national_incomes[i]["Nilai"];
+        }
+
+        if(national_incomes[i]["Uraian"] == "Royalti" ||
+          national_incomes[i]["Uraian"] == "SPW3D" ||
+          national_incomes[i]["Uraian"] == "Advance Payment" ||
+          national_incomes[i]["Uraian"] == "BBN") {
+          jumlahNonPajak += national_incomes[i]["Nilai"];
+        }
+      }
+      var jumlahPenerimaanNegara = jumlahPajak + jumlahNonPajak;
+
+      this.calculated_national_income.push({
+          'Kategori': 'PAJAK',
+          'Uraian': 'Jumlah Pajak',
+          'Nilai': jumlahPajak 
+        }, {
+          'Kategori': 'NON PAJAK',
+          'Uraian': 'Jumlah Non Pajak',
+          'Nilai': jumlahNonPajak 
+        }, {
+          'Kategori': '-',
+          'Uraian': 'Jumlah Penerimaan Negara',
+          'Nilai': jumlahPenerimaanNegara 
+        }
+      );
+    },
+    addPenerimaanNegara(report_id) {
+      for(var i = 0; i < this.profit_losses.length; i++) {
+        let postObj = {
+          report_id: report_id,
+          detail: this.profit_losses[i]["Uraian"],
+          value: this.profit_losses[i]["Nilai"],
+          category: this.profit_losses[i]["Kategori"]
+        };
+        this.axios.post(address + ':3000/add-penerimaan-negara', postObj, headers)
+        .then((response) => {
+          let query = gql.addNationalIncome;
+          postObj.national_income_id = response.data.insertId;
+          let variables = {
+            input: postObj
+          }
+          graphqlFunction.graphqlMutation(query, variables, (result) => {
+            
+          });
+        });
+      }
     },
     spliceArray(spliceFile) {
       for(var i = 0; i < spliceFile.length; i++) {

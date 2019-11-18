@@ -112,6 +112,18 @@ let query = {
 	    }
   	}`,
 
+  	addReport: `mutation createSingleReport($input:ReportsInput) {
+	      createReport(input: $input) {
+	          report_id
+	      }
+  	}`,
+
+  	deleteReport: `mutation deleteSingleReport($reportId: Int!) {
+	      deleteReport(report_id: $reportId) {
+	          report_id
+	      }
+  	}`,
+
   	allBalance: `query getAllBalance {
 	    balances {
 	        balance_id
@@ -132,6 +144,28 @@ let query = {
   	deleteBalance: `mutation deleteSingleBalance($balanceId: Int!) {
 	      deleteBalance(balance_id: $balanceId) {
 	          balance_id
+	      }
+  	}`,
+
+  	allProfitLoss: `query getAllProfitLoss {
+	    profit_losses {
+	        profit_loss_id
+	        report_id
+	        detail
+	        value
+	        category
+	    }
+  	}`,
+
+  	addProfitLoss: `mutation createSingleProfitLoss($input:ProfitLossesInput) {
+	      createProfitLoss(input: $input) {
+	          profit_loss_id
+	      }
+  	}`,
+
+  	deleteProfitLoss: `mutation deleteSingleProfitLoss($profitLossesId: Int!) {
+	      deleteProfitLoss(profit_loss_id: $profitLossId) {
+	          profit_loss_id
 	      }
   	}`,
 }
