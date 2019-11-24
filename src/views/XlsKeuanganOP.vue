@@ -564,15 +564,15 @@ export default {
       var labaRugiBersihTahunBerjalan = 0; //ambil dari laba rugi
       for(var i = 0; i < cashflows.length; i++) {
         if(cashflows[i]["Kategori"] == "AKTIVITAS OPERASI") {
-          arusKasNettoDigunakanUntukAktivitasOperasi += parseInt(cashflows[i]["Nilai"].replace( /^\D+/g, ''));
+          arusKasNettoDigunakanUntukAktivitasOperasi += parseInt(cashflows[i]["Nilai"].replace('Rp', '').replace(',', ''));
         }
 
         if(cashflows[i]["Kategori"] == "AKTIVITAS INVESTASI") {
-          arusKasNettoYangDigunakanUntukAktivitasInvestasi += parseInt(cashflows[i]["Nilai"].replace( /^\D+/g, ''));
+          arusKasNettoYangDigunakanUntukAktivitasInvestasi += parseInt(cashflows[i]["Nilai"].replace('Rp', '').replace(',', ''));
         }
 
         if(cashflows[i]["Kategori"] == "AKTIVITAS PENDANAAN") {
-          arusKasNettoYangDigunakanUntukAktivitasPendanaan += parseInt(cashflows[i]["Nilai"].replace( /^\D+/g, ''));
+          arusKasNettoYangDigunakanUntukAktivitasPendanaan += parseInt(cashflows[i]["Nilai"].replace('Rp', '').replace(',', ''));
         }
       }
       var kenaikanPenurunanNettoKasDanBank = 
