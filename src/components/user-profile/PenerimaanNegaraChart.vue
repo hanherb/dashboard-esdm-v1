@@ -7,39 +7,6 @@
     </d-card-header>
 
     <d-card-body class="pt-0">
-     <!--  <d-row class="border-bottom py-2 bg-light">
-        <d-col col sm="6" class="d-flex mb-2 mb-sm-0">
-          <d-button-group>
-            <d-btn class="btn-white" active>Hour</d-btn>
-            <d-btn class="btn-white">Day</d-btn>
-            <d-btn class="btn-white">Week</d-btn>
-            <d-btn class="btn-white">Month</d-btn>
-          </d-button-group>
-        </d-col>
-
-        <d-col col sm="6">
-          <d-input-group size="sm" class="date-range d-flex justify-content-end">
-            <d-datepicker
-              v-model="dateRange.from"
-              :highlighted="{ from: dateRange.from, to: dateRange.to || new Date() }"
-              placeholder="Start date"
-              small
-              typeable
-            />
-            <d-datepicker
-              v-model="dateRange.to"
-              :highlighted="{ from: dateRange.from, to: dateRange.to || new Date() }"
-              placeholder="End date"
-              small
-              typeable
-            />
-            <d-input-group-text slot="append">
-              <i class="material-icons">&#xE916;</i>
-            </d-input-group-text>
-          </d-input-group>
-        </d-col>
-      </d-row> -->
-
       <!-- Chart -->
       <div ref="legend"></div>
       <canvas
@@ -53,6 +20,7 @@
 </template>
 
 <script>
+import gql from '@/gql';
 import graphqlFunction from '@/graphqlFunction';
 import basicFunction from '@/basicFunction';
 import address from '@/address';
@@ -93,6 +61,10 @@ export default {
   },
   data() {
     return {
+      reports: [],
+      national_incomes: [],
+      showNationalIncome: [],
+      years: [],
       dateRange: {
         from: null,
         to: null,
@@ -139,7 +111,7 @@ export default {
             pointBackgroundColor: colors.white.toHex(),
             pointHoverBackgroundColor: colors.yellow.toRGBA(1),
             borderWidth: 1.5,
-          },
+          }
         ],
       }
     };
@@ -147,67 +119,81 @@ export default {
 
   created: function()
   {
-    this.fetchPenerimaanNegara(() => {
-      this.mountChart();
-    });
+    this.fetchReport();
   },
 
   methods: {
+    fetchReport() {
+      var id = parseInt(window.location.href.split("?id=")[1]);
+      this.axios.get(address + ":3000/get-report", headers).then((response) => {
+        let query = gql.allReport;
+        graphqlFunction.graphqlFetchAll(query, (result) => {
+          for(var i = 0; i < result.reports.length; i++) {
+            if(result.reports[i].user_id == id) {
+              this.reports.push(result.reports[i]);
+              if(!this.years.includes(this.reports[i].year)) {
+                this.years.push(this.reports[i].year);
+                this.years.sort(function(a, b){return a-b});
+                this.chartData.labels = this.years;
+              }
+            }
+          }
+          this.fetchPenerimaanNegara(() => {
+            this.mountChart();
+          });
+        });
+      })
+    },
     fetchPenerimaanNegara(cb) {
-      var id = window.location.href.split("?id=")[1];
+      var id = parseInt(window.location.href.split("?id=")[1]);
       this.axios.get(address + ":3000/get-penerimaan-negara", headers).then((response) => {
-        for(let i = 0; i < response.data.length; i++) {
-          if(response.data[i].upload_by == id) {
-            var keys = Object.keys(response.data[i].data[0]);
-            for(var k = 0; k < keys.length; k++) {
-              if(keys[k].split(' ')[0] == "REALISASI") {
-                this.chartData.labels.push(keys[k].split('REALISASI TAHUN ')[1]);
-              }
-            }
-            var tempTahun = [];
-            for(var k = this.chartData.labels[0]; k <= this.chartData.labels[this.chartData.labels.length-1]; k++) {
-              var temp = {};
-              for(let j = 0; j < response.data[i].data.length; j++) {
-                if(response.data[i].data[j]["URAIAN"] == "Royalti") {
-                  temp["Royalti"] = response.data[i].data[j]["REALISASI TAHUN " + k];
-                }
-                if(response.data[i].data[j]["URAIAN"] == "Deadrent") {
-                  temp["Deadrent"] = response.data[i].data[j]["REALISASI TAHUN " + k];
-                }
-                if(response.data[i].data[j]["URAIAN"] == "Jumlah Pajak") {
-                  temp["Jumlah Pajak"] = response.data[i].data[j]["REALISASI TAHUN " + k];
-                }
-                if(response.data[i].data[j]["URAIAN"] == "Pajak-pajak daerah") {
-                  temp["Pajak-pajak daerah"] = response.data[i].data[j]["REALISASI TAHUN " + k];
-                }
-              }
-              tempTahun.push(temp);
-            }
-
-            for(var k = 0; k < this.chartData.datasets.length; k++) {
-              for(var j = 0; j < tempTahun.length; j++) {
-                if(this.chartData.datasets[k].label == 'Royalti') {
-                  this.chartData.datasets[k].data.push(tempTahun[j]['Royalti']);
-                }
-                if(this.chartData.datasets[k].label == 'Deadrent') {
-                  this.chartData.datasets[k].data.push(tempTahun[j]['Deadrent']);
-                }
-                if(this.chartData.datasets[k].label == 'Jumlah Pajak') {
-                  this.chartData.datasets[k].data.push(tempTahun[j]['Jumlah Pajak']);
-                }
-                if(this.chartData.datasets[k].label == 'Pajak Penghasilan') {
-                  this.chartData.datasets[k].data.push(tempTahun[j]['Biaya Pajak Penghasilan']);
-                }
-                if(this.chartData.datasets[k].label == 'Pajak Daerah') {
-                  this.chartData.datasets[k].data.push(tempTahun[j]['Pajak-pajak daerah']);
+        let query = gql.allNationalIncome;
+        graphqlFunction.graphqlFetchAll(query, (result) => {
+          for(var j = 0; j < this.reports.length; j++) {
+            for(var i = 0; i < result.national_incomes.length; i++) {
+              if(this.reports[j].report_id == result.national_incomes[i].report_id) {
+                if(result.national_incomes[i].detail == 'Royalti' ||
+                  result.national_incomes[i].detail == 'Deadrent' ||
+                  result.national_incomes[i].detail == 'Pajak-pajak daerah' ||
+                  result.national_incomes[i].detail == 'Jumlah Pajak') {
+                  result.national_incomes[i].year = this.reports[j].year;
+                  this.national_incomes.push(result.national_incomes[i]);
                 }
               }
             }
           }
-        }
-        if(cb)
-          return cb();
-      });
+          for(var k = 0; k < this.chartData.datasets.length; k++) {
+            for(var i = 0; i < this.years.length; i++) {
+              for(var j = 0; j < this.national_incomes.length; j++) {
+                if(this.years[i] == this.national_incomes[j].year) {
+                  if(this.chartData.datasets[k].label == 'Royalti') {
+                    if(this.national_incomes[j]['detail'] == 'Royalti') {
+                      this.chartData.datasets[k].data.push(this.national_incomes[j]['value']);
+                    }
+                  }
+                  if(this.chartData.datasets[k].label == 'Deadrent') {
+                    if(this.national_incomes[j]['detail'] == 'Deadrent') {
+                      this.chartData.datasets[k].data.push(this.national_incomes[j]['value']);
+                    }
+                  }
+                  if(this.chartData.datasets[k].label == 'Jumlah Pajak') {
+                    if(this.national_incomes[j]['detail'] == 'Jumlah Pajak') {
+                      this.chartData.datasets[k].data.push(this.national_incomes[j]['value']);
+                    }
+                  }
+                  if(this.chartData.datasets[k].label == 'Pajak Daerah') {
+                    if(this.national_incomes[j]['detail'] == 'Pajak-pajak daerah') {
+                      this.chartData.datasets[k].data.push(this.national_incomes[j]['value']);
+                    }
+                  }
+                }
+              }
+            }
+          }
+          if(cb)
+            return cb();
+        });
+      })
     },
     mountChart() {
       const chartOptions = {

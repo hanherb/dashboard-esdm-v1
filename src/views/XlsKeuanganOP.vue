@@ -19,13 +19,13 @@
                 th( class="text-center") Uraian
                 th( class="text-center") Nilai
             tbody
-              tr( v-for="national_income in national_incomes")
-                td( class="lo-stats__total text-center") {{ national_income.Kategori }}
+              tr( v-for="cashflow in cashflows")
+                td( class="lo-stats__total text-center") {{ cashflow.Kategori }}
                 <!-- td( class="lo-stats__total text-center") {{ profit_loss['Sub-Kategori'] }} -->
-                td( class="lo-stats__total text-center") {{ national_income.Uraian }}
-                td( class="lo-stats__total text-center") {{ national_income.Nilai.toLocaleString() }}
+                td( class="lo-stats__total text-center") {{ cashflow.Uraian }}
+                td( class="lo-stats__total text-center") {{ cashflow.Nilai.toLocaleString() }}
           br
-          div( v-for="c in calculated_national_income")
+          div( v-for="c in calculated_cashflow")
             p {{c.Uraian}} = {{c.Nilai.toLocaleString()}}
           div( align='center' v-if="reports[0]")
             d-button( theme="primary" v-on:click="addReport") Submit
@@ -44,7 +44,7 @@ import '@/assets/scss/vue-tables.scss';
 Vue.use(ClientTable);
 
 export default {
-  name: 'csv-neraca-op',
+  name: 'xls-keuangan-op',
   components: {
     ClientTable,
   },
@@ -54,10 +54,20 @@ export default {
       balances: [],
       profit_losses: [],
       national_incomes: [],
+      cashflows: [],
+      budgets: [],
+      costofgoods: [],
+      source_of_financings: [],
+      investments: [],
+      other_finances: [],
+      assumptions: [],
       reports: [],
       calculated_balance: [],
       calculated_profit_loss: [],
       calculated_national_income: [],
+      calculated_cashflow: [],
+      calculated_budget: [],
+      calculated_costofgood: [],
     };
   },
   filters: {
@@ -77,28 +87,74 @@ export default {
       reader.onload = function(event) {
         var data = new Uint8Array(event.target.result);
         var workbook = XLSX.read(data, {type: 'array'});
+
         let reportConfig = workbook.SheetNames[0]
         let sheetNeraca = workbook.SheetNames[1]
         let sheetLabaRugi = workbook.SheetNames[2]
+        let sheetArusKas = workbook.SheetNames[3]
+        let sheetAsumsiKeuangan = workbook.SheetNames[4]
+        let sheetAnggaranBelanja = workbook.SheetNames[5]
+        let sheetHPP = workbook.SheetNames[6]
+        let sheetSumberPembiayaan = workbook.SheetNames[7]
+        let sheetInvestasi = workbook.SheetNames[8]
+        let sheetKeuanganLainnya = workbook.SheetNames[9]
         let sheetPenerimaanNegara = workbook.SheetNames[10]
 
         let worksheetConfig = workbook.Sheets[reportConfig];
         let worksheetNeraca = workbook.Sheets[sheetNeraca];
         let worksheetLabaRugi = workbook.Sheets[sheetLabaRugi];
         let worksheetPenerimaanNegara = workbook.Sheets[sheetPenerimaanNegara];
+        let worksheetArusKas = workbook.Sheets[sheetArusKas];
+        let worksheetAsumsiKeuangan = workbook.Sheets[sheetAsumsiKeuangan];
+        let worksheetAnggaranBelanja = workbook.Sheets[sheetAnggaranBelanja];
+        let worksheetHPP = workbook.Sheets[sheetHPP];
+        let worksheetSumberPembiayaan = workbook.Sheets[sheetSumberPembiayaan];
+        let worksheetInvestasi = workbook.Sheets[sheetInvestasi];
+        let worksheetKeuanganLainnya = workbook.Sheets[sheetKeuanganLainnya];
+
         vm.reports = XLSX.utils.sheet_to_json(worksheetConfig);
         vm.balances = XLSX.utils.sheet_to_json(worksheetNeraca);
         vm.profit_losses = XLSX.utils.sheet_to_json(worksheetLabaRugi);
         vm.national_incomes = XLSX.utils.sheet_to_json(worksheetPenerimaanNegara);
+        vm.cashflows = XLSX.utils.sheet_to_json(worksheetArusKas);
+        vm.assumptions = XLSX.utils.sheet_to_json(worksheetAsumsiKeuangan);
+        vm.budgets = XLSX.utils.sheet_to_json(worksheetAnggaranBelanja);
+        vm.costofgoods = XLSX.utils.sheet_to_json(worksheetHPP);
+        vm.source_of_financings = XLSX.utils.sheet_to_json(worksheetSumberPembiayaan);
+        vm.investments = XLSX.utils.sheet_to_json(worksheetInvestasi);
+        vm.other_finances = XLSX.utils.sheet_to_json(worksheetKeuanganLainnya);
+
         vm.spliceArray(vm.balances);
         vm.normalizeCategory(vm.balances);
+
         vm.spliceArray(vm.profit_losses);
         vm.normalizeCategory(vm.profit_losses);
+
         vm.spliceArray(vm.national_incomes);
         vm.normalizeCategory(vm.national_incomes);
+
+        vm.spliceArray(vm.cashflows);
+        vm.normalizeCategory(vm.cashflows);
+
+        vm.spliceArray(vm.assumptions);
+
+        vm.spliceArray(vm.budgets);
+        vm.normalizeCategory(vm.budgets);
+
+        vm.spliceArray(vm.costofgoods);
+
+        vm.spliceArray(vm.source_of_financings);
+
+        vm.spliceArray(vm.investments);
+
+        vm.spliceArray(vm.other_finances);
+
         vm.calculateNeraca(vm.balances);
         vm.calculateLabaRugi(vm.profit_losses);
         vm.calculatePenerimaanNegara(vm.national_incomes);
+        vm.calculateArusKas(vm.cashflows);
+        vm.calculateAnggaranBelanja(vm.budgets);
+        vm.calculateHPP(vm.costofgoods);
       };
       reader.readAsArrayBuffer(f);
 
@@ -142,8 +198,20 @@ export default {
         graphqlFunction.graphqlMutation(query, variables, (result) => {
           this.balances = this.balances.concat(this.calculated_balance);
           this.profit_losses = this.profit_losses.concat(this.calculated_profit_loss);
+          this.national_incomes = this.national_incomes.concat(this.calculated_national_income);
+          this.cashflows = this.cashflows.concat(this.calculated_cashflow);
+          this.budgets = this.budgets.concat(this.calculated_budget);
+          this.costofgoods = this.costofgoods.concat(this.calculated_costofgood);
           this.addNeraca(postObj.report_id);
           this.addLabaRugi(postObj.report_id);
+          this.addPenerimaanNegara(postObj.report_id);
+          this.addArusKas(postObj.report_id);
+          this.addAsumsiKeuangan(postObj.report_id);
+          this.addAnggaranBelanja(postObj.report_id);
+          this.addHPP(postObj.report_id);
+          this.addSumberPembiayaan(postObj.report_id);
+          this.addInvestasi(postObj.report_id);
+          this.addKeuanganLainnya(postObj.report_id);
         });
       });
     },
@@ -423,6 +491,7 @@ export default {
         }
 
         if(national_incomes[i]["Uraian"] == "Royalti" ||
+          national_incomes[i]["Uraian"] == "Deadrent" ||
           national_incomes[i]["Uraian"] == "SPW3D" ||
           national_incomes[i]["Uraian"] == "Advance Payment" ||
           national_incomes[i]["Uraian"] == "BBN") {
@@ -447,17 +516,400 @@ export default {
       );
     },
     addPenerimaanNegara(report_id) {
-      for(var i = 0; i < this.profit_losses.length; i++) {
+      for(var i = 0; i < this.national_incomes.length; i++) {
         let postObj = {
           report_id: report_id,
-          detail: this.profit_losses[i]["Uraian"],
-          value: this.profit_losses[i]["Nilai"],
-          category: this.profit_losses[i]["Kategori"]
+          detail: this.national_incomes[i]["Uraian"],
+          value: this.national_incomes[i]["Nilai"],
+          category: this.national_incomes[i]["Kategori"]
         };
         this.axios.post(address + ':3000/add-penerimaan-negara', postObj, headers)
         .then((response) => {
           let query = gql.addNationalIncome;
           postObj.national_income_id = response.data.insertId;
+          let variables = {
+            input: postObj
+          }
+          graphqlFunction.graphqlMutation(query, variables, (result) => {
+            
+          });
+        });
+      }
+    },
+    // fetchArusKas() {
+    //   var id = this.$session.get('user').user_id;
+    //   var lastReport = this.reports[this.reports.length-1];
+    //   this.axios.get(address + ":3000/get-laba-rugi", headers).then((response) => {
+    //     let query = gql.allBalance;
+    //     graphqlFunction.graphqlFetchAll(query, (result) => {
+    //       for(var i = 0; i < result.balances.length; i++) {
+    //         if(result.balances[i].report_id == lastReport.report_id) {
+    //           this.balances.push({
+    //             'balance_id': result.balances[i].balance_id,
+    //             'report_id': result.balances[i].report_id,
+    //             'Kategori': result.balances[i].category,
+    //             'Sub-Kategori': result.balances[i].sub_category,
+    //             'Uraian': result.balances[i].detail,
+    //             'Nilai': result.balances[i].value,
+    //           });
+    //         }
+    //       }
+    //     });
+    //   })
+    // },
+    calculateArusKas(cashflows) {
+      var arusKasNettoDigunakanUntukAktivitasOperasi = 0;
+      var arusKasNettoYangDigunakanUntukAktivitasInvestasi = 0;
+      var arusKasNettoYangDigunakanUntukAktivitasPendanaan = 0;
+      var labaRugiBersihTahunBerjalan = 0; //ambil dari laba rugi
+      for(var i = 0; i < cashflows.length; i++) {
+        if(cashflows[i]["Kategori"] == "AKTIVITAS OPERASI") {
+          arusKasNettoDigunakanUntukAktivitasOperasi += cashflows[i]["Nilai"];
+        }
+
+        if(cashflows[i]["Kategori"] == "AKTIVITAS INVESTASI") {
+          arusKasNettoYangDigunakanUntukAktivitasInvestasi += cashflows[i]["Nilai"];
+        }
+
+        if(cashflows[i]["Kategori"] == "AKTIVITAS PENDANAAN") {
+          arusKasNettoYangDigunakanUntukAktivitasPendanaan += cashflows[i]["Nilai"];
+        }
+      }
+      var kenaikanPenurunanNettoKasDanBank = 
+          arusKasNettoDigunakanUntukAktivitasOperasi + 
+          arusKasNettoYangDigunakanUntukAktivitasInvestasi + 
+          arusKasNettoYangDigunakanUntukAktivitasPendanaan + 
+          labaRugiBersihTahunBerjalan;
+
+      this.calculated_cashflow.push({
+          'Kategori': 'AKTIVITAS OPERASI',
+          'Uraian': 'Arus Kas Netto digunakan untuk Aktivitas Operasi',
+          'Nilai': arusKasNettoDigunakanUntukAktivitasOperasi 
+        }, {
+          'Kategori': 'AKTIVITAS INVESTASI',
+          'Uraian': 'Arus Kas Netto yang digunakan untuk aktivitas Investasi',
+          'Nilai': arusKasNettoYangDigunakanUntukAktivitasInvestasi 
+        }, {
+          'Kategori': 'AKTIVITAS PENDANAAN',
+          'Uraian': 'Arus Kas Netto Yang Digunakan Untuk Aktivitas Pendanaan',
+          'Nilai': arusKasNettoYangDigunakanUntukAktivitasPendanaan 
+        }, {
+          'Kategori': '-',
+          'Uraian': 'Laba / Rugi Bersih Tahun Berjalan',
+          'Nilai': labaRugiBersihTahunBerjalan 
+        }, {
+          'Kategori': '-',
+          'Uraian': 'Kenaikan / Penurunan Netto Kas dan Bank',
+          'Nilai': kenaikanPenurunanNettoKasDanBank 
+        }
+      );
+    },
+    addArusKas(report_id) {
+      for(var i = 0; i < this.cashflows.length; i++) {
+        let postObj = {
+          report_id: report_id,
+          detail: this.cashflows[i]["Uraian"],
+          value: this.cashflows[i]["Nilai"],
+          category: this.cashflows[i]["Kategori"]
+        };
+        this.axios.post(address + ':3000/add-arus-kas', postObj, headers)
+        .then((response) => {
+          let query = gql.addCashflow;
+          postObj.cashflow_id = response.data.insertId;
+          let variables = {
+            input: postObj
+          }
+          graphqlFunction.graphqlMutation(query, variables, (result) => {
+            
+          });
+        });
+      }
+    },
+    // fetchAsumsiKeuangan() {
+    //   var id = this.$session.get('user').user_id;
+    //   var lastReport = this.reports[this.reports.length-1];
+    //   this.axios.get(address + ":3000/get-laba-rugi", headers).then((response) => {
+    //     let query = gql.allBalance;
+    //     graphqlFunction.graphqlFetchAll(query, (result) => {
+    //       for(var i = 0; i < result.balances.length; i++) {
+    //         if(result.balances[i].report_id == lastReport.report_id) {
+    //           this.balances.push({
+    //             'balance_id': result.balances[i].balance_id,
+    //             'report_id': result.balances[i].report_id,
+    //             'Kategori': result.balances[i].category,
+    //             'Sub-Kategori': result.balances[i].sub_category,
+    //             'Uraian': result.balances[i].detail,
+    //             'Nilai': result.balances[i].value,
+    //           });
+    //         }
+    //       }
+    //     });
+    //   })
+    // },
+    addAsumsiKeuangan(report_id) {
+      for(var i = 0; i < this.assumptions.length; i++) {
+        let postObj = {
+          report_id: report_id,
+          currency: this.assumptions[i]["Mata Uang"],
+          unit_rate: 1,
+          detail: this.assumptions[i]["Uraian"],
+          volume_unit: this.assumptions[i]["Satuan"],
+          volume_value: this.assumptions[i]["Volume"],
+          price_value: this.assumptions[i]["Harga Jual"],
+          cutoff_grade_value: this.assumptions[i]["Cut Off Grade Nilai"],
+          cutoff_grade_unit: this.assumptions[i]["Cut Off Grade Satuan"],
+        };
+        this.axios.post(address + ':3000/add-asumsi-keuangan', postObj, headers)
+        .then((response) => {
+          let query = gql.addAssumption;
+          postObj.assumption_id = response.data.insertId;
+          let variables = {
+            input: postObj
+          }
+          graphqlFunction.graphqlMutation(query, variables, (result) => {
+            
+          });
+        });
+      }
+    },
+    // fetchAnggaranBelanja() {
+    //   var id = this.$session.get('user').user_id;
+    //   var lastReport = this.reports[this.reports.length-1];
+    //   this.axios.get(address + ":3000/get-laba-rugi", headers).then((response) => {
+    //     let query = gql.allBalance;
+    //     graphqlFunction.graphqlFetchAll(query, (result) => {
+    //       for(var i = 0; i < result.balances.length; i++) {
+    //         if(result.balances[i].report_id == lastReport.report_id) {
+    //           this.balances.push({
+    //             'balance_id': result.balances[i].balance_id,
+    //             'report_id': result.balances[i].report_id,
+    //             'Kategori': result.balances[i].category,
+    //             'Sub-Kategori': result.balances[i].sub_category,
+    //             'Uraian': result.balances[i].detail,
+    //             'Nilai': result.balances[i].value,
+    //           });
+    //         }
+    //       }
+    //     });
+    //   })
+    // },
+    calculateAnggaranBelanja(budgets) {
+      var jumlahAnggaranBelanja = 0;
+
+      for(var i = 0; i < budgets.length; i++) {
+        jumlahAnggaranBelanja += budgets[i]["Nilai"];
+      }
+
+      this.calculated_budget.push({
+          'Kategori': '-',
+          'Uraian': 'Jumlah Anggaran Belanja',
+          'Nilai': jumlahAnggaranBelanja 
+        }
+      );
+    },
+    addAnggaranBelanja(report_id) {
+      for(var i = 0; i < this.budgets.length; i++) {
+        let postObj = {
+          report_id: report_id,
+          detail: this.budgets[i]["Uraian"],
+          value: this.budgets[i]["Nilai"],
+          category: this.budgets[i]["Kategori"]
+        };
+        this.axios.post(address + ':3000/add-anggaran-belanja', postObj, headers)
+        .then((response) => {
+          let query = gql.addBudget;
+          postObj.budget_id = response.data.insertId;
+          let variables = {
+            input: postObj
+          }
+          graphqlFunction.graphqlMutation(query, variables, (result) => {
+            
+          });
+        });
+      }
+    },
+    // fetchHPP() {
+    //   var id = this.$session.get('user').user_id;
+    //   var lastReport = this.reports[this.reports.length-1];
+    //   this.axios.get(address + ":3000/get-laba-rugi", headers).then((response) => {
+    //     let query = gql.allBalance;
+    //     graphqlFunction.graphqlFetchAll(query, (result) => {
+    //       for(var i = 0; i < result.balances.length; i++) {
+    //         if(result.balances[i].report_id == lastReport.report_id) {
+    //           this.balances.push({
+    //             'balance_id': result.balances[i].balance_id,
+    //             'report_id': result.balances[i].report_id,
+    //             'Kategori': result.balances[i].category,
+    //             'Sub-Kategori': result.balances[i].sub_category,
+    //             'Uraian': result.balances[i].detail,
+    //             'Nilai': result.balances[i].value,
+    //           });
+    //         }
+    //       }
+    //     });
+    //   })
+    // },
+    calculateHPP(costofgoods) {
+      var temp = 0;
+
+      for(var i = 0; i < costofgoods.length; i++) {
+        if(costofgoods[i]["Uraian"] != "Persediaan Awal" && costofgoods[i]["Uraian"] != "Persediaan Akhir") {
+          temp += costofgoods[i]["Nilai"];
+        }
+        if(costofgoods[i]["Uraian"] != "Persediaan Awal") {
+          var persediaanAwal = costofgoods[i]["Nilai"];
+        }
+        if(costofgoods[i]["Uraian"] != "Persediaan Akhir") {
+          var persediaanAkhir = costofgoods[i]["Nilai"];
+        }
+      }
+
+      var totalPersediaan = persediaanAwal - persediaanAkhir;
+      var totalHPP = temp + totalPersediaan;
+
+      this.calculated_costofgood.push({
+          'Uraian': 'Total Persediaan',
+          'Nilai': totalPersediaan 
+        }, {
+          'Uraian': 'Total HPP',
+          'Nilai': totalHPP 
+        }
+      );
+    },
+    addHPP(report_id) {
+      for(var i = 0; i < this.costofgoods.length; i++) {
+        let postObj = {
+          report_id: report_id,
+          detail: this.costofgoods[i]["Uraian"],
+          value: this.costofgoods[i]["Nilai"]
+        };
+        this.axios.post(address + ':3000/add-harga-pokok', postObj, headers)
+        .then((response) => {
+          let query = gql.addCostofgood;
+          postObj.costofgood_id = response.data.insertId;
+          let variables = {
+            input: postObj
+          }
+          graphqlFunction.graphqlMutation(query, variables, (result) => {
+            
+          });
+        });
+      }
+    },
+    // fetchSumberPembiayaan() {
+    //   var id = this.$session.get('user').user_id;
+    //   var lastReport = this.reports[this.reports.length-1];
+    //   this.axios.get(address + ":3000/get-laba-rugi", headers).then((response) => {
+    //     let query = gql.allBalance;
+    //     graphqlFunction.graphqlFetchAll(query, (result) => {
+    //       for(var i = 0; i < result.balances.length; i++) {
+    //         if(result.balances[i].report_id == lastReport.report_id) {
+    //           this.balances.push({
+    //             'balance_id': result.balances[i].balance_id,
+    //             'report_id': result.balances[i].report_id,
+    //             'Kategori': result.balances[i].category,
+    //             'Sub-Kategori': result.balances[i].sub_category,
+    //             'Uraian': result.balances[i].detail,
+    //             'Nilai': result.balances[i].value,
+    //           });
+    //         }
+    //       }
+    //     });
+    //   })
+    // },
+    addSumberPembiayaan(report_id) {
+      for(var i = 0; i < this.source_of_financings.length; i++) {
+        let postObj = {
+          report_id: report_id,
+          detail: this.source_of_financings[i]["Uraian"],
+          value: this.source_of_financings[i]["Nilai"]
+        };
+        this.axios.post(address + ':3000/add-sumber-pembiayaan', postObj, headers)
+        .then((response) => {
+          let query = gql.addSourceOfFinancing;
+          postObj.source_of_financing_id = response.data.insertId;
+          let variables = {
+            input: postObj
+          }
+          graphqlFunction.graphqlMutation(query, variables, (result) => {
+            
+          });
+        });
+      }
+    },
+    // fetchInvestasi() {
+    //   var id = this.$session.get('user').user_id;
+    //   var lastReport = this.reports[this.reports.length-1];
+    //   this.axios.get(address + ":3000/get-laba-rugi", headers).then((response) => {
+    //     let query = gql.allBalance;
+    //     graphqlFunction.graphqlFetchAll(query, (result) => {
+    //       for(var i = 0; i < result.balances.length; i++) {
+    //         if(result.balances[i].report_id == lastReport.report_id) {
+    //           this.balances.push({
+    //             'balance_id': result.balances[i].balance_id,
+    //             'report_id': result.balances[i].report_id,
+    //             'Kategori': result.balances[i].category,
+    //             'Sub-Kategori': result.balances[i].sub_category,
+    //             'Uraian': result.balances[i].detail,
+    //             'Nilai': result.balances[i].value,
+    //           });
+    //         }
+    //       }
+    //     });
+    //   })
+    // },
+    addInvestasi(report_id) {
+      for(var i = 0; i < this.investments.length; i++) {
+        let postObj = {
+          report_id: report_id,
+          detail: this.investments[i]["Uraian"],
+          value: this.investments[i]["Nilai"]
+        };
+        this.axios.post(address + ':3000/add-investasi', postObj, headers)
+        .then((response) => {
+          let query = gql.addInvestment;
+          postObj.investment_id = response.data.insertId;
+          let variables = {
+            input: postObj
+          }
+          graphqlFunction.graphqlMutation(query, variables, (result) => {
+            
+          });
+        });
+      }
+    },
+    // fetchKeuanganLainnya() {
+    //   var id = this.$session.get('user').user_id;
+    //   var lastReport = this.reports[this.reports.length-1];
+    //   this.axios.get(address + ":3000/get-laba-rugi", headers).then((response) => {
+    //     let query = gql.allBalance;
+    //     graphqlFunction.graphqlFetchAll(query, (result) => {
+    //       for(var i = 0; i < result.balances.length; i++) {
+    //         if(result.balances[i].report_id == lastReport.report_id) {
+    //           this.balances.push({
+    //             'balance_id': result.balances[i].balance_id,
+    //             'report_id': result.balances[i].report_id,
+    //             'Kategori': result.balances[i].category,
+    //             'Sub-Kategori': result.balances[i].sub_category,
+    //             'Uraian': result.balances[i].detail,
+    //             'Nilai': result.balances[i].value,
+    //           });
+    //         }
+    //       }
+    //     });
+    //   })
+    // },
+    addKeuanganLainnya(report_id) {
+      for(var i = 0; i < this.other_finances.length; i++) {
+        let postObj = {
+          report_id: report_id,
+          detail: this.other_finances[i]["Uraian"],
+          value: this.other_finances[i]["Nilai"]
+        };
+        this.axios.post(address + ':3000/add-keuangan-lainnya', postObj, headers)
+        .then((response) => {
+          let query = gql.addOtherFinance;
+          postObj.other_finance_id = response.data.insertId;
           let variables = {
             input: postObj
           }

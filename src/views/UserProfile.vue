@@ -14,7 +14,7 @@
         <up-user-goods v-if="user.role == 'supplier' || user.role == 'admin'" /> -->
         <ao-neraca v-if="user.role == 'user' || user.role == 'admin'" />
         <ao-laba-rugi v-if="user.role == 'user' || user.role == 'admin'" />
-        <!-- <ao-penerimaan-negara v-if="user.role == 'user' || user.role == 'admin'" /> -->
+        <ao-penerimaan-negara v-if="user.role == 'user' || user.role == 'admin'" />
       </d-col>
     </d-row>
   </d-container>

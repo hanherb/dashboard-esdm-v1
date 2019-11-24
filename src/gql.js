@@ -168,6 +168,183 @@ let query = {
 	          profit_loss_id
 	      }
   	}`,
+
+  	allNationalIncome: `query getAllNationalIncome {
+	    national_incomes {
+	        national_income_id
+	        report_id
+	        detail
+	        value
+	        category
+	    }
+  	}`,
+
+  	addNationalIncome: `mutation createSingleNationalIncome($input:NationalIncomesInput) {
+	      createNationalIncome(input: $input) {
+	          national_income_id
+	      }
+  	}`,
+
+  	deleteNationalIncome: `mutation deleteSingleNationalIncome($nationalIncomeId: Int!) {
+	      deleteNationalIncome(national_income_id: $nationalIncomeId) {
+	          national_income_id
+	      }
+  	}`,
+
+  	allCashflow: `query getAllCashflow {
+	    cashflows {
+	        cashflow_id
+	        report_id
+	        detail
+	        value
+	        category
+	    }
+  	}`,
+
+  	addCashflow: `mutation createSingleCashflow($input:CashflowsInput) {
+	      createCashflow(input: $input) {
+	          cashflow_id
+	      }
+  	}`,
+
+  	deleteCashflow: `mutation deleteSingleCashflow($nationalIncomeId: Int!) {
+	      deleteCashflow(cashflow_id: $cashflowId) {
+	          cashflow_id
+	      }
+  	}`,
+
+  	allBudget: `query getAllBudget {
+	    budgets {
+	        budget_id
+	        report_id
+	        detail
+	        value
+	        category
+	    }
+  	}`,
+
+  	addBudget: `mutation createSingleBudget($input:BudgetsInput) {
+	      createBudget(input: $input) {
+	          budget_id
+	      }
+  	}`,
+
+  	deleteBudget: `mutation deleteSingleBudget($budgetId: Int!) {
+	      deleteBudget(budget_id: $budgetId) {
+	          budget_id
+	      }
+  	}`,
+
+  	allCostofgood: `query getAllCostofgood {
+	    costofgoods {
+	        costofgood_id
+	        report_id
+	        detail
+	        value
+	    }
+  	}`,
+
+  	addCostofgood: `mutation createSingleCostofgood($input:CostofgoodsInput) {
+	      createCostofgood(input: $input) {
+	          costofgood_id
+	      }
+  	}`,
+
+  	deleteCostofgood: `mutation deleteSingleCostofgood($costofgoodId: Int!) {
+	      deleteCostofgood(costofgood_id: $costofgoodId) {
+	          costofgood_id
+	      }
+  	}`,
+
+  	allSourceOfFinancing: `query getAllSourceOfFinancing {
+	    source_of_financings {
+	        source_of_financing_id
+	        report_id
+	        detail
+	        value
+	    }
+  	}`,
+
+  	addSourceOfFinancing: `mutation createSingleSourceOfFinancing($input:SourceOfFinancingsInput) {
+	      createSourceOfFinancing(input: $input) {
+	          source_of_financing_id
+	      }
+  	}`,
+
+  	deleteSourceOfFinancing: `mutation deleteSingleSourceOfFinancing($sourceOfFinancingId: Int!) {
+	      deleteSourceOfFinancing(source_of_financing_id: $sourceOfFinancingId) {
+	          source_of_financing_id
+	      }
+  	}`,
+
+  	allInvestment: `query getAllInvestment {
+	    investments {
+	        investment_id
+	        report_id
+	        detail
+	        value
+	    }
+  	}`,
+
+  	addInvestment: `mutation createSingleInvestment($input:InvestmentsInput) {
+	      createInvestment(input: $input) {
+	          investment_id
+	      }
+  	}`,
+
+  	deleteInvestment: `mutation deleteSingleInvestment($investmentId: Int!) {
+	      deleteInvestment(investment_id: $investmentId) {
+	          investment_id
+	      }
+  	}`,
+
+  	allOtherFinance: `query getAllOtherFinance {
+	    investments {
+	        other_finance_id
+	        report_id
+	        detail
+	        value
+	    }
+  	}`,
+
+  	addOtherFinance: `mutation createSingleOtherFinance($input:OtherFinancesInput) {
+	      createOtherFinance(input: $input) {
+	          other_finance_id
+	      }
+  	}`,
+
+  	deleteOtherFinance: `mutation deleteSingleOtherFinance($otherFinanceId: Int!) {
+	      deleteOtherFinance(other_finance_id: $otherFinanceId) {
+	          other_finance_id
+	      }
+  	}`,
+
+  	allAssumption: `query getAllAssumption {
+	    assumptions {
+	    	assumption_id
+	        report_id
+	        currency
+	        unit_rate
+	        detail
+	        volume_unit
+	        volume_value
+	        price_value
+	        cutoff_grade_value
+	        cutoff_grade_unit
+	    }
+  	}`,
+
+  	addAssumption: `mutation createSingleAssumption($input:AssumptionsInput) {
+	      createAssumption(input: $input) {
+	          assumption_id
+	      }
+  	}`,
+
+  	deleteAssumption: `mutation deleteSingleAssumption($assumptionId: Int!) {
+	      deleteAssumption(assumption_id: $assumptionId) {
+	          assumption_id
+	      }
+  	}`,
 }
 
 export default query;
