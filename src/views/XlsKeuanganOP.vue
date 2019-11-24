@@ -564,7 +564,7 @@ export default {
       var labaRugiBersihTahunBerjalan = 0; //ambil dari laba rugi
       for(var i = 0; i < cashflows.length; i++) {
         if(cashflows[i]["Kategori"] == "AKTIVITAS OPERASI") {
-          arusKasNettoDigunakanUntukAktivitasOperasi += parseInt(cashflows[i]["Nilai"].replace( /^\D+/g, '');
+          arusKasNettoDigunakanUntukAktivitasOperasi += parseInt(cashflows[i]["Nilai"].replace( /^\D+/g, ''));
         }
 
         if(cashflows[i]["Kategori"] == "AKTIVITAS INVESTASI") {
