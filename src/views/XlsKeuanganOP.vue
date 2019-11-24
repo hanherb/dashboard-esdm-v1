@@ -248,14 +248,14 @@ export default {
           balances[i]["Uraian"] == "Pajak dibayar dimuka" || 
           balances[i]["Uraian"] == "Piutang lain-lain dan biaya dibayar dimuka" || 
           balances[i]["Uraian"] == "Persediaan") {
-          jumlahAktivaLancar += parseInt(balances[i]["Nilai"].replace('Rp', '').replace(',', ''));
+          jumlahAktivaLancar += balances[i]["Nilai"];
         }
         if(balances[i]["Uraian"] == "Aktiva Tetap" ||
           balances[i]["Uraian"] == "Aktiva Eksplorasi" ||
           balances[i]["Uraian"] == "Beban ditangguhkan" ||
           balances[i]["Uraian"] == "Amortisasi" || 
           balances[i]["Uraian"] =="Depresiasi") {
-          jumlahAktivaTidakLancar += parseInt(balances[i]["Nilai"].replace('Rp', '').replace(',', ''));
+          jumlahAktivaTidakLancar += balances[i]["Nilai"];
         }
         if((balances[i]["Uraian"] == "Hutang Usaha" || 
           balances[i]["Uraian"] == "Hutang Bank" || 
@@ -264,7 +264,7 @@ export default {
           balances[i]["Uraian"] == "Hutang Pajak" || 
           balances[i]["Uraian"] == "Hutang lain-lain") &&
           balances[i]["Sub-Kategori"] == "Kewajiban Jangka Pendek") {
-          jumlahKewajibanJangkaPendek += parseInt(balances[i]["Nilai"].replace('Rp', '').replace(',', ''));
+          jumlahKewajibanJangkaPendek += balances[i]["Nilai"];
         }
         if((balances[i]["Uraian"] == "Hutang Bank" || 
           balances[i]["Uraian"] == "Hutang Pajak" || 
@@ -273,12 +273,12 @@ export default {
           balances[i]["Uraian"] == "Provisi Reklamasi dan Pasca Tambang" || 
           balances[i]["Uraian"] == "Hutang lain-lain") &&
           balances[i]["Sub-Kategori"] == "Kewajiban Jangka Panjang") {
-          jumlahKewajibanJangkaPanjang += parseInt(balances[i]["Nilai"].replace('Rp', '').replace(',', ''));
+          jumlahKewajibanJangkaPanjang += balances[i]["Nilai"];
         }
         if(balances[i]["Uraian"] == "Modal Yang Disetor" ||
           balances[i]["Uraian"] == "Laba (rugi) ditahan" ||
           balances[i]["Uraian"] == "Lain-lain") {
-          jumlahEkuitas += parseInt(balances[i]["Nilai"].replace('Rp', '').replace(',', ''));
+          jumlahEkuitas += balances[i]["Nilai"];
         }
       }
       var jumlahAktiva = jumlahAktivaLancar + jumlahAktivaTidakLancar;
@@ -376,28 +376,28 @@ export default {
       var jumlahPendapatanLainLain = 0;
       for(var i = 0; i < profit_losses.length; i++) {
         if(profit_losses[i]["Uraian"] == "Penjualan") {
-          var penjualan = parseInt(profit_losses[i]["Nilai"].replace('Rp', '').replace(',', ''));
+          var penjualan = profit_losses[i]["Nilai"];
         }
         if(profit_losses[i]["Uraian"] == "Royalti") {
-          var royalti = parseInt(profit_losses[i]["Nilai"].replace('Rp', '').replace(',', ''));
+          var royalti = profit_losses[i]["Nilai"];
         }
         if(profit_losses[i]["Uraian"] == "Harga Pokok Penjualan") {
-          var hpp = parseInt(profit_losses[i]["Nilai"].replace('Rp', '').replace(',', ''));
+          var hpp = profit_losses[i]["Nilai"];
         }
         if(profit_losses[i]["Uraian"] == "Beban Penjualan" ||
           profit_losses[i]["Uraian"] == "Beban Umum" ||
           profit_losses[i]["Uraian"] == "Beban Lain-Lain") {
-          jumlahBebanOperasi += parseInt(profit_losses[i]["Nilai"].replace('Rp', '').replace(',', ''));
+          jumlahBebanOperasi += profit_losses[i]["Nilai"];
         }
         if(profit_losses[i]["Uraian"] == "Beban Bunga" || 
           profit_losses[i]["Uraian"] == "Laba Selisih Kurs" || 
           profit_losses[i]["Uraian"] == "Pendapatan Bunga" || 
           profit_losses[i]["Uraian"] == "Beban Lain-Lain" || 
           profit_losses[i]["Uraian"] == "Rugi Selisih Kurs, Bersih") {
-          jumlahPendapatanLainLain += parseInt(profit_losses[i]["Nilai"].replace('Rp', '').replace(',', ''));
+          jumlahPendapatanLainLain += profit_losses[i]["Nilai"];
         }
         if(profit_losses[i]["Uraian"] == "Biaya Pajak Penghasilan") {
-          var biayaPajakPenghasilan = parseInt(profit_losses[i]["Nilai"].replace('Rp', '').replace(',', ''));
+          var biayaPajakPenghasilan = profit_losses[i]["Nilai"];
         }
       }
       var labaRugiKotor = penjualan - royalti - hpp;
@@ -487,7 +487,7 @@ export default {
           national_incomes[i]["Uraian"] == "PPN Keluaran" || 
           national_incomes[i]["Uraian"] == "Pajak-pajak daerah" || 
           national_incomes[i]["Uraian"] == "Lumpsum Payment") {
-          jumlahPajak += parseInt(national_incomes[i]["Nilai"].replace('Rp', '').replace(',', ''));
+          jumlahPajak += national_incomes[i]["Nilai"];
         }
 
         if(national_incomes[i]["Uraian"] == "Royalti" ||
@@ -495,7 +495,7 @@ export default {
           national_incomes[i]["Uraian"] == "SPW3D" ||
           national_incomes[i]["Uraian"] == "Advance Payment" ||
           national_incomes[i]["Uraian"] == "BBN") {
-          jumlahNonPajak += parseInt(national_incomes[i]["Nilai"].replace('Rp', '').replace(',', ''));
+          jumlahNonPajak += national_incomes[i]["Nilai"];
         }
       }
       var jumlahPenerimaanNegara = jumlahPajak + jumlahNonPajak;
@@ -564,15 +564,15 @@ export default {
       var labaRugiBersihTahunBerjalan = 0; //ambil dari laba rugi
       for(var i = 0; i < cashflows.length; i++) {
         if(cashflows[i]["Kategori"] == "AKTIVITAS OPERASI") {
-          arusKasNettoDigunakanUntukAktivitasOperasi += parseInt(cashflows[i]["Nilai"].replace('Rp', '').replace(',', ''));
+          arusKasNettoDigunakanUntukAktivitasOperasi += cashflows[i]["Nilai"];
         }
 
         if(cashflows[i]["Kategori"] == "AKTIVITAS INVESTASI") {
-          arusKasNettoYangDigunakanUntukAktivitasInvestasi += parseInt(cashflows[i]["Nilai"].replace('Rp', '').replace(',', ''));
+          arusKasNettoYangDigunakanUntukAktivitasInvestasi += cashflows[i]["Nilai"];
         }
 
         if(cashflows[i]["Kategori"] == "AKTIVITAS PENDANAAN") {
-          arusKasNettoYangDigunakanUntukAktivitasPendanaan += parseInt(cashflows[i]["Nilai"].replace('Rp', '').replace(',', ''));
+          arusKasNettoYangDigunakanUntukAktivitasPendanaan += cashflows[i]["Nilai"];
         }
       }
       var kenaikanPenurunanNettoKasDanBank = 
@@ -697,7 +697,7 @@ export default {
       var jumlahAnggaranBelanja = 0;
 
       for(var i = 0; i < budgets.length; i++) {
-        jumlahAnggaranBelanja += parseInt(budgets[i]["Nilai"].replace('Rp', '').replace(',', ''));
+        jumlahAnggaranBelanja += budgets[i]["Nilai"];
       }
 
       this.calculated_budget.push({
@@ -754,13 +754,13 @@ export default {
 
       for(var i = 0; i < costofgoods.length; i++) {
         if(costofgoods[i]["Uraian"] != "Persediaan Awal" && costofgoods[i]["Uraian"] != "Persediaan Akhir") {
-          temp += parseInt(costofgoods[i]["Nilai"].replace('Rp', '').replace(',', ''));
+          temp += costofgoods[i]["Nilai"];
         }
         if(costofgoods[i]["Uraian"] != "Persediaan Awal") {
-          var persediaanAwal = parseInt(costofgoods[i]["Nilai"].replace('Rp', '').replace(',', ''));
+          var persediaanAwal = costofgoods[i]["Nilai"];
         }
         if(costofgoods[i]["Uraian"] != "Persediaan Akhir") {
-          var persediaanAkhir = parseInt(costofgoods[i]["Nilai"].replace('Rp', '').replace(',', ''));
+          var persediaanAkhir = costofgoods[i]["Nilai"];
         }
       }
 
