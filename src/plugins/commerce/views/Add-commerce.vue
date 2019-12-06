@@ -101,8 +101,7 @@ export default {
 
   methods: {
       addCommerce() {
-        let user = this.$session.get('user').fullname;
-        let user_id = this.$session.get('user')._id;
+        let user_id = this.$session.get('user').user_id;
         let postObj = {
           name: this.input.name,
           price: parseInt(this.input.price),
@@ -111,12 +110,11 @@ export default {
           description: this.input.description,
           category: this.input.category,
           image: this.input.image,
-          user: user,
           user_id: user_id,
         };
         this.axios.post(address + ':3000/add-commerce', postObj, headers)
         .then((response) => {
-          postObj._id = response.data.insertedIds[0];
+          postObj.commerce_id = response.data.insertId;
           let query = gql.addCommerce;
           let variables = {
             input: postObj
@@ -141,7 +139,7 @@ export default {
         else {
           let formData = new FormData();
           if(this.picture_upload.length != 0) {
-            formData.append('goods_picture', this.picture_upload, 'goods_' + this.$session.get('user')._id + '_' + this.input.name);
+            formData.append('goods_picture', this.picture_upload, 'goods_' + this.$session.get('user').user_id + '_' + this.input.name);
           }
 
           this.axios.post(address + ':3000/post-goods-picture', formData, headers)

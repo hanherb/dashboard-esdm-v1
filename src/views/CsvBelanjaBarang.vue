@@ -6,36 +6,32 @@
       div( class="panel-body")
         div( class="form-group")
           div( class="col-sm-9")
-            d-row
-            input( type="file" id="csv_file" name="csv_file" class="form-control" @change="loadCSV($event)")
+            input( type="file" id="file" ref="file" v-on:change="loadCSV($event)")
         div( class="col-sm-offset-3 col-sm-9")
           div( class="checkbox-inline")
             label( for="header_rows") 
         d-container( fluid class="main-content-container px-4 pb-4")
-          d-row
-            d-col( md="3" class="form-group")
-              d-form-select( v-model="selected_1" :options="select_kategori" @change="filterKategori($event)")
-            d-col( md="3" class="form-group")
-              d-form-select( v-model="selected_2" :options="select_rencana_realisasi" @change="filterRencanaRealisasi($event)")
-            d-col( md="2" class="form-group")
-              d-form-select( v-model="selected_3" :options="select_tahun" @change="filterTahun($event)")
-            d-col( md="2" class="form-group")
-              d-button( theme="primary" v-on:click="applyFilter") Apply Filter
-          v-client-table( v-for="tableData in tableData" class="dataTables_wrapper csv_table_barang" :data="tableData.data" :columns="columns" :options="clientTableOptions")
-              table( class="table mb-0")
-                thead( class="bg-light")
-                  tr
-                    th( v-for="key in parse_header" @click="sortBy(key)" :class="{ active: sortKey == key }") {{ key | capitalize }}
-                      span( class="arrow" :class="sortOrders[key] > 0 ? 'asc' : 'dsc'")
-                tbody
-                  tr( v-for="csv in tableData")
-                    td( v-for="key in parse_header") {{csv[key]}}
+          table( v-if="barangA[0]" class="table table-bordered bg-light text-dark mb-0")
+            thead( class="py-2 bg-light text-semibold border-bottom")
+              tr
+                th( class="text-center") Kategori
+                <!-- th( class="text-center") Sub-Kategori -->
+                th( class="text-center") Uraian
+                th( class="text-center") Nilai
+            tbody
+              tr( v-for="barang in barangA")
+                td( class="lo-stats__total text-center") {{ barang.Kategori }}
+                <!-- td( class="lo-stats__total text-center") {{ profit_loss['Sub-Kategori'] }} -->
+                td( class="lo-stats__total text-center") {{ barang.Uraian }}
+                td( class="lo-stats__total text-center") {{ barang.Nilai.toLocaleString() }}
           br
-          div( align='center' v-if="tableData[0]")
+          div( align='center' v-if="barangA[0]")
             d-button( theme="primary" v-on:click="addBelanjaBarang") Submit
 </template>
 
 <script>
+import XLSX from 'xlsx';
+import gql from '@/gql';
 import graphqlFunction from '../graphqlFunction';
 import address from '../address';
 import headers from '../headers';
@@ -53,35 +49,26 @@ export default {
   },
   data() {
     return {
-      parse_header: [],
-      sortOrders:{},
-      sortKey: '',
-      columns: [],
-      tableData: [],
-      dataToDb: {},
-      filter: {
-        kategori: "All",
-        rencana_realisasi: "All",
-        tahun: "All",
-      },
-      clientTableOptions: {
-        perPage: 40,
-        recordsPerPage: [10, 25, 50, 100],
-        skin: 'transaction-history table dataTable',
-        sortIcon: {
-          base: 'fas float-right mt-1 text-muted',
-          up: 'fa-caret-up',
-          down: 'fa-caret-down',
-        },
-        texts: {
-          filterPlaceholder: '',
-          limit: 'Show',
-        },
-        pagination: {
-          edge: true,
-          nav: 'scroll',
-        },
-      },
+      barangA: [],
+      barangB: [],
+      barangC: [],
+      barangD: [],
+      barangE: [],
+      barangF: [],
+      barangG: [],
+      barangH: [],
+      barangI: [],
+      barangJ: [],
+      barangK: [],
+      barangL: [],
+      barangM: [],
+      barangN: [],
+      barangO: [],
+      barangP: [],
+      barangQ: [],
+      barangR: [],
+      barangS: [],
+      barangT: [],
       validation: "",
       select_kategori: [
         {value: null, text: 'Filter Kategori..', disabled: true },
@@ -134,7 +121,7 @@ export default {
   },
 
   created: function()
-  {
+  { 
     var vm = this;
     this.fetchBelanjaBarang(() => {
       setTimeout(function() {
@@ -178,159 +165,217 @@ export default {
       vm.sortKey = key
       vm.sortOrders[key] = vm.sortOrders[key] * -1
     },
-    csvJSON(csv){
-      var vm = this
-      var lines = csv.split(/\r\n|\n|\r/);
-      var result = []
-      var csvHeaders = lines[0].split(";")
-      vm.parse_header = lines[0].split(";") 
-      lines[0].split(",").forEach(function (key) {
-        vm.sortOrders[key] = 1
-      })
+    // csvJSON(csv){
+    //   var vm = this
+    //   var lines = csv.split(/\r\n|\n|\r/);
+    //   var result = []
+    //   var csvHeaders = lines[0].split(";")
+    //   vm.parse_header = lines[0].split(";") 
+    //   lines[0].split(",").forEach(function (key) {
+    //     vm.sortOrders[key] = 1
+    //   })
       
-      lines.map(function(line, indexLine){
-        if (indexLine < 1) return // Jump header line
+    //   lines.map(function(line, indexLine){
+    //     if (indexLine < 1) return // Jump header line
         
-        var obj = {}
-        var currentline = line.split(";")
+    //     var obj = {}
+    //     var currentline = line.split(";")
         
-        csvHeaders.map(function(header, indexHeader){
-          obj[header] = currentline[indexHeader]
-        })
+    //     csvHeaders.map(function(header, indexHeader){
+    //       obj[header] = currentline[indexHeader]
+    //     })
 
-        result.push(obj)
-      })
-      this.axios.post(address + ':3000/import-csv', {}, headers)
+    //     result.push(obj)
+    //   })
+    //   this.axios.post(address + ':3000/import-csv', {}, headers)
+    //   .then((response) => {
+    //     console.log(response);
+    //   });
+    //   result.pop() // remove the last item because undefined values
+    //   this.columns = Object.keys(result[0]);
+    //   // this.columns[this.columns.indexOf("Self Assessment")] = "Assessment";
+    //   // this.columns.splice(this.columns.indexOf("Surveyor"), 1);
+
+    //   function sum(colname) {
+    //     result[result.length-1][colname] = 0;
+    //     for(var i = 1; i < result.length-1; i++) {
+    //       if(!result[i][colname]) {
+    //         result[result.length-1][colname] = 
+    //           parseInt(result[result.length-1][colname]) + 0;
+    //       }
+    //       else {
+    //         result[result.length-1][colname] = 
+    //           parseInt(result[result.length-1][colname]) + 
+    //           parseInt(result[i][colname]);
+    //       }
+    //     }
+    //   }
+
+    //   function prod(colname) {
+    //     for(var i = 1; i < result.length-1; i++) {
+    //       if(result[i]["Cost, Insurance, & Freight"]) {
+    //         result[i][colname] = parseInt(result[i]["Kuantitas"]) * parseInt(result[i]["Cost, Insurance, & Freight"]);
+    //       }
+    //       else if(result[i]["On Site"]) {
+    //         result[i][colname] = parseInt(result[i]["Kuantitas"]) * parseInt(result[i]["On Site"]);
+    //       }
+    //     }
+    //   }
+
+    //   function prodDiv(colname) {
+    //     for(var i = 1; i < result.length-1; i++) {
+    //       if(result[i]["Self Assessment"]) {
+    //         result[i][colname] = (parseInt(result[i]["Total Price (US$)"]) / parseInt(result[result.length-1]["Total Price (US$)"]) * result[i]["Self Assessment"]).toFixed(2);
+    //       }
+    //       else if(result[i]["Surveyor"]) {
+    //         result[i][colname] = (parseInt(result[i]["Total Price (US$)"]) / parseInt(result[result.length-1]["Total Price (US$)"]) * result[i]["Surveyor"]).toFixed(2);
+    //       }
+    //     }
+    //   }
+
+    //   for(var i = 1; i < result.length-1; i++) {
+    //     if(result[i]["Nasional"]) {
+    //       if(result[i]["Provinsi"] || result[i]["Kabupaten"] ||result[i]["Negara"]) {
+    //         this.validation = "Tidak bisa memilih asal barang lebih dari 1, pada barang " + result[i]["Jenis Barang"];
+    //       }
+    //     }
+    //     else if(result[i]["Provinsi"]) {
+    //       if(result[i]["Nasional"] || result[i]["Kabupaten"] ||result[i]["Negara"]) {
+    //         this.validation = "Tidak bisa memilih asal barang lebih dari 1, pada barang " + result[i]["Jenis Barang"];
+    //       }
+    //     }
+    //     else if(result[i]["Kabupaten"]) {
+    //       if(result[i]["Nasional"] || result[i]["Provinsi"] ||result[i]["Negara"]) {
+    //         this.validation = "Tidak bisa memilih asal barang lebih dari 1, pada barang " + result[i]["Jenis Barang"];
+    //       }
+    //     }
+    //     else if(result[i]["Negara"]) {
+    //       if(result[i]["Nasional"] || result[i]["Provinsi"] ||result[i]["Kabupaten"]) {
+    //         this.validation = "Tidak bisa memilih asal barang lebih dari 1, pada barang " + result[i]["Jenis Barang"];
+    //       }
+    //       if(result[i]["Produsen/Suplier"]) {
+    //         this.validation = "Produsen/Suplier hanya untuk barang lokal, pada barang " + result[i]["Jenis Barang"];
+    //       }
+    //     }
+
+    //     if(result[i]["Produsen/Suplier"]) {
+    //       if(result[i]["Produsen/Suplier"] == "S" || 
+    //         result[i]["Produsen/Suplier"] == "s" ||
+    //         result[i]["Produsen/Suplier"] == "Suplier" ||
+    //         result[i]["Produsen/Suplier"] == "suplier" ||
+    //         result[i]["Produsen/Suplier"] == "Supplier" ||
+    //         result[i]["Produsen/Suplier"] == "supplier") {
+    //         result[i]["Produsen/Suplier"] = "Suplier";
+    //       }
+    //       else if(result[i]["Produsen/Suplier"] == "P" || 
+    //         result[i]["Produsen/Suplier"] == "p" ||
+    //         result[i]["Produsen/Suplier"] == "Produsen" ||
+    //         result[i]["Produsen/Suplier"] == "produsen") {
+    //         result[i]["Produsen/Suplier"] = "Produsen";
+    //       }
+    //     }
+
+    //     if(result[i]["Cost, Insurance, & Freight"] && result[i]["On Site"]) {
+    //       this.validation = "Tidak bisa mengisi On Site dan Cost, Insurance, & Freight secara bersamaan, pada barang " + result[i]["Jenis Barang"];
+    //     }
+
+    //     if(result[i]["Self Assessment"] || result[i]["Surveyor"]) {
+    //       if(result[i]["Self Assessment"]) {
+    //         // result[i]["Assessment"] = result[i]["Self Assessment"];
+    //       }
+    //       else if(result[i]["Surveyor"]) {
+    //         // result[i]["Assessment"] = result[i]["Surveyor"];
+    //       }
+    //     }
+    //   }
+
+    //   prod("Total Price (US$)");
+    //   sum("Kuantitas");
+    //   sum("Cost, Insurance, & Freight");
+    //   sum("On Site");
+    //   sum("Total Price (US$)");
+    //   prodDiv("Bobot Tertimbang (%)");
+    //   sum("Bobot Tertimbang (%)");
+
+    //   return result // JavaScript object
+    // },
+    loadCSV(e) {
+      var vm = this;
+      var files = e.target.files, f = files[0];
+      var reader = new FileReader();
+      reader.onload = function(event) {
+        var data = new Uint8Array(event.target.result);
+        var workbook = XLSX.read(data, {type: 'array'});
+
+        let barangA = workbook.SheetNames[0]
+        let barangB = workbook.SheetNames[1]
+        let barangC = workbook.SheetNames[2]
+        let barangD = workbook.SheetNames[3]
+        let barangE = workbook.SheetNames[4]
+        let barangF = workbook.SheetNames[5]
+        let barangG = workbook.SheetNames[6]
+        let barangH = workbook.SheetNames[7]
+        let barangI = workbook.SheetNames[8]
+        let barangJ = workbook.SheetNames[9]
+        let barangK = workbook.SheetNames[10]
+        let barangL = workbook.SheetNames[11]
+        let barangM = workbook.SheetNames[12]
+        let barangN = workbook.SheetNames[13]
+        let barangO = workbook.SheetNames[14]
+        let barangP = workbook.SheetNames[15]
+        let barangQ = workbook.SheetNames[16]
+        let barangR = workbook.SheetNames[17]
+        let barangS = workbook.SheetNames[18]
+        let barangT = workbook.SheetNames[19]
+
+        let worksheetBarangA = workbook.Sheets[barangA];
+        let worksheetBarangB = workbook.Sheets[barangB];
+        let worksheetBarangC = workbook.Sheets[barangC];
+        let worksheetBarangD = workbook.Sheets[barangD];
+        let worksheetBarangE = workbook.Sheets[barangE];
+        let worksheetBarangF = workbook.Sheets[barangF];
+        let worksheetBarangG = workbook.Sheets[barangG];
+        let worksheetBarangH = workbook.Sheets[barangH];
+        let worksheetBarangI = workbook.Sheets[barangI];
+        let worksheetBarangJ = workbook.Sheets[barangJ];
+        let worksheetBarangK = workbook.Sheets[barangK];
+        let worksheetBarangL = workbook.Sheets[barangL];
+        let worksheetBarangM = workbook.Sheets[barangM];
+        let worksheetBarangN = workbook.Sheets[barangN];
+        let worksheetBarangO = workbook.Sheets[barangO];
+        let worksheetBarangP = workbook.Sheets[barangP];
+        let worksheetBarangQ = workbook.Sheets[barangQ];
+        let worksheetBarangR = workbook.Sheets[barangR];
+        let worksheetBarangS = workbook.Sheets[barangS];
+        let worksheetBarangT = workbook.Sheets[barangT];
+
+        vm.barangA = XLSX.utils.sheet_to_json(worksheetBarangA);
+        vm.barangB = XLSX.utils.sheet_to_json(worksheetBarangB);
+        vm.barangC = XLSX.utils.sheet_to_json(worksheetBarangC);
+        vm.barangD = XLSX.utils.sheet_to_json(worksheetBarangD);
+        vm.barangE = XLSX.utils.sheet_to_json(worksheetBarangE);
+        vm.barangF = XLSX.utils.sheet_to_json(worksheetBarangF);
+        vm.barangG = XLSX.utils.sheet_to_json(worksheetBarangG);
+        vm.barangH = XLSX.utils.sheet_to_json(worksheetBarangH);
+        vm.barangI = XLSX.utils.sheet_to_json(worksheetBarangI);
+        vm.barangJ = XLSX.utils.sheet_to_json(worksheetBarangJ);
+        vm.barangK = XLSX.utils.sheet_to_json(worksheetBarangK);
+        vm.barangL = XLSX.utils.sheet_to_json(worksheetBarangL);
+        vm.barangM = XLSX.utils.sheet_to_json(worksheetBarangM);
+        vm.barangN = XLSX.utils.sheet_to_json(worksheetBarangN);
+        vm.barangO = XLSX.utils.sheet_to_json(worksheetBarangO);
+        vm.barangP = XLSX.utils.sheet_to_json(worksheetBarangP);
+        vm.barangQ = XLSX.utils.sheet_to_json(worksheetBarangQ);
+        vm.barangR = XLSX.utils.sheet_to_json(worksheetBarangR);
+        vm.barangS = XLSX.utils.sheet_to_json(worksheetBarangS);
+        vm.barangT = XLSX.utils.sheet_to_json(worksheetBarangT);
+      };
+      reader.readAsArrayBuffer(f);
+
+      this.axios.post(address + ':3000/import-csv', {})
       .then((response) => {
         console.log(response);
       });
-      result.pop() // remove the last item because undefined values
-      this.columns = Object.keys(result[0]);
-      // this.columns[this.columns.indexOf("Self Assessment")] = "Assessment";
-      // this.columns.splice(this.columns.indexOf("Surveyor"), 1);
-
-      function sum(colname) {
-        result[result.length-1][colname] = 0;
-        for(var i = 1; i < result.length-1; i++) {
-          if(!result[i][colname]) {
-            result[result.length-1][colname] = 
-              parseInt(result[result.length-1][colname]) + 0;
-          }
-          else {
-            result[result.length-1][colname] = 
-              parseInt(result[result.length-1][colname]) + 
-              parseInt(result[i][colname]);
-          }
-        }
-      }
-
-      function prod(colname) {
-        for(var i = 1; i < result.length-1; i++) {
-          if(result[i]["Cost, Insurance, & Freight"]) {
-            result[i][colname] = parseInt(result[i]["Kuantitas"]) * parseInt(result[i]["Cost, Insurance, & Freight"]);
-          }
-          else if(result[i]["On Site"]) {
-            result[i][colname] = parseInt(result[i]["Kuantitas"]) * parseInt(result[i]["On Site"]);
-          }
-        }
-      }
-
-      function prodDiv(colname) {
-        for(var i = 1; i < result.length-1; i++) {
-          if(result[i]["Self Assessment"]) {
-            result[i][colname] = (parseInt(result[i]["Total Price (US$)"]) / parseInt(result[result.length-1]["Total Price (US$)"]) * result[i]["Self Assessment"]).toFixed(2);
-          }
-          else if(result[i]["Surveyor"]) {
-            result[i][colname] = (parseInt(result[i]["Total Price (US$)"]) / parseInt(result[result.length-1]["Total Price (US$)"]) * result[i]["Surveyor"]).toFixed(2);
-          }
-        }
-      }
-
-      for(var i = 1; i < result.length-1; i++) {
-        if(result[i]["Nasional"]) {
-          if(result[i]["Provinsi"] || result[i]["Kabupaten"] ||result[i]["Negara"]) {
-            this.validation = "Tidak bisa memilih asal barang lebih dari 1, pada barang " + result[i]["Jenis Barang"];
-          }
-        }
-        else if(result[i]["Provinsi"]) {
-          if(result[i]["Nasional"] || result[i]["Kabupaten"] ||result[i]["Negara"]) {
-            this.validation = "Tidak bisa memilih asal barang lebih dari 1, pada barang " + result[i]["Jenis Barang"];
-          }
-        }
-        else if(result[i]["Kabupaten"]) {
-          if(result[i]["Nasional"] || result[i]["Provinsi"] ||result[i]["Negara"]) {
-            this.validation = "Tidak bisa memilih asal barang lebih dari 1, pada barang " + result[i]["Jenis Barang"];
-          }
-        }
-        else if(result[i]["Negara"]) {
-          if(result[i]["Nasional"] || result[i]["Provinsi"] ||result[i]["Kabupaten"]) {
-            this.validation = "Tidak bisa memilih asal barang lebih dari 1, pada barang " + result[i]["Jenis Barang"];
-          }
-          if(result[i]["Produsen/Suplier"]) {
-            this.validation = "Produsen/Suplier hanya untuk barang lokal, pada barang " + result[i]["Jenis Barang"];
-          }
-        }
-
-        if(result[i]["Produsen/Suplier"]) {
-          if(result[i]["Produsen/Suplier"] == "S" || 
-            result[i]["Produsen/Suplier"] == "s" ||
-            result[i]["Produsen/Suplier"] == "Suplier" ||
-            result[i]["Produsen/Suplier"] == "suplier" ||
-            result[i]["Produsen/Suplier"] == "Supplier" ||
-            result[i]["Produsen/Suplier"] == "supplier") {
-            result[i]["Produsen/Suplier"] = "Suplier";
-          }
-          else if(result[i]["Produsen/Suplier"] == "P" || 
-            result[i]["Produsen/Suplier"] == "p" ||
-            result[i]["Produsen/Suplier"] == "Produsen" ||
-            result[i]["Produsen/Suplier"] == "produsen") {
-            result[i]["Produsen/Suplier"] = "Produsen";
-          }
-        }
-
-        if(result[i]["Cost, Insurance, & Freight"] && result[i]["On Site"]) {
-          this.validation = "Tidak bisa mengisi On Site dan Cost, Insurance, & Freight secara bersamaan, pada barang " + result[i]["Jenis Barang"];
-        }
-
-        if(result[i]["Self Assessment"] || result[i]["Surveyor"]) {
-          if(result[i]["Self Assessment"]) {
-            // result[i]["Assessment"] = result[i]["Self Assessment"];
-          }
-          else if(result[i]["Surveyor"]) {
-            // result[i]["Assessment"] = result[i]["Surveyor"];
-          }
-        }
-      }
-
-      prod("Total Price (US$)");
-      sum("Kuantitas");
-      sum("Cost, Insurance, & Freight");
-      sum("On Site");
-      sum("Total Price (US$)");
-      prodDiv("Bobot Tertimbang (%)");
-      sum("Bobot Tertimbang (%)");
-
-      return result // JavaScript object
-    },
-    loadCSV(e) {
-      var vm = this
-      if (window.FileReader) {
-        var reader = new FileReader();
-        reader.readAsText(e.target.files[0]);
-        // Handle errors load
-        reader.onload = function(event) {
-          var csv = event.target.result;
-          vm.dataToDb = vm.csvJSON(csv);
-          vm.loadToTable(vm.csvJSON(csv));
-        };
-        reader.onerror = function(evt) {
-          if(evt.target.error.name == "NotReadableError") {
-            alert("Canno't read file !");
-          }
-        };
-      } else {
-        alert('FileReader are not supported in this browser.');
-      }
     },
     loadToTable(data) {
       for(var i = 0; i < data.length; i++) {
@@ -348,19 +393,75 @@ export default {
     },
     addBelanjaBarang() {
       let postObj = {
-        data: this.dataToDb,
-        upload_by: this.$session.get('user')._id,
+        user_id: this.$session.get('user').user_id,
+        year: 2019,
+        term: "Triwulan I",
+        report_type: this.$session.get('user').company_type,
+        approved: 0,
+        flagged_for_deletion: 0
       };
-      if(this.validation) {
-        alert(this.validation);
-      }
-      else {
-        this.axios.post(address + ':3000/add-belanja-barang', postObj, headers)
-        .then((response) => {
-          location.reload();
-          alert("Add Belanja Barang Success");
+      this.axios.post(address + ':3000/add-report-barang', postObj, headers)
+      .then((response) => {
+        let query = gql.addReportProcurement;
+        postObj.report_procurement_id = response.data.insertId;
+        let variables = {
+          input: postObj
+        }
+        graphqlFunction.graphqlMutation(query, variables, (result) => {
+          var belanjaBarang = [{
+            detail: "Truck",
+            specification: "Good Truck",
+            project_area: "Jakarta",
+            tkdn: 35,
+            country_of_origin: "",
+            province_of_origin: "Jakarta",
+            district_of_origin: "",
+            city_of_origin: "",
+            qty: 3,
+            category: "A",
+            unit_price: 50000,
+          }, {
+            detail: "Helm",
+            specification: "Good Helm",
+            project_area: "Bandung",
+            tkdn: 25,
+            country_of_origin: "",
+            province_of_origin: "Bandung",
+            district_of_origin: "",
+            city_of_origin: "",
+            qty: 30,
+            category: "N",
+            unit_price: 3000,
+          }];
+          for(var i = 0; i < belanjaBarang.length; i++) {
+            let postObj2 = {
+              detail: belanjaBarang[i].detail,
+              specification: belanjaBarang[i].specification,
+              project_area: belanjaBarang[i].project_area,
+              tkdn: belanjaBarang[i].tkdn,
+              report_procurement_id: postObj.report_procurement_id,
+              country_of_origin: belanjaBarang[i].country_of_origin,
+              province_of_origin: belanjaBarang[i].province_of_origin,
+              district_of_origin: belanjaBarang[i].district_of_origin,
+              city_of_origin: belanjaBarang[i].city_of_origin,
+              qty: belanjaBarang[i].qty,
+              category: belanjaBarang[i].category,
+              unit_price: belanjaBarang[i].unit_price,
+            };
+            this.axios.post(address + ':3000/add-belanja-barang', postObj2, headers)
+            .then((response) => {
+              let query = gql.addProcurement;
+              postObj2.procurements_id = response.data.insertId;
+              let variables = {
+                input: postObj2
+              }
+              graphqlFunction.graphqlMutation(query, variables, (result) => {
+                console.log(result);
+              });
+            });    
+          }
         });
-      }
+      });
     },
     coloring() {
       for(var i = 0; i < this.tableData.length; i++) {

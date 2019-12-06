@@ -41,47 +41,45 @@ let query = {
 
     allCommerce: `query getAllItem {
 	    commerces {
-	      _id
+	      commerce_id
 	      name
 	      price
 	      qty
 	      description
 	      category
-	      user
 	      user_id
 	      image
 	    }
   	}`,
 
-    singleCommerce: `query getSingleItem($itemId: String!) {
-	    commerce(_id: $itemId) {
-	      _id
+    singleCommerce: `query getSingleItem($commerceId: Int!) {
+	    commerce(commerce_id: $commerceId) {
+	      commerce_id
 	      name
 	      price
 	      qty
 	      description
 	      category
-	      user
 	      user_id
 	      image
 	    }
   	}`,
 
-  	addCommerce: `mutation createSingleCommerce($input:CommerceInput) {
+  	addCommerce: `mutation createSingleCommerce($input:CommercesInput) {
 	      createCommerce(input: $input) {
-	          name
+	          commerce_id
 	      }
   	}`,
 
-  	updateCommerce: `mutation updateSingleCommerce($itemId: String!, $input:CommerceInput) {
-          updateCommerce(_id: $itemId, input: $input) {
-              name
+  	updateCommerce: `mutation updateSingleCommerce($commerceId: Int!, $input:CommercesInput) {
+          updateCommerce(_id: $commerceId, input: $input) {
+              commerce_id
           }
  	}`,
 
- 	deleteCommerce: `mutation deleteSingleCommerce($itemId: String!) {
-          deleteCommerce(_id: $itemId) {
-              name
+ 	deleteCommerce: `mutation deleteSingleCommerce($commerceId: Int!) {
+          deleteCommerce(_id: $commerceId) {
+              commerce_id
           }
   	}`,
 
@@ -343,6 +341,59 @@ let query = {
   	deleteAssumption: `mutation deleteSingleAssumption($assumptionId: Int!) {
 	      deleteAssumption(assumption_id: $assumptionId) {
 	          assumption_id
+	      }
+  	}`,
+
+  	allReportProcurement: `query getAllReportProcurement {
+	    report_procurements {
+    		report_procurement_id
+	      	user_id
+	      	year
+	      	term
+	      	report_type
+	      	approved
+	      	flagged_for_deletion
+	    }
+  	}`,
+
+  	addReportProcurement: `mutation createSingleReportProcurement($input:ReportProcurementsInput) {
+	      createReportProcurement(input: $input) {
+	          report_procurement_id
+	      }
+  	}`,
+
+  	deleteReportProcurement: `mutation deleteSingleReportProcurement($reportProcurementId: Int!) {
+	      deleteReportProcurement(report_procurement_id: $reportProcurementId) {
+	          report_procurement_id
+	      }
+  	}`,
+
+  	allProcurement: `query getAllProcurement {
+	    procurements {
+    		procurements_id
+		    report_procurement_id
+		    detail
+		    specification
+		    unit_price
+		    category
+		    country_of_origin
+		    province_of_origin
+		    district_of_origin
+		    city_of_origin
+		    project_area
+		    tkdn
+	    }
+  	}`,
+
+  	addProcurement: `mutation createSingleProcurement($input:ProcurementsInput) {
+	      createProcurement(input: $input) {
+	          procurements_id
+	      }
+  	}`,
+
+  	deleteProcurement: `mutation deleteSingleProcurement($procurementId: Int!) {
+	      deleteProcurement(procurements_id: $procurementId) {
+	          procurements_id
 	      }
   	}`,
 }
